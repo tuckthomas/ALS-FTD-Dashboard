@@ -8,6 +8,7 @@ from django.conf import settings
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
 
+# Scrap ALSoD website to obtain gene symbols, names, and risk categories. Will be used later to parse ClinicalTrials.gov API 'Keywords' field to create custom filter optoin based upon gene mutation.
 def scrape_alsod_gene_list(request):
     url = "https://alsod.ac.uk/"
     response = requests.get(url)
