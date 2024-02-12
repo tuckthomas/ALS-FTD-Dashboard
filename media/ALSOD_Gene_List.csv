@@ -1,0 +1,155 @@
+Gene Symbol,Gene Name,Gene Risk Category
+AGT,angiotensinogen,Tenuous
+ALAD,aminolevulinate dehydratase,Tenuous
+ALS2,alsin Rho guanine nucleotide exchange factor ALS2,Tenuous
+ALS3,amyotrophic lateral sclerosis 3,Tenuous
+ALS7,amyotrophic lateral sclerosis 7,Tenuous
+ANG,angiogenin,Moderate evidence
+ANXA11,annexin A11,Definitive ALS gene
+APEX1,apurinic/apyrimidinic endodeoxyribonuclease 1,Tenuous
+APOE,apolipoprotein E,Tenuous
+AR,androgen receptor,Tenuous
+ARHGEF28,rho guanine nucleotide exchange factor 28,Moderate evidence
+ARPP21,cAMP Regulated Phosphoprotein 21,Tenuous
+ATXN1,ataxin 1,Strong evidence
+ATXN2,ataxin 2,Clinical modifier
+B4GALT6,"beta-1,4-galactosyltransferase 6",Tenuous
+BCL11B,BAF chromatin remodeling complex subunit BCL11B,Tenuous
+BCL6,BCL6 transcription repressor,Tenuous
+C9orf72,C9orf72-SMCR8 complex subunit,Definitive ALS gene
+CAMTA1,Calmodulin brinding transcriptions activator 1,Clinical modifier
+CAV1,caveolin 1,Unassigned
+CAV2,caveolin 2,Unassigned
+CCNF,cyclin F,Strong evidence
+CCS,copper chaperone for superoxide dismutase,Tenuous
+CDH13,cadherin 13,Tenuous
+CDH22,cadherin 22,Moderate evidence
+CFAP410,Cilia and Flagella Associated Protein 410,Strong evidence
+CHCHD10,coiled-coil-helix-coiled-coil-helix domain containing 10,Definitive ALS gene
+CHGB,chromogranin B,Tenuous
+CHMP2B,charged multivesicular body protein 2B,Moderate evidence
+CNTF,ciliary neurotrophic factor,Tenuous
+CNTN4,contactin 4,Tenuous
+CNTN6,contactin 6,Moderate evidence
+CRIM1,cysteine rich transmembrane BMP regulator 1,Tenuous
+CRYM,crystallin mu,Moderate evidence
+CSNK1G3,casein kinase 1 gamma 3,Moderate evidence
+CST3,cystatin C,Tenuous
+CX3CR1,C-X3-C motif chemokine receptor 1,Moderate evidence
+CYP2D6,Cytochrome P450 family 2 subfamily D member 6,Tenuous
+DAO,D-amino acid oxidase,Moderate evidence
+DCTN1,dynactin subunit 1,Tenuous
+DIAPH3,diaphanous related formin 3,Tenuous
+DISC1,DISC1 scaffold protein,Tenuous
+DNAJC7,DnaJ heat shock protein family member C7,Moderate evidence
+DNMT3A,DNA methyltransferase 3 alpha,Moderate evidence
+DNMT3B,DNA methyltransferase 3 beta,Tenuous
+DOC2B,double C2 domain beta,Tenuous
+DPP6,dipeptidyl peptidase like 6,Tenuous
+DYNC1H1,dynein cytoplasmic 1 heavy chain 1,Tenuous
+EFEMP1,EGF containing fibulin extracellular matrix protein 1,Tenuous
+ELP3,elongator acetyltransferase complex subunit 3,Tenuous
+ENAH,ENAH actin regulator,Clinical modifier
+EphA3,EPH receptor A3,Tenuous
+EPHA4,EPH receptor A4,Definitive ALS gene
+ERBB4,erb-b2 receptor tyrosine kinase 4,Moderate evidence
+ERLIN1,ER lipid raft associated 1,Tenuous
+EWSR1,EWS RNA binding protein 1,Tenuous
+FEZF2,FEZ family zinc finger 2,Tenuous
+FGGY,FGGY carbohydrate kinase domain containing,Tenuous
+FIG4,FIG4 phosphoinositide 5-phosphatase,Moderate evidence
+FUS,FUS RNA binding protein,Definitive ALS gene
+GARS,glycyl-tRNA synthetase 1,Tenuous
+GLE1,GLE1 RNA export mediator,Moderate evidence
+GLT8D1,glycosyltransferase 8 domain containing 1,Tenuous
+GPX3,glutathione peroxidase 3,Moderate evidence
+GRB14,growth factor receptor bound protein 14,Tenuous
+GRN,granulin precursor,Tenuous
+HEXA,hexosaminidase subunit alpha,Tenuous
+HFE,homeostatic iron regulator,Strong evidence
+HNRNPA1,heterogeneous nuclear ribonucleoprotein A1,Definitive ALS gene
+HNRNPA2B1,heterogeneous nuclear ribonucleoprotein A2/B1,Tenuous
+ITPR2,"inositol 1,4,5-triphosphate receptor type 2",Tenuous
+KDR,kinase insert domain receptor,Tenuous
+KIF5A,kinesin family member 5A,Definitive ALS gene
+KIFAP3,kinesin associated protein 3,Tenuous
+LIF,LIF interleukin 6 family cytokine,Tenuous
+LIPC,"lipase C, hepatic type",Tenuous
+LMNB1,lamin B1,Moderate evidence
+LOX,lysyl oxidase,Tenuous
+LUM,lumican,Tenuous
+MAOB,monoamine oxidase B,Tenuous
+MAPT,microtubule associated protein tau,Tenuous
+MATR3,matrin 3,Tenuous
+MOBP,myelin associated oligodendrocyte basic protein,Tenuous
+MTND2P1,MT-ND2 pseudogene 1,Tenuous
+NAIP,NLR family apoptosis inhibitory protein,Tenuous
+NEFH,neurofilament heavy,Tenuous
+NEFL,neurofilament light,Tenuous
+NEK1,NIMA related kinase 1,Definitive ALS gene
+NETO1,neuropilin and tolloid like 1,Tenuous
+NIPA1,NIPA magnesium transporter 1,Strong evidence
+NT5C1A,"5'-nucleotidase, cytosolic IA",Tenuous
+ODR4,odr-4 GPCR localization factor homolog,Tenuous
+OGG1,8-oxoguanine DNA glycosylase,Tenuous
+OMA1,OMA1 zinc metallopeptidase,Tenuous
+OPTN,optineurin,Definitive ALS gene
+PARK7,Parkinsonism associated deglycase,Tenuous
+PCP4,Purkinje cell protein 4,Tenuous
+PFN1,profilin 1,Definitive ALS gene
+PLEKHG5,pleckstrin homology and RhoGEF domain containing G5,Tenuous
+PNPLA6,patatin like phospholipase domain containing 6,Tenuous
+PON1,paraoxonase 1,Tenuous
+PON2,paraoxonase 2,Tenuous
+PON3,paraoxonase 3,Tenuous
+PRPH,peripherin,Tenuous
+PSEN1,presenilin-1,Tenuous
+PVR,PVR cell adhesion molecule,Tenuous
+RAMP3,receptor activity modifying protein 3,Tenuous
+RBMS1,RNA binding motif single stranded interacting protein 1,Tenuous
+RFTN1,"raftlin, lipid raft linker 1",Tenuous
+RNASE2,ribonuclease A family member 2,Tenuous
+RNF19A,"ring finger protein 19A, RBR E3 ubiquitin protein ligase",Tenuous
+SARM1,sterile alpha and TIR motif containing 1,Moderate evidence
+SCFD1,sec1 family domain containing 1,Strong evidence
+SCN7A,sodium voltage-gated channel alpha subunit 7,Tenuous
+SELL,selectin L,Tenuous
+SEMA6A,semaphorin 6A,Tenuous
+SETX,senataxin,Tenuous
+SIGMAR1,sigma non-opioid intracellular receptor 1,Tenuous
+SLC1A2,solute carrier family 1 member 2,Tenuous
+SLC39A11,solute carrier family 39 member 11,Tenuous
+SLC52A3,solute carrier family 52 member 3,Tenuous
+SMN1,"survival of motor neuron 1, telomeric",Moderate evidence
+SMN2,"survival of motor neuron 2, centromeric",Tenuous
+SNCG,synuclein,Tenuous
+SOD1,superoxide dismutase 1,Definitive ALS gene
+SOD2,superoxide dismutase 2,Tenuous
+SOX5,SRY-box transcription factor 5,Tenuous
+SPAST,spastin,Tenuous
+SPG11,"SPG11 vesicle trafficking associated, spatacsin",Tenuous
+SPG7,"SPG7 matrix AAA peptidase subunit, paraplegin",Tenuous
+SQSTM1,sequestosome 1,Moderate evidence
+SS18L1,SS18L1 subunit of BAF chromatin remodeling complex,Moderate evidence
+SUSD1,sushi domain containing 1,Tenuous
+SYNE1,spectrin repeat containing nuclear envelope protein 1,Tenuous
+SYT9,synaptotagmin 9,Tenuous
+TAF15,TATA-box binding protein associated factor 15,Tenuous
+TARDBP,TAR DNA binding protein,Definitive ALS gene
+TBK1,TANK binding kinase 1,Definitive ALS gene
+TIA1,TIA1 cytotoxic granule associated RNA binding protein,Tenuous
+TNIP1,TNFAIP3 interacting protein 1,Moderate evidence
+TRPM7,transient receptor potential cation channel subfamily M member 7,Tenuous
+TUBA4A,tubulin alpha 4a,Strong evidence
+UBQLN1,ubiquilin 1,Tenuous
+UBQLN2,ubiquilin 2,Definitive ALS gene
+UNC13A,unc-13 homolog A,Definitive ALS gene
+VAPB,VAMP associated protein B and C,Definitive ALS gene
+VCP,valosin containing protein,Definitive ALS gene
+VDR,vitamin D receptor,Tenuous
+VEGFA,vascular endothelial growth factor A,Tenuous
+VPS54,VPS54 subunit of GARP complex,Tenuous
+VRK1,VRK serine/threonine kinase 1,Tenuous
+ZFP64,ZFP64 zinc finger protein,Tenuous
+ZNF512B,zinc finger protein 512B,Tenuous
+ZNF746,zinc finger protein 746,Tenuous
