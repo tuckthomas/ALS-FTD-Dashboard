@@ -6,10 +6,9 @@ import re
 import pandas as pd
 from django.conf import settings
 from bs4 import BeautifulSoup
-from django.http import HttpResponse
+from django.http import HttpResponse, response
 
-# Scrap ALSoD website to obtain gene symbols, names, and risk categories. Will be used later to parse ClinicalTrials.gov API 'Keywords' field to create custom filter option based upon gene mutation.
-def scrape_alsod_gene_list(request):
+def scrape_alsod_gene_list():
     url = "https://alsod.ac.uk/"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -31,7 +30,8 @@ def scrape_alsod_gene_list(request):
 
     for row in rows:
         columns = row.findAll("td", class_="assetIDConfig")
-        if len(columns) >= 3:  # Ensure there are at least 3 columns for symbol, name, and category
+         # Ensure there are at least 3 columns for symbol, name, and category
+        if len(columns) >= 3:
             # Apply the enhanced sanitize function to each relevant piece of text
             gene_symbol = sanitize(columns[1].text)
             gene_name = sanitize(columns[2].text)
@@ -55,51 +55,18 @@ def scrape_alsod_gene_list(request):
     # Save the DataFrame to a CSV file
     df.to_csv(filepath, index=False)
 
-    return HttpResponse(f"Gene list successfully scraped and saved to {filename}")
+    return pd.DataFrame({
+        "Gene Symbol": gene_symbols,
+        "Gene Name": gene_names,
+        "Gene Risk Category": gene_risk_categories
+    })
 
-def fetch_trials(request):
+def fetch_trial_data():
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     query_params = {
         "format": "json",
         "query.cond": "ALS OR FTD OR amyotrophic lateral sclerosis OR frontal lobe dementia",
-        "pageSize": 1000,  # ClinicalTrials.gov's per page limitation
-        "fields": "BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType"
-    }
-
-    all_studies_details = []
-    try:
-        while True:
-            response = requests.get(base_url, params=query_params)
-            if response.status_code == 200:
-                data = response.json()
-                studies_details = data.get("studies", [])
-                all_studies_details.extend(studies_details)
-
-                print(f"Fetched {len(studies_details)} studies details successfully.")
-
-                # Pagination: Check for nextPageToken in the response to fetch the next batch of studies
-                nextPageToken = data.get("nextPageToken")
-                if not nextPageToken:
-                    print("No more pages to fetch.")
-                    break  # No more pages, exit the loop
-                
-                query_params["pageToken"] = nextPageToken
-            else:
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return JsonResponse({"error": "Failed to fetch data", "status_code": response.status_code}, status=response.status_code)
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
-    
-    print(f"Total fetched studies details: {len(all_studies_details)}")
-    return JsonResponse(all_studies_details, safe=False)
-
-def fetch_trials_csv(request):
-    base_url = "https://clinicaltrials.gov/api/v2/studies"
-    query_params = {
-        "format": "json",
-        "query.cond": "ALS OR FTD OR amyotrophic lateral sclerosis OR frontal lobe dementia",
-        "pageSize": 1000,  # ClinicalTrials.gov's per page limitation
+        "pageSize": 1000,
         "fields": "BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType"
     }
 
@@ -114,23 +81,52 @@ def fetch_trials_csv(request):
 
                 nextPageToken = data.get("nextPageToken")
                 if not nextPageToken:
-                    break  # No more pages
+                    break
 
                 query_params["pageToken"] = nextPageToken
             else:
-                return JsonResponse({"error": "Failed to fetch data", "status_code": response.status_code}, status=response.status_code)
+                return {"error": "Failed to fetch data", "status_code": response.status_code}
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return {"error": str(e)}
 
-    # Convert the list of dictionaries to a DataFrame
-    df = pd.json_normalize(all_studies_details)
-    
-    # Define the filename and path to save the CSV file
-    filename = 'trials_data.csv'
+    return pd.json_normalize(all_studies_details)
+
+def create_mutation_target_column(df_trials, df_gene_list):
+    # Handle null/blank values for 'protocolSection.conditionsModule.keywords'
+    column_name = 'protocolSection.conditionsModule.keywords'
+    if column_name not in df_trials.columns:
+        df_trials[column_name] = ''  # Add column with empty strings if it doesn't exist
+    else:
+        df_trials[column_name].fillna('', inplace=True)  # Replace null values with empty strings
+
+    df_trials[column_name] = df_trials[column_name].astype(str)
+    df_trials['Mutation/Target'] = ''
+
+    for index, row in df_gene_list.iterrows():
+        gene_symbol = row['Gene Symbol']
+        # Now correctly using the full field name for string operations
+        mask = df_trials[column_name].str.contains(gene_symbol, case=False, regex=False)
+        df_trials.loc[mask, 'Mutation/Target'] = df_trials.loc[mask, 'Mutation/Target'] + gene_symbol + ','
+
+    # Remove trailing commas from the 'Mutation/Target' column
+    df_trials['Mutation/Target'] = df_trials['Mutation/Target'].str.rstrip(',')
+
+    return df_trials
+
+
+def process_and_save_trials_data(request):
+    # Step 1: Fetch the trial data
+    trial_data = fetch_trial_data()  # Ensure this returns a DataFrame
+
+    # Step 2: Scrape the ALSOD gene list
+    gene_list_df = scrape_alsod_gene_list()  # Ensure this returns a DataFrame
+
+    # Step 3: Enhance the trial data with 'Mutation/Target' column
+    trial_data_with_mutation_target = create_mutation_target_column(trial_data, gene_list_df)
+
+    # Step 4: Save the enhanced DataFrame to CSV
+    filename = 'enhanced_trials_data.csv'
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    
-    # Save the DataFrame to a CSV file
-    df.to_csv(filepath, index=False)
-    
-    return JsonResponse({"message": "Data successfully saved to CSV", "filename": filepath})
+    trial_data_with_mutation_target.to_csv(filepath, index=False)
 
+    return JsonResponse({"message": "Enhanced trial data successfully saved to CSV", "filename": filename})
