@@ -116,10 +116,10 @@ def create_mutation_target_column(df_trials, df_gene_list):
 
 def process_and_save_trials_data(request):
     # Step 1: Fetch the trial data
-    trial_data = fetch_trial_data()  # Ensure this returns a DataFrame
+    trial_data = fetch_trial_data()
 
     # Step 2: Scrape the ALSOD gene list
-    gene_list_df = scrape_alsod_gene_list()  # Ensure this returns a DataFrame
+    gene_list_df = scrape_alsod_gene_list()
 
     # Step 3: Enhance the trial data with 'Mutation/Target' column
     trial_data_with_mutation_target = create_mutation_target_column(trial_data, gene_list_df)
