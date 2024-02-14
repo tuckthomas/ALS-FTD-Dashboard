@@ -175,15 +175,6 @@ def scrape_alsod_gene_list():
 
 
 
-# Converts headers received from API to the shortened name
-def denest_field_names(nested_headers):
-    denested_headers = []
-    for header in nested_headers:
-        denested_headers.append(header.split('.')[-1])  # Take the last part after the final dot
-    return denested_headers
-
-
-
 # This function fetches trial data from ClinicalTrials.gov's API.
 # It processes the response, and returns a structured format of trial details.
 def fetch_trial_data():
