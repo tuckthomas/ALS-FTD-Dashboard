@@ -1,12 +1,12 @@
 from django.contrib import admin
-from django.urls import path
-from Dashboard.views import process_and_save_trials_data
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .api import api 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('process_and_save_trials_data/', process_and_save_trials_data, name='process_and_save_trials_data'),
+    path("api/", api.urls),
 ]
 
 if settings.DEBUG:

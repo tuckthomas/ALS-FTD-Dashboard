@@ -8,6 +8,25 @@ from django.conf import settings
 from bs4 import BeautifulSoup
 from django.http import HttpResponse, response
 
+# Consolidated Function
+def process_and_save_trials_data(request):
+    # Step 1: Fetch the trial data
+    trial_data = fetch_trial_data()
+
+    # Step 2: Scrape the ALSOD gene list
+    gene_list_df = scrape_alsod_gene_list()
+
+    # Step 3: Enhance the trial data with 'Mutation/Target' column
+    trial_data_with_mutation_target = create_mutation_target_column(trial_data, gene_list_df)
+
+    # Step 4: Save the enhanced DataFrame to CSV
+    filename = 'enhanced_trials_data.csv'
+    filepath = os.path.join(settings.MEDIA_ROOT, filename)
+    trial_data_with_mutation_target.to_csv(filepath, index=False)
+
+    return JsonResponse({"message": "Enhanced trial data successfully saved to CSV", "filename": filename})
+
+# Scraps Dr. Al-Chalabi's ALSoD HTML table containing Gene Symbols, Gene Names, and their Risk Category
 def scrape_alsod_gene_list():
     url = "https://alsod.ac.uk/"
     response = requests.get(url)
@@ -61,6 +80,7 @@ def scrape_alsod_gene_list():
         "Gene Risk Category": gene_risk_categories
     })
 
+# API Fetch Request of ClinicalTrials.gov V2 API
 def fetch_trial_data():
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     query_params = {
@@ -91,6 +111,7 @@ def fetch_trial_data():
 
     return pd.json_normalize(all_studies_details)
 
+# Parses 'Keyword' field from API data using the Gene Symbold from ALSoD data
 def create_mutation_target_column(df_trials, df_gene_list):
     # Handle null/blank values for 'protocolSection.conditionsModule.keywords'
     column_name = 'protocolSection.conditionsModule.keywords'
@@ -112,21 +133,3 @@ def create_mutation_target_column(df_trials, df_gene_list):
     df_trials['Mutation/Target'] = df_trials['Mutation/Target'].str.rstrip(',')
 
     return df_trials
-
-
-def process_and_save_trials_data(request):
-    # Step 1: Fetch the trial data
-    trial_data = fetch_trial_data()
-
-    # Step 2: Scrape the ALSOD gene list
-    gene_list_df = scrape_alsod_gene_list()
-
-    # Step 3: Enhance the trial data with 'Mutation/Target' column
-    trial_data_with_mutation_target = create_mutation_target_column(trial_data, gene_list_df)
-
-    # Step 4: Save the enhanced DataFrame to CSV
-    filename = 'enhanced_trials_data.csv'
-    filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    trial_data_with_mutation_target.to_csv(filepath, index=False)
-
-    return JsonResponse({"message": "Enhanced trial data successfully saved to CSV", "filename": filename})

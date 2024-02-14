@@ -1,5 +1,8 @@
 from pathlib import Path
 import os
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ALS_FTD_Research_Dashboard.settings')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -10,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'REDACTED'
+SECRET_KEY = 'YOU_MUST_GENERATE_YOUR_OWN_SECRET_KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -27,6 +30,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'Dashboard',
+    'ninja',
 ]
 
 MIDDLEWARE = [
@@ -59,14 +64,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ALS_FTD_Research_Dashboard.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# For personal simplicity purposes, I connected this to my existing PostgreSQL database that I use for other functions.
+# Anyone using this should be able to use Django's default SQLite3 datbase
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'als_ftd_research_dashboard',
+        'USER': 'REDACT',
+        'PASSWORD': 'REDACT',
+        'HOST': 'REDACT',
+        'PORT': 'REDACT',
     }
 }
 
@@ -105,7 +115,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+
+# The absolute path to the directory where collectstatic will collect static files for deployment.
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
+
+# This is an additional locations where Django will look for static files, in addition to each app's "static" directory.
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# Tells Django to use WhiteNoise to serve static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -115,3 +137,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # At the bottom of the file
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
