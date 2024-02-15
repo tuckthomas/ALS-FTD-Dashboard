@@ -11,6 +11,7 @@ from django.conf import settings
 
 router = Router()
 
+# More of a placeholder for now, until the front-end is developed
 @router.get("/", tags=["Trials"])
 def get_trials(request):
     update_data()  # Update the database records first
