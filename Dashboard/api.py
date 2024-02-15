@@ -11,7 +11,7 @@ from django.conf import settings
 
 router = Router()
 
-@router.get("/", tags=["Trials"])  # This might just be "/", based on your desired path
+@router.get("/", tags=["Trials"])
 def get_trials(request):
     update_data()  # Update the database records first
     trials = get_serialized_trials()
