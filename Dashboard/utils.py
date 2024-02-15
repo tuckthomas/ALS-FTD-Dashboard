@@ -3,6 +3,8 @@ import os
 import re
 import ast
 import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 from django.conf import settings
 from bs4 import BeautifulSoup
 from django.db import models
@@ -86,35 +88,75 @@ def update_data():
                 trial_obj.genes.set(genes_to_set)
                 
             updated_trials += 1
+    
+    """
+    The below portion saves the given data frames into an XLS file with three tabs, and adds a disclosure
+    statement to the Dashboard_gene tab. With an accomanying views.py function, this will allow users
+    to download the data in XLS format.
+    """
+    # After processing, fetch data into data frames
+    gene_df = pd.DataFrame(list(Gene.objects.all().values()))
+    trial_df = pd.DataFrame(list(Trial.objects.all().values()))
+    # Generate trial_genes_df using the dedicated function
+    trial_genes_df = get_trial_genes_dataframe()
+    
+    # Now call save_to_xls with these data frames
+    save_to_xls(gene_df, trial_df, trial_genes_df)
 
     print(f"Total trials updated or created: {updated_trials}")
-    print("ALS/FTD Research Data has been successfully obtained. Now completing API get.......")
-    print("Exiting update_data function...")
 
 
-# Attempts to parse a date string and return it in 'YYYY-MM-DD' format.
-# If parsing fails or the input is 'nan', returns None.
-def parse_date_with_default(date_str, default_date=datetime(1900, 1, 1)):
-    if pd.isna(date_str) or date_str in ['', 'nan']:
-        return None  # or default_date.strftime("%Y-%m-%d") if you prefer a default date
-    try:
-        parsed_date = parser.parse(str(date_str), default=default_date)
-        return parsed_date.strftime("%Y-%m-%d")
-    except (ValueError, TypeError):
-        return None
+
+# Obtains the data frame of Clinical Trials/Studies with Gene targets
+def get_trial_genes_dataframe():
+    trial_genes_data = []
+    for trial in Trial.objects.prefetch_related('genes').all():
+        for gene in trial.genes.all():
+            trial_genes_data.append({
+                'trial_id': trial.unique_protocol_id,
+                'gene_id': gene.gene_symbol,
+            })
+    trial_genes_df = pd.DataFrame(trial_genes_data)
+    return trial_genes_df
+
+
+
+# Populates the dataframes from 'update_data' function into a three-tab XLS file.
+def save_to_xls(gene_df, trial_df, trial_genes_df):
+    # Create a new Excel workbook
+    wb = Workbook()
+    
+    # Create sheets with the specified order
+    ws_trial = wb.active  # First sheet is created by default
+    ws_trial.title = "Dashboard_trial"
+    ws_gene = wb.create_sheet(title="Dashboard_gene")
+    ws_trial_genes = wb.create_sheet(title="Dashboard_trial_genes")
+    
+    # Populate sheets with data frames
+    data_frames = [trial_df, gene_df, trial_genes_df]
+    sheets = [ws_trial, ws_gene, ws_trial_genes]
+    for df, ws in zip(data_frames, sheets):
+        for r in dataframe_to_rows(df, index=False, header=True):
+            ws.append(r)
+    
+    # Add disclosure/citation to the Dashboard_gene sheet
+    citation_text = "Citation: ALS/FTD gene data has been obtained from https://ALSoD.ac.uk. Updates to variants for many genes in ALSOD since 2015 have been taken from the supplementary material of Emily McCann et al (2021), which has been a valuable resource. Source: https://alsod.ac.uk/acknowledgements.php"
+    ws_gene.append([])  # Add an empty row for spacing
+    ws_gene.append([citation_text])  # Add the disclosure statement
+    
+    # Save the workbook to the specified file path
+    file_path = os.path.join(settings.MEDIA_ROOT, 'ALS, FTD Clinical Trial Research Data Tables.xlsx')
+    wb.save(file_path)
+    print(f"File saved to {file_path}")
 
 
 
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
-# It prepares the trial data for database updates.
+# Additionally, it creates a column for each records ClinicalTrials.gov URL based upon a defined schema.
 def enhanced_fetch_trial_data():
     # Fetch trial data and print type before conversion
     trials_data_df = fetch_trial_data()
     print(f"Type of trials_data_raw before conversion: {type(trials_data_df).__name__}")
-
-    # Print the first ten records' 'keyword' field
-    print("First ten records' 'keyword' field:")
-    print(trials_data_df['keyword'].head(10))
 
     gene_list_df = scrape_alsod_gene_list()  # Assume this fetches your gene list correctly
     gene_symbols = gene_list_df['Gene Symbol'].tolist()
@@ -140,8 +182,15 @@ def enhanced_fetch_trial_data():
         # Return a comma-separated string of matched genes, or an empty string if none are matched
         return ','.join(matched_genes)
 
+    # Generates the URL for each Study/Trial based upon ClinicalTrial.gov's URL schema
+    def clinical_trial_url(nct_id):
+        return f"https://clinicaltrials.gov/study/{nct_id}"
+
     # Apply the match_genes function to each row of the trials_data DataFrame.
     trials_data_df['genes'] = trials_data_df.apply(lambda row: match_genes(row, gene_symbols), axis=1)
+
+    # Add clinical_trial_url column
+    trials_data_df['clinical_trial_url'] = trials_data_df['nct_id'].apply(clinical_trial_url)
 
     return trials_data_df
 
@@ -193,9 +242,6 @@ def scrape_alsod_gene_list():
     filename = 'ALSOD_Gene_List.csv'
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
-    # Save the DataFrame to a CSV file
-    df.to_csv(filepath, index=False)
-
     print("Scraped gene list DataFrame shape:", df.shape)  # Check the shape of the DataFrame
     return df
 
@@ -209,7 +255,7 @@ def fetch_trial_data():
         "format": "json",
         "query.cond": "ALS OR FTD OR amyotrophic lateral sclerosis OR frontal lobe dementia",
         "pageSize": 1000,
-        "fields": "OrgStudyId|BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType|Phase|StartDate|StartDateType"
+        "fields": "OrgStudyId|NCTId|BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType|Phase|StartDate|StartDateType|StudyFirstSubmitDate|StudyFirstSubmitQCDate"
     }
     print("Starting fetch_trial_data..before 'all_study_details'...")
     all_studies_details = []
@@ -261,7 +307,8 @@ def fetch_trial_data():
 
     # Renaming API column output to match the database model's field names
     column_mappings = {
-        "protocolSection.identificationModule.orgStudyIdInfo.id": "unique_protocol_id",
+        "protocolSection.identificationModule.orgStudyIdInfo.id": "unique_protocol_id", # Primary Key from models.py
+        "protocolSection.identificationModule.nctId": "nct_id",
         "protocolSection.identificationModule.briefTitle": "brief_title",
         "protocolSection.designModule.studyType": "study_type",
         "protocolSection.designModule.phases": "study_phase",
@@ -292,12 +339,12 @@ def fetch_trial_data():
     if not df_studies.empty:
         print("Sample record after renaming:", df_studies.iloc[0])
 
-    # Print the first ten records' 'keyword' field if it exists
-    if 'keyword' in df_studies.columns:
-        print("First ten records' 'keyword' field:")
-        print(df_studies['keyword'].head(10))
+    # Print the first ten records' 'nct_id' field if it exists
+    if 'nct_id' in df_studies.columns:
+        print("First ten records' 'nct_id' field:")
+        print(df_studies['nct_id'].head(50))
     else:
-        print("The 'keyword' column does not exist in the DataFrame.")
+        print("The 'nct_id' column does not exist in the DataFrame.")
 
     # Directly return the DataFrame
     return df_studies
