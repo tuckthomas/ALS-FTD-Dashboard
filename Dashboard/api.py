@@ -11,7 +11,9 @@ from django.conf import settings
 
 router = Router()
 
-# More of a placeholder for now, until the front-end is developed
+# More of a placeholder for now, until the front-end is developed.
+# Or, until I issue an SSL certificate on my reverse proxy server.
+# Whichever comes first.....
 @router.get("/", tags=["Trials"])
 def get_trials(request):
     update_data()  # Update the database records first
