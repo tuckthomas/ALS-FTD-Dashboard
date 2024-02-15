@@ -11,11 +11,31 @@ class Gene(models.Model):
 
 # Model for ClinicalTrials.gov Data
 class Trial(models.Model):
+    EXPANDED_ACCESS_CHOICES = [
+        ('TRUE', 'True'),
+        ('FALSE', 'False'),
+        ('', '')
+    ]
+
+    FDA_REGULATED_DRUG_CHOICES = [
+        ('TRUE', 'True'),
+        ('FALSE', 'False'),
+        ('', '')
+    ]
+
+    FDA_REGULATED_DEVICE_CHOICES = [
+        ('TRUE', 'True'),
+        ('FALSE', 'False'),
+        ('', '')
+    ]
+
     unique_protocol_id = models.CharField(max_length=255, primary_key=True)  # Primary Key
     brief_title = models.TextField(null=True, blank=True)
     study_type = models.CharField(max_length=255, null=True, blank=True)
     study_phase = models.CharField(max_length=255, null=True, blank=True)
     overall_status = models.CharField(max_length=255, null=True, blank=True)
+    study_submitance_date = models.DateField(null=True, blank=True)
+    study_submitance_date_qc = models.DateField(null=True, blank=True)
     study_start_date = models.DateField(null=True, blank=True)
     study_start_date_type = models.CharField(max_length=255, null=True, blank=True)
     status_verified_date = models.DateField(null=True, blank=True)
@@ -24,11 +44,15 @@ class Trial(models.Model):
     responsible_party_type = models.CharField(null=True, max_length=255)
     responsible_party_investigator_full_name = models.CharField(null=True, max_length=255, blank=True)
     condition = models.TextField(null=True, blank=True)
+    collaborators = models.TextField(null=True, blank=True)
     keyword = models.TextField(null=True, blank=True)
     intervention_name = models.TextField(null=True, blank=True)
     study_population = models.TextField(null=True, blank=True)
     enrollment_count = models.IntegerField(null=True, blank=True)
     enrollment_type = models.CharField(max_length=100, null=True, blank=True)
+    expanded_access = models.CharField(max_length=5, choices=EXPANDED_ACCESS_CHOICES, default='', blank=True)
+    fda_regulated_drug = models.CharField(max_length=5, choices=FDA_REGULATED_DRUG_CHOICES, default='', blank=True)
+    fda_regulated_device = models.CharField(max_length=5, choices=FDA_REGULATED_DEVICE_CHOICES, default='', blank=True)
     genes = models.ManyToManyField(Gene, related_name='trials')  # Many-to-Many relationship
 
     def __str__(self):
