@@ -57,7 +57,7 @@ def update_data():
                         trial_data[field] = None  # Set to None if conversion fails
                         print(f"Error converting {field} to int for trial ID {unique_id}: {value}")
 
-            date_fields = ['study_start_date', 'status_verified_date', 'completion_date']
+            date_fields = ['study_submitance_date', 'study_submitance_date_qc', 'study_start_date', 'status_verified_date', 'completion_date']
             for date_field in date_fields:
                 date_value = trial_data[date_field]
                 if pd.isna(date_value) or date_value in ['', 'nan']:
@@ -266,6 +266,8 @@ def fetch_trial_data():
         "protocolSection.designModule.studyType": "study_type",
         "protocolSection.designModule.phases": "study_phase",
         "protocolSection.statusModule.overallStatus": "overall_status",
+        "protocolSection.statusModule.studyFirstSubmitDate": "study_submitance_date",
+        "protocolSection.statusModule.studyFirstSubmitQcDate": "study_submitance_date_qc",
         "protocolSection.statusModule.startDateStruct.date": "study_start_date",
         "protocolSection.statusModule.startDateStruct.type": "study_start_date_type",
         "protocolSection.statusModule.statusVerifiedDate": "status_verified_date",
@@ -274,11 +276,15 @@ def fetch_trial_data():
         "protocolSection.sponsorCollaboratorsModule.responsibleParty.type": "responsible_party_type",
         "protocolSection.sponsorCollaboratorsModule.responsibleParty.investigatorFullName": "responsible_party_investigator_full_name",
         "protocolSection.conditionsModule.conditions": "condition",
+        "protocolSection.sponsorCollaboratorsModule.collaborators": "collaborators",
         "protocolSection.conditionsModule.keywords": "keyword",
         "protocolSection.armsInterventionsModule.interventions": "intervention_name",
         "protocolSection.eligibilityModule.studyPopulation": "study_population",
         "protocolSection.designModule.enrollmentInfo.count": "enrollment_count",
-        "protocolSection.designModule.enrollmentInfo.type": "enrollment_type"
+        "protocolSection.designModule.enrollmentInfo.type": "enrollment_type",
+        "protocolSection.statusModule.expandedAccessInfo.hasExpandedAccess": "expanded_access",
+        "protocolSection.oversightModule.isFdaRegulatedDrug": "fda_reguhlated_drug",
+        "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_reguhlated_device"
     }
 
     df_studies.rename(columns=column_mappings, inplace=True)
