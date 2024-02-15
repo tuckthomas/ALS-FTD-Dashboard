@@ -29,9 +29,9 @@ class TrialSchema(BaseModel):
     study_population: Optional[str] = None
     enrollment_count: Optional[int] = None
     enrollment_type: Optional[str] = None
-    expanded_access: Optional[str] = None  # New field
-    fda_regulated_drug: Optional[str] = None  # New field
-    fda_regulated_device: Optional[str] = None  # New field
+    expanded_access: Optional[str] = None
+    fda_regulated_drug: Optional[str] = None
+    fda_regulated_device: Optional[str] = None
     genes: Optional[List[GeneSchema]] = Field(default_factory=list)
 
     @validator('study_submitance_date', 'study_submitance_date_qc', 'study_start_date', 'status_verified_date', 'completion_date', pre=True, always=True)
