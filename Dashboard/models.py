@@ -30,6 +30,7 @@ class Trial(models.Model):
     ]
 
     unique_protocol_id = models.CharField(max_length=255, primary_key=True)  # Primary Key
+    nct_id = models.CharField(max_length=255)
     brief_title = models.TextField(null=True, blank=True)
     study_type = models.CharField(max_length=255, null=True, blank=True)
     study_phase = models.CharField(max_length=255, null=True, blank=True)
@@ -53,6 +54,7 @@ class Trial(models.Model):
     expanded_access = models.CharField(max_length=5, choices=EXPANDED_ACCESS_CHOICES, default='', blank=True)
     fda_regulated_drug = models.CharField(max_length=5, choices=FDA_REGULATED_DRUG_CHOICES, default='', blank=True)
     fda_regulated_device = models.CharField(max_length=5, choices=FDA_REGULATED_DEVICE_CHOICES, default='', blank=True)
+    clinical_trial_url = models.CharField(max_length=255, null=True, blank=True)
     genes = models.ManyToManyField(Gene, related_name='trials')  # Many-to-Many relationship
 
     def __str__(self):
