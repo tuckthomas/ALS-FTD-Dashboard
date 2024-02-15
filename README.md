@@ -7,45 +7,44 @@ This is a work in progress. The API functionaltiy is working with an initial amo
 The front-end has not yet been developed. I am still contimplating the best front-end approach. Whether it be with custom graphs, charts, and tables. Though, I am currently leaning towards using Metabase as the Dashboard front-end.
 
 # Requirements
-This project depends on several Python packages that can be installed executing the requhirements.txt file. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
+This project depends on several Python packages. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
 
 **Python Version:** 3.9.2
 
-# Django and Core Dependencies
+## Django and Core Dependencies
 These packages are required for the project to run:
 
-1. Django==4.2.10 - The web framework used.
-2. django-ninja==1.1.0 - For building APIs with Django.
-3. beautifulsoup4==4.12.3 - For parsing HTML and XML documents.
-4. numpy==1.26.4 - For numerical operations.
-5. pandas==2.2.0 - For data manipulation and analysis.
-6. openpyxl==3.1.2 - For reading/writing Excel 2010 xlsx/xlsm files.
-7. pydantic==2.6.1 - Data validation and settings management using python type annotations.
-8. ipython==7.20.0 - For interactive computing.
-9. requests==2.25.1 - For making HTTP requests.
+- `Django==4.2.10` - The web framework used.
+- `django-ninja==1.1.0` - For building APIs with Django.
+- `beautifulsoup4==4.12.3` - For parsing HTML and XML documents.
+- `numpy==1.26.4` - For numerical operations.
+- `pandas==2.2.0` - For data manipulation and analysis.
+- `openpyxl==3.1.2` - For reading/writing Excel 2010 xlsx/xlsm files.
+- `pydantic==2.6.1` - Data validation and settings management using python type annotations.
+- `ipython==7.20.0` - For interactive computing.
+- `requests==2.25.1` - For making HTTP requests.
 
-# Database Drivers
+## Database Drivers
 I opted to use my existing PostgreSQL database. Depending on your database choice, you might need specific drivers:
 
-1. mysqlclient==1.4.4 - A MySQL driver (Optional, only if using MySQL).
-2. psycopg2-binary==2.9.9 - A PostgreSQL driver (Optional, specifically for PostgreSQL users).
+- `mysqlclient==1.4.4` - A MySQL driver (Optional, only if using MySQL).
+- `psycopg2-binary==2.9.9` - A PostgreSQL driver (Optional, specifically for PostgreSQL users).
 
-# Other Dependencies
+## Other Dependencies
 The following packages might be used for specific functionalities within the project. They are not strictly required for the core functionality but may enhance the project's capabilities or are dependencies of the above packages:
 
-1. asgiref==3.7.2
-2. certifi==2020.6.20
-3. chardet==4.0.0
-4. cryptography==3.3.2
-5. idna==2.10
-6. python-dateutil==2.8.2
-7. pytz==2021.1
-8. sqlparse==0.4.1
-9. urllib3==1.26.5
+- `asgiref==3.7.2`
+- `certifi==2020.6.20`
+- `chardet==4.0.0`
+- `cryptography==3.3.2`
+- `idna==2.10`
+- `python-dateutil==2.8.2`
+- `pytz==2021.1`
+- `sqlparse==0.4.1`
+- `urllib3==1.26.5`
 
-# Optional Packages
+## Optional Packages
 These packages are optional and might be required under specific circumstances or for development purposes:
 
-1. ipython_genutils==0.2.0, jedi==0.18.0, parso==0.8.1, pexpect==4.8.0, pickleshare==0.7.5, prompt-toolkit==3.0.14, Pygments==2.7.1,
-2. traitlets==5.0.5, wcwidth==0.1.9 - For enhanced IPython interaction.
-3. OpenSSL==20.0.1, pycurl==7.43.0.6, pycurl-wrapper===2.0-2-g027c28a - For secure connection handling and HTTP requests.
+- `ipython_genutils==0.2.0`, `jedi==0.18.0`, `parso==0.8.1`, `pexpect==4.8.0`, `pickleshare==0.7.5`, `prompt-toolkit==3.0.14`, `Pygments==2.7.1`, `traitlets==5.0.5`, `wcwidth==0.1.9` - For enhanced IPython interaction.
+- `pyOpenSSL==20.0.1`, `pycurl==7.43.0.6`, `pycurl-wrapper===2.0-2-g027c28a` - For secure connection handling and HTTP requests.
