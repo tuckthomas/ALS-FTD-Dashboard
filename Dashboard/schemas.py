@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, validator, ValidationError
+from pydantic import BaseModel, validator, ValidationError, Field
 from typing import List, Optional
 from .models import Gene, Trial
 
@@ -10,23 +10,31 @@ class GeneSchema(BaseModel):
 
 class TrialSchema(BaseModel):
     unique_protocol_id: str
-    brief_title: Optional[str]
-    study_type: Optional[str]
-    overall_status: Optional[str]
-    status_verified_date: Optional[datetime]
-    completion_date: Optional[datetime]
-    lead_sponsor_name: Optional[str]
-    responsible_party_type: Optional[str]
-    responsible_party_investigator_full_name: Optional[str]
-    condition: Optional[str]
-    keyword: Optional[str]
-    intervention_name: Optional[str]
-    study_population: Optional[str]
-    enrollment_count: Optional[int]
-    enrollment_type: Optional[str]
-    genes: Optional[List[GeneSchema]]
+    brief_title: Optional[str] = None
+    study_type: Optional[str] = None
+    study_phase: Optional[str] = None
+    overall_status: Optional[str] = None
+    study_submitance_date: Optional[datetime] = None
+    study_submitance_date_qc: Optional[datetime] = None
+    study_start_date: Optional[datetime] = None
+    study_start_date_type: Optional[str] = None
+    status_verified_date: Optional[datetime] = None
+    completion_date: Optional[datetime] = None
+    lead_sponsor_name: Optional[str] = None
+    responsible_party_type: Optional[str] = None
+    responsible_party_investigator_full_name: Optional[str] = None
+    condition: Optional[str] = None
+    keyword: Optional[str] = None
+    intervention_name: Optional[str] = None
+    study_population: Optional[str] = None
+    enrollment_count: Optional[int] = None
+    enrollment_type: Optional[str] = None
+    expanded_access: Optional[str] = None  # New field
+    fda_regulated_drug: Optional[str] = None  # New field
+    fda_regulated_device: Optional[str] = None  # New field
+    genes: Optional[List[GeneSchema]] = Field(default_factory=list)
 
-    @validator('status_verified_date', 'completion_date', pre=True, always=True)
+    @validator('study_submitance_date', 'study_submitance_date_qc', 'study_start_date', 'status_verified_date', 'completion_date', pre=True, always=True)
     def parse_date(cls, value):
         if value is None:
             return None
@@ -53,6 +61,28 @@ def get_serialized_trials():
             TrialSchema(
                 unique_protocol_id=trial.unique_protocol_id,
                 brief_title=trial.brief_title,
+                study_type=trial.study_type,
+                study_phase=trial.study_phase,
+                overall_status=trial.overall_status,
+                study_submitance_date=trial.study_submitance_date,
+                study_submitance_date_qc=trial.study_submitance_date_qc,
+                study_start_date=trial.study_start_date,
+                study_start_date_type=trial.study_start_date_type,
+                status_verified_date=trial.status_verified_date,
+                completion_date=trial.completion_date,
+                lead_sponsor_name=trial.lead_sponsor_name,
+                responsible_party_type=trial.responsible_party_type,
+                responsible_party_investigator_full_name=trial.responsible_party_investigator_full_name,
+                condition=trial.condition,
+                collaborators=trial.collaborators,
+                keyword=trial.keyword,
+                intervention_name=trial.intervention_name,
+                study_population=trial.study_population,
+                enrollment_count=trial.enrollment_count,
+                enrollment_type=trial.enrollment_type,
+                expanded_access=trial.expanded_access,
+                fda_regulated_drug=trial.fda_regulated_drug,
+                fda_regulated_device=trial.fda_regulated_device,
                 genes=[GeneSchema(
                     gene_symbol=gene.gene_symbol,
                     gene_name=gene.gene_name,
@@ -61,4 +91,3 @@ def get_serialized_trials():
             )
         )
     return serialized_trials
-
