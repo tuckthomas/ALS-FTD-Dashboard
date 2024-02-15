@@ -14,7 +14,10 @@ class Trial(models.Model):
     unique_protocol_id = models.CharField(max_length=255, primary_key=True)  # Primary Key
     brief_title = models.TextField(null=True, blank=True)
     study_type = models.CharField(max_length=255, null=True, blank=True)
+    study_phase = models.CharField(max_length=255, null=True, blank=True)
     overall_status = models.CharField(max_length=255, null=True, blank=True)
+    study_start_date = models.DateField(null=True, blank=True)
+    study_start_date_type = models.CharField(max_length=255, null=True, blank=True)
     status_verified_date = models.DateField(null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
     lead_sponsor_name = models.CharField(null=True, max_length=255, blank=True)
@@ -26,7 +29,7 @@ class Trial(models.Model):
     study_population = models.TextField(null=True, blank=True)
     enrollment_count = models.IntegerField(null=True, blank=True)
     enrollment_type = models.CharField(max_length=100, null=True, blank=True)
-    genes = models.ManyToManyField(Gene, related_name='trials', null=True)  # Many-to-Many relationship
+    genes = models.ManyToManyField(Gene, related_name='trials')  # Many-to-Many relationship
 
     def __str__(self):
         return self.brief_title
