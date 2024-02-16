@@ -154,7 +154,21 @@ def enhanced_fetch_trial_data():
     # Add clinical_trial_url column
     trials_data_df['clinical_trial_url'] = trials_data_df['nct_id'].apply(clinical_trial_url)
 
+    # Validate and transform data for choice fields
+    trials_data_df['expanded_access'] = trials_data_df['expanded_access'].apply(validate_and_transform_choice_field)
+    trials_data_df['fda_regulated_drug'] = trials_data_df['fda_regulated_drug'].apply(validate_and_transform_choice_field)
+    trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
+
     return trials_data_df
+
+
+# Data validation for TRUE, FALSE, or BLANK/NULL Choice Fields
+def validate_and_transform_choice_field(value):
+    valid_values = ['TRUE', 'FALSE', '']
+    # Ensure the value is in uppercase to match the choices exactly
+    transformed_value = value.upper() if isinstance(value, str) else ''
+    # Return the value if it is valid, otherwise return an empty string
+    return transformed_value if transformed_value in valid_values else ''
 
 
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
@@ -258,7 +272,7 @@ def fetch_trial_data():
         "format": "json",
         "query.cond": "ALS OR FTD OR amyotrophic lateral sclerosis OR frontal lobe dementia",
         "pageSize": 1000,
-        "fields": "OrgStudyId|NCTId|BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType|Phase|StartDate|StartDateType|StudyFirstSubmitDate|StudyFirstSubmitQCDate"
+        "fields": "OrgStudyId|NCTId|BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType|Phase|StartDate|StartDateType|StudyFirstSubmitDate|StudyFirstSubmitQCDate|HasExpandedAccess|IsFDARegulatedDrug|IsFDARegulatedDevice"
     }
     print("Starting fetch_trial_data..before 'all_study_details'...")
     all_studies_details = []
@@ -330,8 +344,8 @@ def fetch_trial_data():
         "protocolSection.designModule.enrollmentInfo.count": "enrollment_count",
         "protocolSection.designModule.enrollmentInfo.type": "enrollment_type",
         "protocolSection.statusModule.expandedAccessInfo.hasExpandedAccess": "expanded_access",
-        "protocolSection.oversightModule.isFdaRegulatedDrug": "fda_reguhlated_drug",
-        "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_reguhlated_device"
+        "protocolSection.oversightModule.isFdaRegulatedDrug": "fda_regulated_drug",
+        "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_regulated_device"
     }
 
     df_studies.rename(columns=column_mappings, inplace=True)
