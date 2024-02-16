@@ -44,10 +44,10 @@ class Trial(models.Model):
     lead_sponsor_name = models.CharField(null=True, max_length=255, blank=True)
     responsible_party_type = models.CharField(null=True, max_length=255)
     responsible_party_investigator_full_name = models.CharField(null=True, max_length=255, blank=True)
-    condition = models.TextField(null=True, blank=True)
+    condition = models.JSONField(null=True, blank=True)
     collaborators = models.TextField(null=True, blank=True)
-    keyword = models.TextField(null=True, blank=True)
-    intervention_name = models.TextField(null=True, blank=True)
+    keyword = models.JSONField(null=True, blank=True)
+    intervention_name = models.JSONField(null=True, blank=True)
     study_population = models.TextField(null=True, blank=True)
     enrollment_count = models.IntegerField(null=True, blank=True)
     enrollment_type = models.CharField(max_length=100, null=True, blank=True)
@@ -55,7 +55,7 @@ class Trial(models.Model):
     fda_regulated_drug = models.CharField(max_length=5, choices=FDA_REGULATED_DRUG_CHOICES, default='', blank=True)
     fda_regulated_device = models.CharField(max_length=5, choices=FDA_REGULATED_DEVICE_CHOICES, default='', blank=True)
     clinical_trial_url = models.CharField(max_length=255, null=True, blank=True)
-    genes = models.ManyToManyField(Gene, related_name='trials')  # Many-to-Many relationship
+    genes = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.brief_title
