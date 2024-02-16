@@ -34,6 +34,8 @@ To use Metabase as the dashboard front-end, Docker is required for installation.
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
   apt-get update
   apt-get install docker-ce docker-ce-cli containerd.io
+  - Pull latest Metabase image from Docker and run Metabase:
+  ```sh
   docker pull metabase/metabase:latest
   docker run -d -p 3000:3000 --name metabase metabase/metabase # Replace Port '3000' with Different Port if Desired
 - 'PyJWT'==PyJWT==2.8.0' - For Metabase Dashboard Embedding
