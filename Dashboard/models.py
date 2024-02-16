@@ -33,7 +33,7 @@ class Trial(models.Model):
     nct_id = models.CharField(max_length=255)
     brief_title = models.TextField(null=True, blank=True)
     study_type = models.CharField(max_length=255, null=True, blank=True)
-    study_phase = models.CharField(max_length=255, null=True, blank=True)
+    study_phase = models.JSONField(null=True, blank=True)
     overall_status = models.CharField(max_length=255, null=True, blank=True)
     study_submitance_date = models.DateField(null=True, blank=True)
     study_submitance_date_qc = models.DateField(null=True, blank=True)
