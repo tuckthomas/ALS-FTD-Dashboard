@@ -77,8 +77,13 @@ DATABASES = {
         'PASSWORD': 'REDACT',
         'HOST': 'REDACT',
         'PORT': 'REDACT',
+        'OPTIONS': {
+            'options': '-c search_path=public',
+            'client_encoding': 'UTF8',
+        },
     }
 }
+
 
 
 # Password validation
