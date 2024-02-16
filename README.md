@@ -23,6 +23,19 @@ These packages are required for the project to run:
 - `ipython==7.20.0` - For interactive computing.
 - `requests==2.25.1` - For making HTTP requests.
 
+## Optional Metabase Front-End
+To use Metabase as the dashboard front-end, Docker is required for installation. Ensure Docker is installed and running on your system. Here's how to install Metabase using Docker:
+
+- Ensure Docker is installed on your system. For Debian-based systems:
+  ```sh
+  apt-get update
+  apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
+  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  apt-get update
+  apt-get install docker-ce docker-ce-cli containerd.io
+- 'PyJWT'==PyJWT==2.8.0' - For Metabase Dashboard Embedding
+
 ## Database Drivers
 I opted to use my existing PostgreSQL database. Depending on your database choice, you might need specific drivers:
 
@@ -47,3 +60,4 @@ These packages are optional and might be required under specific circumstances o
 
 - `ipython_genutils==0.2.0`, `jedi==0.18.0`, `parso==0.8.1`, `pexpect==4.8.0`, `pickleshare==0.7.5`, `prompt-toolkit==3.0.14`, `Pygments==2.7.1`, `traitlets==5.0.5`, `wcwidth==0.1.9` - For enhanced IPython interaction.
 - `pyOpenSSL==20.0.1`, `pycurl==7.43.0.6`, `pycurl-wrapper===2.0-2-g027c28a` - For secure connection handling and HTTP requests.
+- 'PyJWT'==PyJWT==2.8.0' - For Metabase Data Visualization/Query Editor
