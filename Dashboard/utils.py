@@ -164,11 +164,14 @@ def enhanced_fetch_trial_data():
 
 # Data validation for TRUE, FALSE, or BLANK/NULL Choice Fields
 def validate_and_transform_choice_field(value):
-    valid_values = ['TRUE', 'FALSE', '']
-    # Ensure the value is in uppercase to match the choices exactly
-    transformed_value = value.upper() if isinstance(value, str) else ''
-    # Return the value if it is valid, otherwise return an empty string
-    return transformed_value if transformed_value in valid_values else ''
+    # Map the initial capitalized format to the expected uppercase format
+    value_map = {
+        'True': 'TRUE',
+        'False': 'FALSE',
+        '': ''
+    }
+    # Use the value directly if it's in the map; otherwise, return an empty string for invalid or missing inputs
+    return value_map.get(value, '')
 
 
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
