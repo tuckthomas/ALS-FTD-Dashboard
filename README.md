@@ -39,7 +39,10 @@ To use Metabase as the dashboard front-end, Docker is required for installation.
   ```sh
   docker pull metabase/metabase:latest
   docker run -d -p 3000:3000 --name metabase metabase/metabase # Replace Port '3000' with Different Port if Desired
-- 'PyJWT'==PyJWT==2.8.0' - For Metabase Dashboard Embedding
+  
+- Install PyJWT for Embedding Metabase Dashboard into Webpage:
+  ```sh
+  pip install PyJWT
 
 ## Database Drivers
 I opted to use my existing PostgreSQL database. Depending on your database choice, you might need specific drivers:
