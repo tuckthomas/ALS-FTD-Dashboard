@@ -24,7 +24,7 @@ These packages are required for the project to run:
 - `requests==2.25.1` - For making HTTP requests.
 
 ## Optional Metabase Front-End
-To use Metabase as the dashboard front-end, Docker is required for installation. Ensure Docker is installed and running on your system. Here's how to install Metabase using Docker:
+To use Metabase as the dashboard front-end, Docker is required for installation. Ensure Docker is installed and running on your system. I am running Debian 12 within a Proxmox LXC. If using a similar setup or Debian-based system, here's how to install Metabase using Docker:
 
 - Ensure Docker is installed on your system. For Debian-based systems:
   ```sh
