@@ -238,10 +238,6 @@ def scrape_alsod_gene_list():
         "Gene Risk Category": gene_risk_categories
     })
 
-    # Define the filename and the filepath
-    filename = 'ALSOD_Gene_List.csv'
-    filepath = os.path.join(settings.MEDIA_ROOT, filename)
-
     print("Scraped gene list DataFrame shape:", df.shape)  # Check the shape of the DataFrame
     return df
 
