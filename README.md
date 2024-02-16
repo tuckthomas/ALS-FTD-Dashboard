@@ -44,6 +44,10 @@ To use Metabase as the dashboard front-end, Docker is required for installation.
   ```sh
   pip install PyJWT
 
+Here is an early example of a dashboard using Metabase:
+
+![Early-Metabase-Dashboard-Example](media/Early-Metabase-Dashboard-Example.jpg)
+
 ## Database Drivers
 I opted to use my existing PostgreSQL database. Depending on your database choice, you might need specific drivers:
 
