@@ -1,9 +1,10 @@
 from .models import Gene, Trial
-from pydantic import BaseModel, validator, ValidationError, Field, HttpUrl
+from pydantic import BaseModel, validator, ValidationError, Field, HttpUrl, json
 from typing import List, Optional, Union
 from datetime import datetime, date
 from pydantic.networks import AnyHttpUrl
 from django.forms.models import model_to_dict
+import json
 
 class GeneSchema(BaseModel):
     gene_symbol: str
@@ -17,18 +18,18 @@ class TrialSchema(BaseModel):
     study_type: Optional[str] = None
     study_phase: Optional[str] = None
     overall_status: Optional[str] = None
-    study_submitance_date: Optional[datetime] = None
-    study_submitance_date_qc: Optional[datetime] = None
-    study_start_date: Optional[datetime] = None
+    study_submitance_date: Optional[date] = None
+    study_submitance_date_qc: Optional[date] = None
+    study_start_date: Optional[date] = None
     study_start_date_type: Optional[str] = None
-    status_verified_date: Optional[datetime] = None
-    completion_date: Optional[datetime] = None
+    status_verified_date: Optional[date] = None
+    completion_date: Optional[date] = None
     lead_sponsor_name: Optional[str] = None
     responsible_party_type: Optional[str] = None
     responsible_party_investigator_full_name: Optional[str] = None
-    condition: Optional[str] = None
-    keyword: Optional[str] = None
-    intervention_name: Optional[str] = None
+    condition: Optional[Union[str, List[str]]] = None  # Could be a string or list of strings
+    keyword: Optional[Union[str, List[str]]] = None  # Could be a string or list of strings
+    intervention_name: Optional[Union[str, List[dict]]] = None  # Could be a string or list of dictionaries
     study_population: Optional[str] = None
     enrollment_count: Optional[int] = None
     enrollment_type: Optional[str] = None
@@ -36,7 +37,8 @@ class TrialSchema(BaseModel):
     fda_regulated_drug: Optional[str] = None
     fda_regulated_device: Optional[str] = None
     clinical_trial_url: Optional[str] = None
-    genes: Optional[List[GeneSchema]] = Field(default_factory=list)
+    genes: Optional[List[str]] = None  # Expecting a list of strings
+
 
     # Prepare URL for JSON serialization
     def dict(self, **kwargs):
@@ -78,43 +80,28 @@ class TrialSchema(BaseModel):
 # Function to fetch and serialize trials from the database
 def get_serialized_trials():
     serialized_trials = []
-    for trial in Trial.objects.prefetch_related('genes').all():
-        # Ensure URL is a string
-        clinical_trial_url = str(trial.clinical_trial_url) if trial.clinical_trial_url else None
-        trial_data = TrialSchema(
-            unique_protocol_id=trial.unique_protocol_id,
-            nct_id=trial.nct_id,
-                brief_title=trial.brief_title,
-                study_type=trial.study_type,
-                study_phase=trial.study_phase,
-                overall_status=trial.overall_status,
-                study_submitance_date=trial.study_submitance_date,
-                study_submitance_date_qc=trial.study_submitance_date_qc,
-                study_start_date=trial.study_start_date,
-                study_start_date_type=trial.study_start_date_type,
-                status_verified_date=trial.status_verified_date,
-                completion_date=trial.completion_date,
-                lead_sponsor_name=trial.lead_sponsor_name,
-                responsible_party_type=trial.responsible_party_type,
-                responsible_party_investigator_full_name=trial.responsible_party_investigator_full_name,
-                condition=trial.condition,
-                collaborators=trial.collaborators,
-                keyword=trial.keyword,
-                intervention_name=trial.intervention_name,
-                study_population=trial.study_population,
-                enrollment_count=trial.enrollment_count,
-                enrollment_type=trial.enrollment_type,
-                expanded_access=trial.expanded_access,
-                fda_regulated_drug=trial.fda_regulated_drug,
-                fda_regulated_device=trial.fda_regulated_device,
-                clinical_trial_url=clinical_trial_url,
-                genes=[GeneSchema(
-                    gene_symbol=gene.gene_symbol,
-                    gene_name=gene.gene_name,
-                    gene_risk_category=gene.gene_risk_category
-                ) for gene in trial.genes.all()]
-            ).dict()
-            
-        serialized_trials.append(trial_data)
+    for trial in Trial.objects.all():  # No need to prefetch_related('genes') since 'genes' is now a JSONField
+        trial_dict = model_to_dict(trial, exclude=['id', 'genes'])  # Exclude the 'id' field, if you have one
+
+        # Convert the JSON string fields to dictionaries, if needed
+        for field in ['condition', 'keyword', 'intervention_name']:
+            field_value = getattr(trial, field, None)
+            if isinstance(field_value, str):
+                # If the field is a string, attempt to load it as JSON
+                try:
+                    trial_dict[field] = json.loads(field_value)
+                except json.JSONDecodeError:
+                    # If JSON decoding fails, leave the field as is
+                    pass
+            else:
+                trial_dict[field] = field_value  # If it's already a dict, use it as is
+
+        # No need to manually convert 'genes' as it should already be in the correct format
+        trial_dict['genes'] = getattr(trial, 'genes', None)
+
+        # Create a TrialSchema instance using the trial_dict
+        trial_schema = TrialSchema(**trial_dict)
+        # Append the serialized form of the TrialSchema instance to the list of serialized trials
+        serialized_trials.append(trial_schema.dict())
 
     return serialized_trials
