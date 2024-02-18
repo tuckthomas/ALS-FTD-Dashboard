@@ -8,7 +8,6 @@ As part of a non-profit/volunteer contribution, this is the repository to an upc
 # Familial ALS Person Imapact and Donation Link
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses.
 
-Many years ago my family started a 501(c)(3) that, until COVID-19, was utilized annually for a charity golf outing, dinner, and auction in Fort Wayne, IN. Funds were then donated to ALS organizatoins focused on developing biomarkers, effective treatments, and ultimately a cure.
 If you appreciate this work and would like to suppport it, please remit donations to one of the following charities:
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
