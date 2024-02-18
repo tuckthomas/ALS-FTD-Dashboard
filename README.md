@@ -5,7 +5,15 @@ As part of a non-profit/volunteer contribution, this is the repository to an upc
 
 **The front-end has not yet been developed.** I am still contemplating the best front-end approach. Whether it be with custom graphs, charts, and tables. Though, I am currently leaning towards using Metabase as the Dashboard front-end.
 
-# Requirements
+# Familial ALS Person Imapact and Donation Link
+Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses.
+
+Many years ago my family started a 501(c)(3) that, until COVID-19, was utilized annually for a charity golf outing, dinner, and auction in Fort Wayne, IN. Funds were then donated to ALS organizatoins focused on developing biomarkers, effective treatments, and ultimately a cure.
+If you appreciate this work and would like to suppport it, please remit donations to one of the following charities:
+- [Everything ALS]([https://github.com/metabase/metabase](https://www.everythingals.org/donate)
+- [ALS Hope Foundatoin](https://www.alshf.org/donate)
+
+# System Requirements
 This project depends on several Python packages. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
 
 **Python Version:** 3.9.2
