@@ -7,7 +7,7 @@ As part of a non-profit/volunteer contribution, this is the repository to an upc
 # Familial ALS Personal Impact and Donation Link
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.tuckstime.com/)
 
-If you appreciate this work and would like to suppport it, please remit donations to one of the following charities:
+If you appreciate this work and would like to suppport it, please remit donations to one of the following charities charities listed below. ***Also, I'm available for full-time employment, as well as contract opportunities.***
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 
