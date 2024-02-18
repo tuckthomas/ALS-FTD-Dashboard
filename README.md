@@ -1,8 +1,19 @@
 # ALS & FTD Clinical Trial Research Dashboard
-## [fALS.com](https://www.f-als.com)
+## [f-ALS.com](https://www.f-als.com)
 As part of a non-profit/volunteer contribution, this is the repository to an upcoming Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on familial ALS/FTD; allowing for further data exploration.
 
-**This is a work in progress.** The API functionaltiy is working with an initial amount of identifed fields that were requested, though additional fields will be added soon. **Furthermore, I still have quite a bit of data cleanup, normalization, and validation to complete.** I am sharing this as-is in case anyone is interested in contributing.
+**This is a work in progress.** The API functionaltiy retrieving ClinicalTrials.gov fields, performing initial data normalization and validation, and saving the data to the database is working for the intitial identified fields. Additional fields will continue to be added, when appropriate. Furthermore, API fetches of clinical trial data from other countries will be included at a later date. **Furthermore, I still have quite a bit of data cleanup, normalization, and validation to complete.** I am sharing this as-is in case anyone is interested in contributing.
+
+## Public API
+To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single end-point is available. However, at a later date, additional end-points will be incluided.
+
+## How can I extract the data in the meantime?
+By vising [f-als.com](https://www.f-als.com) and viewing the 'Raw Data' tab of the dashboard, there is an option in the upper right-hand corner of the table. Selecting the option will provide a drop-down menu allowing the site visitor the following extraction options:
+- CSV
+- XLSX
+- JSON
+
+Additionally, .png files of dashboard visualizations may also be downloaded.
 
 # Familial ALS Personal Impact and Donation Link
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.tuckstime.com/)
