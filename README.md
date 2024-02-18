@@ -28,6 +28,7 @@ These packages are required for the project to run:
 - `pydantic==2.6.1` - Data validation and settings management using python type annotations.
 - `ipython==7.20.0` - For interactive computing.
 - `requests==2.25.1` - For making HTTP requests.
+- `whitenoise==6.6.0` - For serving static files.
 
 ## Optional Metabase Front-End Requirements
 **What is Metabase?** [Metabase](https://github.com/metabase/metabase) is open-source business intelligence tool that enables users to explore, visualize, and share data insights without the need for extensive technical knowledge. It allows for easy querying through a user-friendly interface, making it accessible for users to generate reports and dashboards from their data sources.
