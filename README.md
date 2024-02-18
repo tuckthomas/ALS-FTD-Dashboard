@@ -4,8 +4,6 @@ As part of a non-profit/volunteer contribution, this is the repository to an upc
 
 **This is a work in progress.** The API functionaltiy is working with an initial amount of identifed fields that were requested, though additional fields will be added soon. **Furthermore, I still have quite a bit of data cleanup, normalization, and validation to complete.** I am sharing this as-is in case anyone is interested in contributing.
 
-**The front-end has not yet been developed.** I am still contemplating the best front-end approach. Whether it be with custom graphs, charts, and tables. Though, I am currently leaning towards using Metabase as the Dashboard front-end.
-
 # Familial ALS Personal Impact and Donation Link
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.tuckstime.com/)
 
