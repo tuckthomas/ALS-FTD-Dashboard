@@ -10,8 +10,8 @@ Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my gra
 
 Many years ago my family started a 501(c)(3) that, until COVID-19, was utilized annually for a charity golf outing, dinner, and auction in Fort Wayne, IN. Funds were then donated to ALS organizatoins focused on developing biomarkers, effective treatments, and ultimately a cure.
 If you appreciate this work and would like to suppport it, please remit donations to one of the following charities:
-- [Everything ALS]([https://github.com/metabase/metabase](https://www.everythingals.org/donate)
-- [ALS Hope Foundatoin](https://www.alshf.org/donate)
+- [Everything ALS](https://www.everythingals.org/donate)
+- [ALS Hope Foundation](https://www.alshf.org/donate)
 
 # System Requirements
 This project depends on several Python packages. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
