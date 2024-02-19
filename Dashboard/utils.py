@@ -184,7 +184,9 @@ def validate_and_transform_choice_field(value):
 
 
 
-# This function fetches trial data and enhances it by associating gene symbols based on keywords, but also when the gene symbol is part of a string of text within the keyword field, using the scraped gene list.
+# This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
+# To refine the matching process and avoid false positives like the ones you mentioned, an additional check occurs to ensure that gene symbols
+# are recognized as distinct words or part of a larger keyword that correctly represents a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
 def match_genes(row, gene_symbols):
     valid_keywords_count = 0
     invalid_keywords_count = 0
@@ -196,12 +198,13 @@ def match_genes(row, gene_symbols):
             # Split the string by comma and strip each keyword
             keywords_list = [keyword.strip() for keyword in row['keyword'].split(',')]
 
-            # Match keywords with gene symbols ignoring case, checking for substring match
+            # Use regex to match gene symbols more accurately
             for keyword in keywords_list:
                 matched_this_round = False
                 for gene in gene_symbols:
-                    # Check if the gene symbol is a substring of the keyword
-                    if gene.upper() in keyword.upper():
+                    # Pattern to match gene symbol as a whole word or within specific contexts
+                    pattern = rf'\b{gene}\b|\b{gene}[^A-Za-z0-9_]|[^A-Za-z0-9_]{gene}\b'
+                    if re.search(pattern, keyword, re.IGNORECASE):
                         matched_genes.append(gene)
                         valid_keywords_count += 1
                         matched_this_round = True
@@ -212,7 +215,7 @@ def match_genes(row, gene_symbols):
 
         except (ValueError, TypeError) as e:
             print(f"Error processing keywords for trial {row['unique_protocol_id']}: {e}")
-            print("Problematic row data:", row)  # Print the problematic row data
+            print("Problematic row data:", row)
             invalid_keywords_count += 1
     else:
         print(f"Invalid or empty 'keyword' field for trial {row['unique_protocol_id']}")
@@ -225,10 +228,6 @@ def match_genes(row, gene_symbols):
     print(f"Valid keywords count: {valid_keywords_count}")
     print(f"Invalid/Empty keywords count: {invalid_keywords_count}")
     return json.dumps(matched_genes)
-
-
-
-
 
 
 
