@@ -184,7 +184,7 @@ def validate_and_transform_choice_field(value):
 
 
 
-# This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
+# This function fetches trial data and enhances it by associating gene symbols based on keywords, but also when the gene symbol is part of a string of text within the keyword field, using the scraped gene list.
 def match_genes(row, gene_symbols):
     valid_keywords_count = 0
     invalid_keywords_count = 0
@@ -196,15 +196,20 @@ def match_genes(row, gene_symbols):
             # Split the string by comma and strip each keyword
             keywords_list = [keyword.strip() for keyword in row['keyword'].split(',')]
 
-            # Match keywords with gene symbols ignoring case
+            # Match keywords with gene symbols ignoring case, checking for substring match
             for keyword in keywords_list:
+                matched_this_round = False
                 for gene in gene_symbols:
-                    if gene.upper() == keyword.upper():
+                    # Check if the gene symbol is a substring of the keyword
+                    if gene.upper() in keyword.upper():
                         matched_genes.append(gene)
                         valid_keywords_count += 1
-                        break  # Break the inner loop once a match is found
-                else:
+                        matched_this_round = True
+                        break  # Optional: Break the inner loop once a match is found depending on requirements
+
+                if not matched_this_round:
                     invalid_keywords_count += 1
+
         except (ValueError, TypeError) as e:
             print(f"Error processing keywords for trial {row['unique_protocol_id']}: {e}")
             print("Problematic row data:", row)  # Print the problematic row data
@@ -220,6 +225,7 @@ def match_genes(row, gene_symbols):
     print(f"Valid keywords count: {valid_keywords_count}")
     print(f"Invalid/Empty keywords count: {invalid_keywords_count}")
     return json.dumps(matched_genes)
+
 
 
 
