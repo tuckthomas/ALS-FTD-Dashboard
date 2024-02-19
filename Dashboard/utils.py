@@ -125,28 +125,30 @@ def save_to_xls(gene_df, trial_df):
 
 
 
-
 # This function creates a column for the URL of each trial record based upon ClinicalTrial.gov's URL schema.
 def enhanced_fetch_trial_data():
-    # Fetch trial data and print type before conversion
+    # Fetch trial data
     trials_data_df = fetch_trial_data()
     print(f"Type of trials_data_raw before conversion: {type(trials_data_df).__name__}")
 
-    gene_list_df = scrape_alsod_gene_list()  # Assume this fetches your gene list correctly
+    gene_list_df = scrape_alsod_gene_list()
     gene_symbols = gene_list_df['Gene Symbol'].tolist()
+
+    # Define the list of field names to be combined
+    fields_to_combine = ['keyword', 'condition', 'study_population', 'brief_title']
 
     # Generates the URL for each Study/Trial based upon ClinicalTrial.gov's URL schema
     def clinical_trial_url(nct_id):
         return f"https://clinicaltrials.gov/study/{nct_id}"
 
-    # Create a new DataFrame for processing
-    processed_data_df = trials_data_df[['unique_protocol_id', 'keyword']].copy()
+    # Create a new DataFrame for processing that includes the fields defined above
+    processed_data_df = trials_data_df[fields_to_combine + ['unique_protocol_id']].copy()
 
-    # Convert the 'keyword' field to a text format with commas separating each keyword
-    processed_data_df['keyword'] = processed_data_df['keyword'].apply(lambda x: ','.join(x) if isinstance(x, list) else '')
+    # Use a lambda function to iterate over the fields_to_combine and process each field accordingly
+    processed_data_df['combined_keywords'] = processed_data_df.apply(lambda row: ','.join([','.join(row[field]) if isinstance(row[field], list) else row[field] for field in fields_to_combine]), axis=1)
 
-    # Apply the match_genes function to each row of the processed DataFrame.
-    processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row, gene_symbols), axis=1)
+    # Apply the match_genes function to each row of the processed DataFrame using the combined keywords.
+    processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row['combined_keywords'], gene_symbols), axis=1)
 
     # Merge the processed data back into the original DataFrame
     trials_data_df = pd.merge(trials_data_df, processed_data_df[['unique_protocol_id', 'genes']], on='unique_protocol_id', how='left')
@@ -160,6 +162,7 @@ def enhanced_fetch_trial_data():
     trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
 
     return trials_data_df
+
 
 
 # Data validation for TRUE, FALSE, or BLANK/NULL Choice Fields
@@ -187,16 +190,15 @@ def validate_and_transform_choice_field(value):
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
 # To refine the matching process and avoid false positives like the ones you mentioned, an additional check occurs to ensure that gene symbols
 # are recognized as distinct words or part of a larger keyword that correctly represents a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
-def match_genes(row, gene_symbols):
+def match_genes(combined_keywords, gene_symbols):
     valid_keywords_count = 0
     invalid_keywords_count = 0
-    matched_genes = []
+    matched_genes = set()  # Use a set to avoid duplicates
 
-    # Check if 'keyword' field is not empty and is a valid string
-    if isinstance(row['keyword'], str) and row['keyword'].strip():
+    if isinstance(combined_keywords, str) and combined_keywords.strip():
         try:
             # Split the string by comma and strip each keyword
-            keywords_list = [keyword.strip() for keyword in row['keyword'].split(',')]
+            keywords_list = [keyword.strip() for keyword in combined_keywords.split(',')]
 
             # Use regex to match gene symbols more accurately
             for keyword in keywords_list:
@@ -205,7 +207,7 @@ def match_genes(row, gene_symbols):
                     # Pattern to match gene symbol as a whole word or within specific contexts
                     pattern = rf'\b{gene}\b|\b{gene}[^A-Za-z0-9_]|[^A-Za-z0-9_]{gene}\b'
                     if re.search(pattern, keyword, re.IGNORECASE):
-                        matched_genes.append(gene)
+                        matched_genes.add(gene)
                         valid_keywords_count += 1
                         matched_this_round = True
                         break  # Optional: Break the inner loop once a match is found depending on requirements
@@ -214,20 +216,17 @@ def match_genes(row, gene_symbols):
                     invalid_keywords_count += 1
 
         except (ValueError, TypeError) as e:
-            print(f"Error processing keywords for trial {row['unique_protocol_id']}: {e}")
-            print("Problematic row data:", row)
+            print(f"Error processing combined keywords: {e}")
             invalid_keywords_count += 1
     else:
-        print(f"Invalid or empty 'keyword' field for trial {row['unique_protocol_id']}")
+        print("Invalid or empty 'combined_keywords' field")
         invalid_keywords_count += 1
 
-    # Print the total count of records with valid keyword matches
+    # Print results for debug purposes
     print(f"Total records with valid keyword matches: {valid_keywords_count}")
-
-    # Serialize matched genes list to JSON string
     print(f"Valid keywords count: {valid_keywords_count}")
     print(f"Invalid/Empty keywords count: {invalid_keywords_count}")
-    return json.dumps(matched_genes)
+    return json.dumps(list(matched_genes))  # Convert set back to list for JSON serialization
 
 
 
