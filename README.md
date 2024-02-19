@@ -15,7 +15,7 @@ If you appreciate this work and would like to suppport it, please remit donation
 ## Public API
 To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single API end-point is created. However, at a later date in the near future, additional API end-points will be created.
 
-## How can I manually extract the data in the meantime?
+## How can I download your raw dataset in the meantime?
 By vising [f-als.com](https://www.f-als.com) and viewing the 'Raw Data' tab of the dashboard, there is an option in the upper right-hand corner of the table. Selecting the option will provide a drop-down menu allowing the site visitor the following extraction options:
 - CSV
 - XLSX
