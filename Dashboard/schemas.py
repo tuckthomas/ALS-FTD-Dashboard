@@ -16,7 +16,7 @@ class TrialSchema(BaseModel):
     nct_id: Optional[str] = None
     brief_title: Optional[str] = None
     study_type: Optional[str] = None
-    study_phase: Optional[str] = None
+    study_phase: Optional[Union[str, List[str]]] = None
     overall_status: Optional[str] = None
     study_submitance_date: Optional[date] = None
     study_submitance_date_qc: Optional[date] = None
@@ -27,17 +27,21 @@ class TrialSchema(BaseModel):
     lead_sponsor_name: Optional[str] = None
     responsible_party_type: Optional[str] = None
     responsible_party_investigator_full_name: Optional[str] = None
-    condition: Optional[Union[str, List[str]]] = None  # Could be a string or list of strings
-    keyword: Optional[Union[str, List[str]]] = None  # Could be a string or list of strings
-    intervention_name: Optional[Union[str, List[dict]]] = None  # Could be a string or list of dictionaries
+    condition: Optional[Union[str, List[str]]] = None
+    keyword: Optional[Union[str, List[str]]] = None
+    intervention_name: Optional[Union[str, List[dict]]] = None
     study_population: Optional[str] = None
     enrollment_count: Optional[int] = None
     enrollment_type: Optional[str] = None
     expanded_access: Optional[str] = None
     fda_regulated_drug: Optional[str] = None
     fda_regulated_device: Optional[str] = None
+    primary_outcomes: Optional[Union[str, List[dict]]] = None
+    secondary_outcomes: Optional[Union[str, List[dict]]] = None
+    other_outcomes: Optional[Union[str, List[dict]]] = None
     clinical_trial_url: Optional[str] = None
-    genes: Optional[List[str]] = None  # Expecting a list of strings
+    study_location: Optional[Union[str, List[dict]]] = None
+    genes: Optional[List[str]] = None
 
 
     # Prepare URL for JSON serialization
@@ -77,6 +81,12 @@ class TrialSchema(BaseModel):
                     # Raise an error if none of the formats match
                     raise ValidationError(f"Date format for {value} is not supported.")
 
+    @validator('study_phase', pre=True)
+    def ensure_list(cls, value):
+        if value is None or isinstance(value, list):
+            return value
+        return [value]  
+
 # Function to fetch and serialize trials from the database
 def get_serialized_trials():
     serialized_trials = []
@@ -84,7 +94,7 @@ def get_serialized_trials():
         trial_dict = model_to_dict(trial, exclude=['id', 'genes'])  # Exclude the 'id' field, if you have one
 
         # Convert the JSON string fields to dictionaries, if needed
-        for field in ['condition', 'keyword', 'intervention_name']:
+        for field in ['study_phase', 'condition', 'keyword', 'intervention_name', 'study_location', 'primary_outcomes', 'secondary_outcomes', 'other_outcomes']:
             field_value = getattr(trial, field, None)
             if isinstance(field_value, str):
                 # If the field is a string, attempt to load it as JSON

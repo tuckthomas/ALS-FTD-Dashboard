@@ -54,7 +54,11 @@ class Trial(models.Model):
     expanded_access = models.CharField(max_length=5, choices=EXPANDED_ACCESS_CHOICES, default='', blank=True)
     fda_regulated_drug = models.CharField(max_length=5, choices=FDA_REGULATED_DRUG_CHOICES, default='', blank=True)
     fda_regulated_device = models.CharField(max_length=5, choices=FDA_REGULATED_DEVICE_CHOICES, default='', blank=True)
+    primary_outcomes = models.JSONField(null=True, blank=True)
+    secondary_outcomes = models.JSONField(null=True, blank=True)
+    other_outcomes = models.JSONField(null=True, blank=True)
     clinical_trial_url = models.CharField(max_length=255, null=True, blank=True)
+    study_location = models.JSONField(null=True, blank=True)
     genes = models.JSONField(null=True, blank=True)
 
     def __str__(self):

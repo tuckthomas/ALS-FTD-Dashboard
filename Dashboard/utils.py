@@ -44,6 +44,7 @@ def update_data():
     print(gene_list_df.columns)
 
     updated_trials = 0
+    updated_trial_ids = set()  # Collect IDs of trials being updated or created
     # Iterate through each trial record
     for _, row in trials_data.iterrows():
         for date_field in ['study_submitance_date', 'study_submitance_date_qc', 'study_start_date', 'status_verified_date', 'completion_date']:
@@ -76,13 +77,26 @@ def update_data():
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON for {json_field} in trial ID {row['unique_protocol_id']}: {defaults[json_field]}")
                     defaults[json_field] = None
-
+        
+        # Add the current trial's unique_protocol_id to the set of processed IDs
+        updated_trial_ids.add(row['unique_protocol_id'])
         # Update or create the Trial record
         trial_obj, created = Trial.objects.update_or_create(
             unique_protocol_id=row['unique_protocol_id'],
             defaults=defaults
         )
         updated_trials += (1 if created else 0)
+
+    # Fetch all existing trial IDs from the database
+    existing_trial_ids = set(Trial.objects.values_list('unique_protocol_id', flat=True))
+    
+    # Identify IDs in the database that weren't updated or created in this cycle
+    obsolete_trial_ids = existing_trial_ids - updated_trial_ids
+    
+    # Delete records that are considered obsolete
+    if obsolete_trial_ids:
+        Trial.objects.filter(unique_protocol_id__in=obsolete_trial_ids).delete()
+        print(f"Deleted {len(obsolete_trial_ids)} obsolete trial records.")
 
     # After processing, fetch data into data frames
     gene_df = pd.DataFrame(list(Gene.objects.all().values()))
@@ -122,6 +136,7 @@ def save_to_xls(gene_df, trial_df):
     file_path = os.path.join(settings.MEDIA_ROOT, 'ALS, FTD Clinical Trial Research Data Tables.xlsx')
     wb.save(file_path)
     print(f"File saved to {file_path}")
+
 
 
 
@@ -192,7 +207,7 @@ def validate_and_transform_choice_field(value):
 
 
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
-# To refine the matching process and avoid false positives, an additional check occurs to ensure that gene symbols
+# To refine the matching process and avoid false positives like the ones you mentioned, an additional check occurs to ensure that gene symbols
 # are recognized as distinct words or part of a larger keyword that correctly represents a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
 def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol):
     valid_keywords_count = 0
@@ -298,14 +313,37 @@ def scrape_alsod_gene_list():
 
 # This function fetches trial data from ClinicalTrials.gov's API.
 # It processes the response, and returns a structured format of trial details.
-# Column name remappings are then applied to rename nested API fields to the defined database structure from the models.py file.
 def fetch_trial_data():
+    # ClinicalTrials.gov's API V2 URL.
     base_url = "https://clinicaltrials.gov/api/v2/studies"
+    # Conditions to include in search.
+    include_conditions = [
+        "ALS", "FTD", "amyotrophic lateral sclerosis", 
+        "Amyotrophic Lateral Sclerosis", "Motor Neuron Disease", 
+        "motor neuron disease", "MND", "mnd", "frontal lobe dementia", 
+        "Frontal Lobe Dementia"
+    ]
+
+    # Constructing the query condition string.
+    # Join include conditions with 'OR'
+    query_cond = " OR ".join(include_conditions)
+
+    fields = [
+        "OrgStudyId", "NCTId", "BriefTitle", "StudyType", "OverallStatus",
+        "StatusVerifiedDate", "CompletionDate", "LeadSponsorName",
+        "ResponsiblePartyType", "ResponsiblePartyInvestigatorFullName",
+        "Condition", "Keyword", "InterventionName", "InterventionDescription",
+        "StudyPopulation", "EnrollmentCount", "EnrollmentType", "Phase",
+        "StartDate", "StartDateType", "StudyFirstSubmitDate",
+        "StudyFirstSubmitQCDate", "HasExpandedAccess", "IsFDARegulatedDrug",
+        "IsFDARegulatedDevice", "Location", "PrimaryOutcome", "SecondaryOutcome",
+        "OtherOutcome"
+    ]
     query_params = {
         "format": "json",
-        "query.cond": "ALS OR FTD OR amyotrophic lateral sclerosis OR frontal lobe dementia",
+        "query.cond": query_cond,
         "pageSize": 1000,
-        "fields": "OrgStudyId|NCTId|BriefTitle|StudyType|OverallStatus|StatusVerifiedDate|CompletionDate|LeadSponsorName|ResponsiblePartyType|ResponsiblePartyInvestigatorFullName|Condition|Keyword|InterventionName|InterventionDescription|StudyPopulation|EnrollmentCount|EnrollmentType|Phase|StartDate|StartDateType|StudyFirstSubmitDate|StudyFirstSubmitQCDate|HasExpandedAccess|IsFDARegulatedDrug|IsFDARegulatedDevice"
+        "fields": "|".join(fields)
     }
     print("Starting fetch_trial_data..before 'all_study_details'...")
     all_studies_details = []
@@ -322,7 +360,7 @@ def fetch_trial_data():
 
                 studies_details = data.get("studies", [])
                 all_studies_details.extend(studies_details)
-
+                # Continues to next 1000 page query due to ClinicalTrials.gov's imposed limitations.
                 nextPageToken = data.get("nextPageToken")
                 if not nextPageToken:
                     break
@@ -335,8 +373,50 @@ def fetch_trial_data():
         print("An error occurred during API call:", e)
         return {"error": str(e)}
 
-    # Convert the list of dictionaries to a pandas DataFrame
-    df_studies = pd.json_normalize(all_studies_details)
+    # False-positive conditions needing excluded from dataset.
+    exclude_conditions = [
+        "Spinal Muscular Atrophy", 'spinal muscular atrophy',
+        "SMA", "Type 2 Spinal Muscular Atrophy", "Type 2 SMA",
+        "Type 3 Spinal Muscular Atrophy", "Type 3 SMA", "Spinal Muscular Atrophy (SMA)",
+        "Muscular Atrophy, Spinal, Type II", "Muscular Atrophy, Spinal, Type III",
+        "Muscular Atrophy, Spinal, Type 2",  "Muscular Atrophy, Spinal, Type 3",
+        "Infantile-onset Spinal Muscular Atrophy", "Infantile-onset SMA",
+        "Muscular Atrophy, Spinal", "Aphasia, Primary Progressive", "Anomia",
+        "Primary Progressive Aphasia", "primary progressive aphasia",
+        "PPA", "Logopenic Progressive Aphasia", "logopenic progressive aphasia",
+        "Pick Disease of the Brain", "Pick Disease", "Pick's Disease",
+        "Picks Disease of Brain", "Tetraplegia","Niemann-Pick Disease",
+        "Niemann-Pick Disease, Type C1", "Niemann-Pick Disease Type C1",
+        "Niemann-Pick Disease, Type C", "Alzheimer Disease", "Sialorrhea",
+        "Corticobasal Degeneration (CBD)", "Corticobasal Syndrome (CBS)",
+        "Cortical-basal Ganglionic Degeneration (CBGD)", "Progressive Supranuclear Palsy (PSP)",
+        "Nonfluent Variant Primary Progressive Aphasia (nfvPPA)",
+        "Oligosymptomatic/Variant Progressive Supranuclear Palsy (o/vPSP)", "CBD",
+        "CBS", "CBGD", "PSP", "nfvPPA", "oPSP", "vPSP", "o/vPSP", "Corticobasal Degeneration",
+        "Corticobasal Syndrome", "Cortocal-basal Ganglionic Degeneration", "Progressive Supranuclear Palsy",
+        "Nonfluent Variant Primary Progressive Aphasia", "Oligosymptomatic Progressive Supranuclear Palsy",
+        "Chronic Lymphocytic Leukemia", "Hurler Syndrome (MPS I)", "Hurler-Scheie Syndrome", "Hunter Syndrome (MPS II)",
+        "Sanfilippo Syndrome (MPS III)", "Krabbe Disease (Globoid Leukodystrophy)", "Metachromatic Leukodystrophy",
+        "Metachromatic Leukodystrophy (MLD)", "Adrenoleukodystrophy (ALD and AMN)", "Sandhoff Disease", 
+        "Tay Sachs Disease", "Pelizaeus Merzbacher (PMD)", "Alpha-mannosidosis", "Juvenile Neuronal Ceroid Lipofuscinosis",
+        "Smith-Lemli-Opitz Syndrome", "Creatine Transporter Deficiency", "Mucopolysaccharidosis I", "Mucopolysaccharidosis VI",
+        "Adrenoleukodystrophy", "Metachromatic Leukodystrophy", "Wolman Disease", "Krabbe's Disease", "Gaucher's Disease",
+        "Fucosidosis", "Batten Disease", "Severe Aplastic Anemia", "Diamond-Blackfan Anemia", "Amegakaryocytic Thrombocytopenia",
+        "Myelodysplastic Syndrome", "Acute Myelogenous Leukemia", "Acute Lymphocytic Leukemia", "Lysosomal Acid Lipase Deficiency"
+    ]
+
+    # Post-processing to exclude trials based on exclusion criteria, referencing the nested field name for 'conditions'
+    filtered_studies_details = []
+    for study in all_studies_details:
+        # Extracts the list of conditions for the study
+        study_conditions = study.get('protocolSection', {}).get('conditionsModule', {}).get('conditions', [])
+        # Checks if any of the study conditions match any of the exclusion criteria
+        if not any(excl_condition.lower() in [cond.lower() for cond in study_conditions] for excl_condition in exclude_conditions):
+            filtered_studies_details.append(study)
+
+    # Converts to DataFrame for further processing
+    df_studies = pd.json_normalize(filtered_studies_details)
+
     print("After conversion to DataFrame, headers:", df_studies.columns.tolist())
     if not df_studies.empty:
         print("Sample record after conversion to DataFrame:", df_studies.iloc[0])
@@ -378,7 +458,11 @@ def fetch_trial_data():
         "protocolSection.designModule.enrollmentInfo.type": "enrollment_type",
         "protocolSection.statusModule.expandedAccessInfo.hasExpandedAccess": "expanded_access",
         "protocolSection.oversightModule.isFdaRegulatedDrug": "fda_regulated_drug",
-        "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_regulated_device"
+        "protocolSection.contactsLocationsModule.locations": "study_location",
+        "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_regulated_device",
+        "protocolSection.outcomesModule.primaryOutcomes": "primary_outcomes",
+        "protocolSection.outcomesModule.secondaryOutcomes": "secondary_outcomes",
+        "protocolSection.outcomesModule.otherOutcomes": "other_outcomes"
     }
 
     df_studies.rename(columns=column_mappings, inplace=True)
