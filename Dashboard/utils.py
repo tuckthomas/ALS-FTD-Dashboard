@@ -133,6 +133,8 @@ def enhanced_fetch_trial_data():
 
     gene_list_df = scrape_alsod_gene_list()
     gene_symbols = gene_list_df['Gene Symbol'].tolist()
+    gene_names = gene_list_df['Gene Name'].tolist()  # Assuming this column exists now
+    gene_name_to_symbol = dict(zip(gene_list_df['Gene Name'], gene_list_df['Gene Symbol']))
 
     # Define the list of field names to be combined
     fields_to_combine = ['keyword', 'condition', 'study_population', 'brief_title']
@@ -148,7 +150,8 @@ def enhanced_fetch_trial_data():
     processed_data_df['combined_keywords'] = processed_data_df.apply(lambda row: ','.join([','.join(row[field]) if isinstance(row[field], list) else row[field] for field in fields_to_combine]), axis=1)
 
     # Apply the match_genes function to each row of the processed DataFrame using the combined keywords.
-    processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row['combined_keywords'], gene_symbols), axis=1)
+    # Now including gene names and the mapping from gene names to gene symbols as additional parameters
+    processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol), axis=1)
 
     # Merge the processed data back into the original DataFrame
     trials_data_df = pd.merge(trials_data_df, processed_data_df[['unique_protocol_id', 'genes']], on='unique_protocol_id', how='left')
@@ -162,6 +165,8 @@ def enhanced_fetch_trial_data():
     trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
 
     return trials_data_df
+
+
 
 
 
@@ -186,11 +191,10 @@ def validate_and_transform_choice_field(value):
     return ''
 
 
-
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
 # To refine the matching process and avoid false positives like the ones you mentioned, an additional check occurs to ensure that gene symbols
 # are recognized as distinct words or part of a larger keyword that correctly represents a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
-def match_genes(combined_keywords, gene_symbols):
+def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol):
     valid_keywords_count = 0
     invalid_keywords_count = 0
     matched_genes = set()  # Use a set to avoid duplicates
@@ -200,17 +204,28 @@ def match_genes(combined_keywords, gene_symbols):
             # Split the string by comma and strip each keyword
             keywords_list = [keyword.strip() for keyword in combined_keywords.split(',')]
 
-            # Use regex to match gene symbols more accurately
+            # Use regex to match gene symbols and gene names more accurately
             for keyword in keywords_list:
                 matched_this_round = False
-                for gene in gene_symbols:
-                    # Pattern to match gene symbol as a whole word or within specific contexts
-                    pattern = rf'\b{gene}\b|\b{gene}[^A-Za-z0-9_]|[^A-Za-z0-9_]{gene}\b'
-                    if re.search(pattern, keyword, re.IGNORECASE):
-                        matched_genes.add(gene)
+                for gene_symbol in gene_symbols:
+                    # Pattern for gene symbol matches
+                    pattern_symbol = rf'\b{gene_symbol}\b|\b{gene_symbol}[^A-Za-z0-9_]|[^A-Za-z0-9_]{gene_symbol}\b'
+                    if re.search(pattern_symbol, keyword, re.IGNORECASE):
+                        matched_genes.add(gene_symbol)
                         valid_keywords_count += 1
                         matched_this_round = True
-                        break  # Optional: Break the inner loop once a match is found depending on requirements
+                        break  # Break if a gene symbol match is found
+                
+                if not matched_this_round:
+                    for gene_name in gene_names:
+                        # Pattern for gene name matches, allowing dashes
+                        pattern_name = rf'\b{gene_name}\b'
+                        if re.search(pattern_name, keyword, re.IGNORECASE):
+                            # Add the gene symbol equivalent for the matched gene name
+                            matched_genes.add(gene_name_to_symbol[gene_name])
+                            valid_keywords_count += 1
+                            matched_this_round = True
+                            break  # Break if a gene name match is found
 
                 if not matched_this_round:
                     invalid_keywords_count += 1
