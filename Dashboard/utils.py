@@ -192,7 +192,7 @@ def validate_and_transform_choice_field(value):
 
 
 # This function fetches trial data and enhances it by associating gene symbols based on keywords, using the scraped gene list.
-# To refine the matching process and avoid false positives like the ones you mentioned, an additional check occurs to ensure that gene symbols
+# To refine the matching process and avoid false positives, an additional check occurs to ensure that gene symbols
 # are recognized as distinct words or part of a larger keyword that correctly represents a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
 def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol):
     valid_keywords_count = 0
