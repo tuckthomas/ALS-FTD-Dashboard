@@ -1,4 +1,9 @@
-# ALS & FTD Clinical Trial Research Dashboard
+<p align="center">
+  <img src="Media/fals-Logo.png" alt="fals-logo">
+</p>
+
+<h1 align="center">Clinical Trial Research Dashboard</h1>
+
 ## [f-ALS.com](https://www.f-als.com), Familial ALS Personal Impact, and Donation Link
 As part of a non-profit/volunteer contribution, this is the repository to an upcoming Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on familial ALS/FTD; allowing for further data exploration.
 
