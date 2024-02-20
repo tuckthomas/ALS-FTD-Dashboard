@@ -298,6 +298,7 @@ def scrape_alsod_gene_list():
 
 # This function fetches trial data from ClinicalTrials.gov's API.
 # It processes the response, and returns a structured format of trial details.
+# Column name remappings are then applied to rename nested API fields to the defined database structure from the models.py file.
 def fetch_trial_data():
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     query_params = {
