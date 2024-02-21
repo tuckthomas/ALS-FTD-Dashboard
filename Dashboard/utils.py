@@ -101,7 +101,7 @@ def update_data():
     # After processing, fetch data into data frames
     gene_df = pd.DataFrame(list(Gene.objects.all().values()))
     trial_df = pd.DataFrame(list(Trial.objects.all().values()))
-    # Now call save_to_xls with these data frames
+    # Call function to save_to_xls with these data frames
     save_to_xls(gene_df, trial_df)
 
     print(f"Total trials updated or created: {updated_trials}")
@@ -120,7 +120,7 @@ def save_to_xls(gene_df, trial_df):
     
     # Populate sheets with data frames
     data_frames = [trial_df, gene_df]
-    sheets = [ws_trial, ws_gene, ws_trial_genes]
+    sheets = [ws_trial, ws_gene]
     for df, ws in zip(data_frames, sheets):
         for r in dataframe_to_rows(df, index=False, header=True):
             # Convert lists to strings before appending to Excel
@@ -165,7 +165,7 @@ def enhanced_fetch_trial_data():
     processed_data_df['combined_keywords'] = processed_data_df.apply(lambda row: ','.join([','.join(row[field]) if isinstance(row[field], list) else row[field] for field in fields_to_combine]), axis=1)
 
     # Apply the match_genes function to each row of the processed DataFrame using the combined keywords.
-    # Now including gene names and the mapping from gene names to gene symbols as additional parameters
+    # Includes gene names and the mapping from gene names to gene symbols as additional parameters
     processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol), axis=1)
 
     # Merge the processed data back into the original DataFrame
@@ -374,12 +374,16 @@ def fetch_trial_data():
         return {"error": str(e)}
 
     # False-positive conditions from ClinicalTrials.gov needing excluded from dataset.
+    # Different trials often times refer to the same condition using slightly different context.
+    # I found some trials misspell the conditions; requiring misspelling of exclusion criteria.
     exclude_conditions = [
         # Spinal Muscular Atrophy
-        "Spinal Muscular Atrophy", "spinal muscular atrophy",
+        "Spinal Muscular Atrophy", "spinal muscular atrophy", "Spinal Muscular Atrophy (SMA)",
         "SMA", "Type * Spinal Muscular Atrophy", "Type * SMA",
         "Infantile-onset Spinal Muscular Atrophy", "Infantile-onset SMA",
         "Muscular Atrophy, Spinal, Type *", "Muscular Atrophy, Spinal",
+        "Type 2 Spinal Muscular Atrophy", "Spinal Muscular Atrophy 1", "Spinal Muscular Atrophy Type II",
+        "Spinal Muscular Atrophy Type III"
         # Primary Progressive Aphasia
         "Aphasia, Primary Progressive", "Primary Progressive Aphasia", "primary progressive aphasia",
         "PPA", "Logopenic Progressive Aphasia", "logopenic progressive aphasia",
@@ -394,8 +398,8 @@ def fetch_trial_data():
         "Corticobasal Degeneration", "Corticobasal Syndrome", "Cortocal-basal Ganglionic Degeneration",
         "Progressive Supranuclear Palsy", "Oligosymptomatic Progressive Supranuclear Palsy",
         # Niemann-Pick Disease
-        "Niemann-Pick Disease", "Niemann-Pick Disease, Type C*",
-        "Niemann-Pick Diseases", "Niemann-Pick Disease Type C*",
+        "Niemann-Pick Disease", "Neimann-Pick Disease", "Niemann-Pick Disease, Type C", "Niemann-Pick Disease, Type C*",
+        "Niemann-Pick Disease, Type C1", "Niemann-Pick Diseases", "Niemann-Pick Disease Type C*", "Pick Disease of the Brain",
         # Other diseases
         "Chronic Lymphocytic Leukemia", "Hurler Syndrome (MPS I)", "Hurler-Scheie Syndrome", "Hunter Syndrome (MPS II)",
         "Sanfilippo Syndrome (MPS III)", "Krabbe Disease (Globoid Leukodystrophy)", "Metachromatic Leukodystrophy",
@@ -502,7 +506,10 @@ def fetch_trial_data():
         "Isolated Congenital Asplenia", "Lambert Eaton (LEMS)", "Biliary Atresia", "STAG1 Gene Mutation", "Coffin Lowry Syndrome",
         "Borjeson-Forssman-Lehman Syndrome", "Blau Syndrome", "Arginase 1 Deficiency", "HSPB8 Myopathy", "Beta-Mannosidosis",
         "TBX4 Syndrome", "DHDDS Gene Mutations", "MAND-MBD5-Associated Neurodevelopmental Disorder", "Constitutional Mismatch Repair Deficiency (CMMRD)",
-        "SPATA5 Disorder", "SPATA5L* Related Disorder"
+        "SPATA5 Disorder", "SPATA5L* Related Disorder", "Kennedy's Disease", "Sialorrhea", "Fibromyalgia", "Fertility Issues", "Asmd, Visceral Type",
+        "Sphingomyelin Lipidosis", "Cholangiocarcinoma", "Stage III Gallbladder Cancer AJCC v7", "Stage IIIA Gallbladder Cancer AJCC v7",
+        "Stage IIIB Gallbladder Cancer AJCC v7", "Stage IV Gallbladder Cancer AJCC v7", "Stage IVA Gallbladder Cancer AJCC v7",
+        "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia", "Psychiatric Adults Patients"
     ]
 
     # Post-processing to exclude trials based on exclusion criteria, referencing the nested field name for 'conditions'
@@ -579,4 +586,3 @@ def fetch_trial_data():
 
     # Directly return the DataFrame
     return df_studies
-
