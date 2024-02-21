@@ -17,7 +17,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
-# This function is designed to update the database with trial and gene data, handling many-to-many relationships appropriately.
+# This function is designed to update the database with trial and gene data.
 # It iterates over each trial, updating or creating trial records, and associates genes by creating or fetching gene records.
 # The logic for dynamically using field names from the Trial model minimizes hardcoding and adapts to changes in the model's structure.
 def update_data():
