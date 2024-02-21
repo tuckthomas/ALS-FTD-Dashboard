@@ -179,9 +179,42 @@ def enhanced_fetch_trial_data():
     trials_data_df['fda_regulated_drug'] = trials_data_df['fda_regulated_drug'].apply(validate_and_transform_choice_field)
     trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
 
+    # Convert Study Phase JSONB data to defined mappings
+    trials_data_df['study_phase'] = trials_data_df['study_phase'].apply(convert_study_phase)
+
     return trials_data_df
 
 
+# Converts study phase data from API.
+def convert_study_phase(study_phase_list):
+    # Normalize the input list to match the expected format
+    normalized_phase_list = [phase.replace('PHASE', 'Phase') for phase in study_phase_list]
+    print(f"Normalized study_phase_list: {normalized_phase_list}")  # Debug print
+
+    # Define a mapping from list input to desired output
+    phase_mapping = {
+        (): 'NA',
+        (None,): 'NA',  # Handle None as input, assuming it can be a possible input
+        ('NA',): 'NA',
+        ('Early_Phase1',): 'Early Phase 1',
+        ('Phase1',): 'Phase 1',
+        ('Phase1', 'Phase2'): 'Phase 1/2',
+        ('Phase2',): 'Phase 2',
+        ('Phase2', 'Phase3'): 'Phase 2/3',
+        ('Phase3',): 'Phase 3',
+    }
+
+    # Convert the normalized input list to a tuple for mapping
+    study_phase_key = tuple(normalized_phase_list) if normalized_phase_list else ()
+
+    print(f"Converted study_phase_key: {study_phase_key}")  # Debug print
+
+    # Attempt to get the mapped value
+    mapped_value = phase_mapping.get(study_phase_key, 'Unknown')
+    
+    print(f"Mapped value: {mapped_value}")  # Debug print
+
+    return mapped_value
 
 
 
