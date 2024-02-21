@@ -16,7 +16,7 @@ class TrialSchema(BaseModel):
     nct_id: Optional[str] = None
     brief_title: Optional[str] = None
     study_type: Optional[str] = None
-    study_phase: Optional[Union[str, List[str]]] = None
+    study_phase: Optional[str] = None
     overall_status: Optional[str] = None
     study_submitance_date: Optional[date] = None
     study_submitance_date_qc: Optional[date] = None
@@ -80,12 +80,6 @@ class TrialSchema(BaseModel):
                 except ValueError:
                     # Raise an error if none of the formats match
                     raise ValidationError(f"Date format for {value} is not supported.")
-
-    @validator('study_phase', pre=True)
-    def ensure_list(cls, value):
-        if value is None or isinstance(value, list):
-            return value
-        return [value]  
 
 # Function to fetch and serialize trials from the database
 def get_serialized_trials():
