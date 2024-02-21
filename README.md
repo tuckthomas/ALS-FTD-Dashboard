@@ -46,6 +46,8 @@ These packages are required for the project to run:
 - `ipython==7.20.0` - For interactive computing.
 - `requests==2.25.1` - For making HTTP requests.
 - `whitenoise==6.6.0` - For serving static files.
+- `fuzzywuzzy==0.18.0 ` - For fuzzy string matching, useful in scenarios where you need to find close matches to strings.
+- `python-Levenshtein` - Provides a faster, C-based extension for the FuzzyWuzzy library to speed up string comparison operations.
 
 ## Optional Metabase Front-End Requirements
 **What is Metabase?** [Metabase](https://github.com/metabase/metabase) is open-source business intelligence tool that enables users to explore, visualize, and share data insights without the need for extensive technical knowledge. It allows for easy querying through a user-friendly interface, making it accessible for users to generate reports and dashboards from their data sources.
