@@ -15,6 +15,7 @@ from datetime import datetime
 from dateutil import parser as date_parser
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
+from fuzzywuzzy import process
 import json
 
 # This function is designed to update the database with trial and gene data.
@@ -352,10 +353,12 @@ def fetch_trial_data():
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     # Conditions to include in search.
     include_conditions = [
-        "ALS", "FTD", "amyotrophic lateral sclerosis", 
-        "Amyotrophic Lateral Sclerosis", "Motor Neuron Disease", 
+        "ALS", "amyotrophic lateral sclerosis", 
+        "Amyotrophic Lateral Sclerosis", "Lou Gehrig’s disease", "Motor Neuron Disease", 
         "motor neuron disease", "MND", "mnd", "frontal lobe dementia", 
-        "Frontal Lobe Dementia"
+        "Frontal Lobe Dementia", "Frontotemporal dementia", "Frontotemporal Dementia",
+        "frontotemporal dementia", "FTD", "Behavioral variant Frontotemporal Dementia (bvFTD)",
+        "bvFTD", "Frontotemporal Lobar Degeneration (FTLD)", "FTLD", "Frontotemporal Lobar Degeneration"
     ]
 
     # Constructing the query condition string.
@@ -417,7 +420,10 @@ def fetch_trial_data():
         "Infantile-onset Spinal Muscular Atrophy", "Infantile-onset SMA",
         "Muscular Atrophy, Spinal, Type *", "Muscular Atrophy, Spinal",
         "Type 2 Spinal Muscular Atrophy", "Spinal Muscular Atrophy 1", "Spinal Muscular Atrophy Type II",
-        "Spinal Muscular Atrophy Type III"
+        "Spinal Muscular Atrophy Type III", "SMA II", "SMA - Spinal Muscular Atrophy", "Spinal Muscular Atrophy Type I",
+        "Chest Deformities", "Spinal Orthosis", "Pulmonary Rehabilitation", "Spinal Muscular Atrophy Type 3",
+        "Infantile Spinal Muscular Atrophy, Type I [Werdnig- Hoffman]", "Infantile Spinal Muscular Atrophy",
+        "Natural History of Type 1 Spinal Muscular Atrophy (SMA)", "Spinal and Bulbar Muscular Atrophy",
         # Primary Progressive Aphasia
         "Aphasia, Primary Progressive", "Primary Progressive Aphasia", "primary progressive aphasia",
         "PPA", "Logopenic Progressive Aphasia", "logopenic progressive aphasia",
@@ -434,6 +440,7 @@ def fetch_trial_data():
         # Niemann-Pick Disease
         "Niemann-Pick Disease", "Neimann-Pick Disease", "Niemann-Pick Disease, Type C", "Niemann-Pick Disease, Type C*",
         "Niemann-Pick Disease, Type C1", "Niemann-Pick Diseases", "Niemann-Pick Disease Type C*", "Pick Disease of the Brain",
+        "Niemann-Pick Type C Disease",
         # Other diseases
         "Chronic Lymphocytic Leukemia", "Hurler Syndrome (MPS I)", "Hurler-Scheie Syndrome", "Hunter Syndrome (MPS II)",
         "Sanfilippo Syndrome (MPS III)", "Krabbe Disease (Globoid Leukodystrophy)", "Metachromatic Leukodystrophy",
@@ -543,19 +550,44 @@ def fetch_trial_data():
         "SPATA5 Disorder", "SPATA5L* Related Disorder", "Kennedy's Disease", "Sialorrhea", "Fibromyalgia", "Fertility Issues", "Asmd, Visceral Type",
         "Sphingomyelin Lipidosis", "Cholangiocarcinoma", "Stage III Gallbladder Cancer AJCC v7", "Stage IIIA Gallbladder Cancer AJCC v7",
         "Stage IIIB Gallbladder Cancer AJCC v7", "Stage IV Gallbladder Cancer AJCC v7", "Stage IVA Gallbladder Cancer AJCC v7",
-        "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia", "Psychiatric Adults Patients"
+        "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia", "Psychiatric Adults Patients", "Alzheimer Disease",
+        "Postpoliomyelitis", "Duchenne Muscular Dystrophy", "Inherited Metabolic Diseases", "Lysosomal Storage Disorders", "Peroxisomal Storage Diseases",
+        "Inborn Errors of Metabolism", "Mucopolysaccharidosis", "Spinal Cord Injuries", "Death, Sudden, Cardiac", "Out-Of-Hospital Cardiac Arrest",
+        "Ventricular Fibrillation", "Cardiopulmonary Arrest With Successful Resuscitation", "Insomnia", "Depression", "Distal Hereditary Motor Neuropathy, Type II",
+        "Distal Hereditary Motor Neuropathy, Type V", "Distal Hereditary Motor Neuronopathy Type I", "Distal Hereditary Motor Neuronopathy Type VI",
+        "Cerebral Palsy", "Hirayama Disease", "Osteoporosis","Poliomyelitis", "Postpoliomyelitis Syndrome",
+        "Children With Spastic Diplegia, Between the Ages of 2 to 10 Years", "Gross Motor Function Classification System (GMFCS) Level I,II and III",
+        "Inclusion Body Myopathy With Early-onset Paget Disease and Frontotemporal Dementia", "Paget Disease of Bone",
+        "Myopathy", "Pompe Disease (Late-onset)", "Inclusion Body Myositis, Sporadic", "Facioscapulohumeral Muscular Dystrophy 1",
+        "Myotonic Dystrophy Type 1 (DM1)", "Myotonic Dystrophy Type 2", "IGF-1 Deficiency" "Stage III Gallbladder Cancer AJCC v7",
+        "Stage IIIA Gallbladder Cancer AJCC v7", "Stage IIIB Gallbladder Cancer AJCC v7", "Stage IV Gallbladder Cancer AJCC v7",
+        "Stage IVA Gallbladder Cancer AJCC v7", "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia",
+        "Psychiatric Adults Patients", "Advanced solid tumors", "IGF-1 Deficiency",
     ]
 
-    # Post-processing to exclude trials based on exclusion criteria, referencing the nested field name for 'conditions'
+    # Post-processing of fetched API data to apply exclusion criteria:
+    # This approach inadvertently filtered out studies that have both relevant and irrelevant conditions. I'm going to try changing it so that, 
+    # if a study is included in the dataset, at least one of its conditions listed is not in the exclusion criteria,
+    # AND if the condition is a 'fuzzy' match to the inclusion conditions, then the record remains in the dataset.
+    # Otherwise, the record is excluded.
+    exclude_conditions_set = {cond.lower() for cond in exclude_conditions}
     filtered_studies_details = []
     for study in all_studies_details:
-        # Extracts the list of conditions for the study
-        study_conditions = study.get('protocolSection', {}).get('conditionsModule', {}).get('conditions', [])
-        # Checks if any of the study conditions match any of the exclusion criteria
-        if not any(excl_condition.lower() in [cond.lower() for cond in study_conditions] for excl_condition in exclude_conditions):
-            filtered_studies_details.append(study)
+        # Extract and lowercase the conditions for the study
+        study_conditions = [cond.lower() for cond in study.get('protocolSection', {}).get('conditionsModule', {}).get('conditions', [])]
+        
+        # Filter out studies with conditions in the exclude list and then check for fuzzy matches
+        for cond in study_conditions:
+            if cond not in exclude_conditions_set:
+                # Find the best match from included_conditions and its score
+                match, score = process.extractOne(cond, include_conditions)
+                
+                # Define a threshold for considering a match good enough (e.g., 80 out of 100)
+                if score >= 80:  # Adjust the threshold as needed
+                    filtered_studies_details.append(study)
+                    break  # If a match is found, no need to check other conditions for this study
 
-    # Converts to DataFrame for further processing
+    # Convert to DataFrame for further processing
     df_studies = pd.json_normalize(filtered_studies_details)
 
     print("After conversion to DataFrame, headers:", df_studies.columns.tolist())
