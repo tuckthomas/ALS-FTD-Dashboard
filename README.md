@@ -15,6 +15,7 @@ Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my gra
 If you appreciate this work and would like to suppport it, please remit donations to one of the following charities charities listed below. ***Also, I'm available for full-time employment, as well as contract opportunities.***
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
+- [I AM ALS](https://www.iamals.org/give/)
 
 
 ## Public API
