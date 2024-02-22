@@ -1,5 +1,10 @@
 from django.db import models
 
+# Table Update Log Update
+class Update_Log(models.Model):
+    database_table_name = models.CharField(max_length=255, primary_key=True)
+    table_update_date = models.DateField(null=True, blank=True) 
+
 # Model for Gene List Information
 class Gene(models.Model):
     gene_symbol = models.CharField(max_length=255)
