@@ -20,6 +20,13 @@ If you appreciate this work and would like to suppport it, please remit donation
 ## Public API
 To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single API end-point is created. However, at a later date in the near future, additional API end-points will be created.
 
+## How are you creating a genetic mutation field?
+Within the utils.py file is a function that scrapes the ALS online Database's HTML table to obtain the Gene Symbol, Gene Name, and Category data. Within a separate function, a 'search and match' of the 'keywords' field occurs using the Gene Symbols and the Gene Name. If a match is found, the Gene Symbol is added to the 'Genes' JSON array.
+
+The web scrapping will only occur every 30 days. When the cron-job occurs at 3:00 AM every night, triggering the function, if the current date is less than 30 days from the date of the last web scrap, the function will intead retrieve existing data saved to the database.
+
+**Citation:** ALSoD. (n.d.). *Amyotrophic Lateral Sclerosis online Database*  from [ALSoD](https://alsod.ac.uk/).
+
 ## How can I download your raw dataset in the meantime?
 By vising [f-als.com](https://www.f-als.com) and viewing the 'Raw Data' tab of the dashboard, there is an option in the upper right-hand corner of the table. Selecting the option will provide a drop-down menu allowing the site visitor the following extraction options:
 - CSV
@@ -27,11 +34,6 @@ By vising [f-als.com](https://www.f-als.com) and viewing the 'Raw Data' tab of t
 - JSON
 
 Additionally, .png files of dashboard visualizations may also be downloaded.
-
-## How are you creating a genetic mutation field?
-Within the utils.py file is a function that scrapes the ALS online Database's HTML table to obtain the Gene Symbol, Gene Name, and Category data. Within a separate function, a 'search and match' of the 'keywords' field occurs using the Gene Symbols and the Gene Name. If a match is found, the Gene Symbol is added to the 'Genes' JSON array.
-
-**Citation:** ALSoD. (n.d.). *Amyotrophic Lateral Sclerosis online Database*  from [ALSoD](https://alsod.ac.uk/).
 
 # System Requirements
 This project depends on several Python packages. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
