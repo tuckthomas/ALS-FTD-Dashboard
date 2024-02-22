@@ -298,50 +298,62 @@ def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol
 # This function scrapes gene information from Dr. Al-Chalabi's ALSoD.ac.uk HTML table.
 # It processes it into a structured format, ready for database insertion or association with trials, while handling text sanitization.
 def scrape_alsod_gene_list():
-    url = "https://alsod.ac.uk/"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
+    # Check the last update date from Update_Log table for 'Dashboard_gene' table
+    try:
+        update_log = Update_Log.objects.get(database_table_name='Dashboard_gene')
+        last_update_date = update_log.table_update_date
+    except Update_Log.DoesNotExist:
+        # If there is no record, consider last update date as None
+        last_update_date = None
 
-    rows = soup.findAll("tr", class_="clickable-row")
+    # Calculate the difference or set a default to proceed with scraping
+    if last_update_date is None or (timezone.now().date() - last_update_date >= timedelta(days=30)):
+        url = "https://alsod.ac.uk/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
 
-    gene_symbols = []
-    gene_names = []
-    gene_risk_categories = []
+        rows = soup.findAll("tr", class_="clickable-row")
+        gene_symbols = []
+        gene_names = []
+        gene_risk_categories = []
 
-    def sanitize(text):
-        # Remove all instances of double quotes from the text.
-        text = text.replace('"', '')
-        # Remove text within parentheses including the parentheses themselves.
-        text = re.sub(r'\(.*?\)', '', text)
-        # Normalize whitespace and strip leading/trailing whitespace.
-        text = ' '.join(text.split())
-        return text
+        def sanitize(text):
+            text = text.replace('"', '')
+            text = re.sub(r'\(.*?\)', '', text)
+            text = ' '.join(text.split())
+            return text
 
-    for row in rows:
-        columns = row.findAll("td", class_="assetIDConfig")
-         # Ensure there are at least 3 columns for symbol, name, and category
-        if len(columns) >= 3:
-            # Apply the enhanced sanitize function to each relevant piece of text
-            gene_symbol = sanitize(columns[1].text)
-            gene_name = sanitize(columns[2].text)
-            gene_risk_category = sanitize(columns[3].text)
+        for row in rows:
+            columns = row.findAll("td", class_="assetIDConfig")
+            if len(columns) >= 3:
+                gene_symbol = sanitize(columns[1].text)
+                gene_name = sanitize(columns[2].text)
+                gene_risk_category = sanitize(columns[3].text)
 
-            gene_symbols.append(gene_symbol)
-            gene_names.append(gene_name)
-            gene_risk_categories.append(gene_risk_category)
+                gene_symbols.append(gene_symbol)
+                gene_names.append(gene_name)
+                gene_risk_categories.append(gene_risk_category)
 
-    # Create a DataFrame with the collected data
-    df = pd.DataFrame({
-        "Gene Symbol": gene_symbols,
-        "Gene Name": gene_names,
-        "Gene Risk Category": gene_risk_categories
-    })
+        df = pd.DataFrame({
+            "Gene Symbol": gene_symbols,
+            "Gene Name": gene_names,
+            "Gene Risk Category": gene_risk_categories
+        })
 
-    # Define the filename and the filepath
-    filename = 'ALSOD_Gene_List.csv'
-    filepath = os.path.join(settings.MEDIA_ROOT, filename)
+        # Update the Update_Log table with the current date as the last update date for 'Dashboard_gene'
+        Update_Log.objects.update_or_create(
+            database_table_name='Dashboard_gene', 
+            defaults={'table_update_date': timezone.now().date()}
+        )
+    else:
+        # Query the 'Dashboard_gene' table directly
+        genes = Gene.objects.all().values('gene_symbol', 'gene_name', 'gene_risk_category')
+        df = pd.DataFrame(list(genes))  # Convert query results to a list before creating DataFrame
 
-    print("Scraped gene list DataFrame shape:", df.shape)  # Check the shape of the DataFrame
+        # Explicitly rename columns to ensure consistency
+        df.columns = ['Gene Symbol', 'Gene Name', 'Gene Risk Category']
+
+    print("DataFrame shape:", df.shape)
     return df
 
 
@@ -354,8 +366,8 @@ def fetch_trial_data():
     # Conditions to include in search.
     include_conditions = [
         "ALS", "amyotrophic lateral sclerosis", 
-        "Amyotrophic Lateral Sclerosis", "Lou Gehrig’s disease", "Motor Neuron Disease", 
-        "motor neuron disease", "MND", "mnd", "frontal lobe dementia", 
+        "Amyotrophic Lateral Sclerosis", "Lou Gehrig’s disease", "Lou Gehrigs Disease",
+        "Motor Neuron Disease", "motor neuron disease", "MND", "mnd", "frontal lobe dementia", 
         "Frontal Lobe Dementia", "Frontotemporal dementia", "Frontotemporal Dementia",
         "frontotemporal dementia", "FTD", "Behavioral variant Frontotemporal Dementia (bvFTD)",
         "bvFTD", "Frontotemporal Lobar Degeneration (FTLD)", "FTLD", "Frontotemporal Lobar Degeneration"
@@ -642,6 +654,12 @@ def fetch_trial_data():
     print("After renaming, headers:", df_studies.columns.tolist())
     if not df_studies.empty:
         print("Sample record after renaming:", df_studies.iloc[0])
+
+    # Update the Update_Log table with the current date as the last update date for 'Dashboard_trial'
+        Update_Log.objects.update_or_create(
+            database_table_name='Dashboard_trial', 
+            defaults={'table_update_date': timezone.now().date()}
+        )
 
     # Print the first ten records' 'nct_id' field if it exists
     if 'nct_id' in df_studies.columns:
