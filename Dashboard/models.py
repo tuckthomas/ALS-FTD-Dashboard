@@ -16,12 +16,6 @@ class Gene(models.Model):
 
 # Model for ClinicalTrials.gov Data
 class Trial(models.Model):
-    EXPANDED_ACCESS_CHOICES = [
-        ('TRUE', 'True'),
-        ('FALSE', 'False'),
-        ('', '')
-    ]
-
     FDA_REGULATED_DRUG_CHOICES = [
         ('TRUE', 'True'),
         ('FALSE', 'False'),
@@ -56,7 +50,6 @@ class Trial(models.Model):
     study_population = models.TextField(null=True, blank=True)
     enrollment_count = models.IntegerField(null=True, blank=True)
     enrollment_type = models.CharField(max_length=100, null=True, blank=True)
-    expanded_access = models.CharField(max_length=5, choices=EXPANDED_ACCESS_CHOICES, default='', blank=True)
     fda_regulated_drug = models.CharField(max_length=5, choices=FDA_REGULATED_DRUG_CHOICES, default='', blank=True)
     fda_regulated_device = models.CharField(max_length=5, choices=FDA_REGULATED_DEVICE_CHOICES, default='', blank=True)
     primary_outcomes = models.JSONField(null=True, blank=True)
