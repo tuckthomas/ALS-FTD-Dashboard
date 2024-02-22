@@ -28,6 +28,11 @@ By vising [f-als.com](https://www.f-als.com) and viewing the 'Raw Data' tab of t
 
 Additionally, .png files of dashboard visualizations may also be downloaded.
 
+## How are you creating a genetic mutation field?
+Within the utils.py file is a function that scrapes the ALS Database HTML table to obtain the Gene Symbol, Gene Name, and Category data. Within a separate function, a 'search and match' of the 'keywords' field occurs using the Gene Symbols and the Gene Name. If a match is found, the Gene Symbol is added to the 'Genes' JSON array.
+
+- `ALSOD. (n.d.). *Amyotrophic Lateral Sclerosis Online Database*  from [ALSoD](https://alsod.ac.uk/")`
+
 # System Requirements
 This project depends on several Python packages. Below is a breakdown of the required packages, along with optional dependencies if you're using PostgreSQL as your database.
 
