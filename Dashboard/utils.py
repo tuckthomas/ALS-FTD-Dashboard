@@ -140,7 +140,6 @@ def save_to_xls(gene_df, trial_df):
 
 
 
-
 # This function creates a column for the URL of each trial record based upon ClinicalTrial.gov's URL schema.
 def enhanced_fetch_trial_data():
     # Fetch trial data
@@ -149,38 +148,47 @@ def enhanced_fetch_trial_data():
 
     gene_list_df = scrape_alsod_gene_list()
     gene_symbols = gene_list_df['Gene Symbol'].tolist()
-    gene_names = gene_list_df['Gene Name'].tolist()  # Assuming this column exists now
+    gene_names = gene_list_df['Gene Name'].tolist()  # Assuming this column exists
     gene_name_to_symbol = dict(zip(gene_list_df['Gene Name'], gene_list_df['Gene Symbol']))
 
-    # Define the list of field names to be combined
+    # Define fields to be combined
     fields_to_combine = ['keyword', 'condition', 'study_population', 'brief_title']
 
-    # Generates the URL for each Study/Trial based upon ClinicalTrial.gov's URL schema
+    # Generate clinical trial URL
     def clinical_trial_url(nct_id):
         return f"https://clinicaltrials.gov/study/{nct_id}"
 
-    # Create a new DataFrame for processing that includes the fields defined above
     processed_data_df = trials_data_df[fields_to_combine + ['unique_protocol_id']].copy()
 
-    # Use a lambda function to iterate over the fields_to_combine and process each field accordingly
-    processed_data_df['combined_keywords'] = processed_data_df.apply(lambda row: ','.join([','.join(row[field]) if isinstance(row[field], list) else row[field] for field in fields_to_combine]), axis=1)
+    # Combine keywords
+    processed_data_df['combined_keywords'] = processed_data_df.apply(
+        lambda row: ','.join([','.join(row[field]) if isinstance(row[field], list) else row[field] for field in fields_to_combine]), axis=1)
 
-    # Apply the match_genes function to each row of the processed DataFrame using the combined keywords.
-    # Includes gene names and the mapping from gene names to gene symbols as additional parameters
-    processed_data_df['genes'] = processed_data_df.apply(lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol), axis=1)
+    # Match genes
+    processed_data_df['genes'] = processed_data_df.apply(
+        lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol), axis=1)
 
-    # Merge the processed data back into the original DataFrame
+    # Merge processed data
     trials_data_df = pd.merge(trials_data_df, processed_data_df[['unique_protocol_id', 'genes']], on='unique_protocol_id', how='left')
 
     # Add clinical_trial_url column
     trials_data_df['clinical_trial_url'] = trials_data_df['nct_id'].apply(clinical_trial_url)
 
-    # Validate and transform data for choice fields
+    # Validate and transform choice fields
     trials_data_df['expanded_access'] = trials_data_df['expanded_access'].apply(validate_and_transform_choice_field)
+    # Debugging: Print out how many records have expanded_access set to 'TRUE' before the update
+    print("Records with expanded_access 'TRUE' before update:", trials_data_df[trials_data_df['expanded_access'] == 'TRUE'].shape[0])
     trials_data_df['fda_regulated_drug'] = trials_data_df['fda_regulated_drug'].apply(validate_and_transform_choice_field)
     trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
 
-    # Convert Study Phase JSONB data to defined mappings
+    # Update study_phase based on expanded_access being 'TRUE'
+    trials_data_df['study_phase'] = trials_data_df.apply(lambda row: 'EAP' if row['expanded_access'] == 'TRUE' else row['study_phase'], axis=1)
+    # Verify the update by checking how many records now have study_phase set to 'EAP'
+    print("Records with study_phase 'EAP' after update:", trials_data_df[trials_data_df['study_phase'] == 'EAP'].shape[0])
+    # Drop the expanded_access field
+    trials_data_df.drop('expanded_access', axis=1, inplace=True)
+
+    # Convert Study Phase data
     trials_data_df['study_phase'] = trials_data_df['study_phase'].apply(convert_study_phase)
 
     return trials_data_df
@@ -188,6 +196,10 @@ def enhanced_fetch_trial_data():
 
 # Converts study phase data from API.
 def convert_study_phase(study_phase_list):
+    # If the input is a string, wrap it in a list
+    if isinstance(study_phase_list, str):
+        study_phase_list = [study_phase_list]
+
     # Normalize the input list to match the expected format
     normalized_phase_list = [phase.replace('PHASE', 'Phase') for phase in study_phase_list]
     print(f"Normalized study_phase_list: {normalized_phase_list}")  # Debug print
@@ -195,7 +207,7 @@ def convert_study_phase(study_phase_list):
     # Define a mapping from list input to desired output
     phase_mapping = {
         (): 'NA',
-        (None,): 'NA',  # Handle None as input, assuming it can be a possible input
+        (None,): 'NA',
         ('NA',): 'NA',
         ('Early_Phase1',): 'Early Phase 1',
         ('Phase1',): 'Phase 1',
@@ -203,6 +215,8 @@ def convert_study_phase(study_phase_list):
         ('Phase2',): 'Phase 2',
         ('Phase2', 'Phase3'): 'Phase 2/3',
         ('Phase3',): 'Phase 3',
+        ('Phase4',): 'Phase 4',
+        ('EAP',): 'EAP',  # Ensure 'EAP' is correctly recognized
     }
 
     # Convert the normalized input list to a tuple for mapping
@@ -216,7 +230,6 @@ def convert_study_phase(study_phase_list):
     print(f"Mapped value: {mapped_value}")  # Debug print
 
     return mapped_value
-
 
 
 # Data validation for TRUE, FALSE, or BLANK/NULL Choice Fields
