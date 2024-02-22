@@ -33,7 +33,6 @@ class TrialSchema(BaseModel):
     study_population: Optional[str] = None
     enrollment_count: Optional[int] = None
     enrollment_type: Optional[str] = None
-    expanded_access: Optional[str] = None
     fda_regulated_drug: Optional[str] = None
     fda_regulated_device: Optional[str] = None
     primary_outcomes: Optional[Union[str, List[dict]]] = None
@@ -85,7 +84,7 @@ class TrialSchema(BaseModel):
 def get_serialized_trials():
     serialized_trials = []
     for trial in Trial.objects.all():  # No need to prefetch_related('genes') since 'genes' is now a JSONField
-        trial_dict = model_to_dict(trial, exclude=['id', 'genes'])  # Exclude the 'id' field, if you have one
+        trial_dict = model_to_dict(trial, exclude=['id', 'genes']) 
 
         # Convert the JSON string fields to dictionaries, if needed
         for field in ['study_phase', 'condition', 'keyword', 'intervention_name', 'study_location', 'primary_outcomes', 'secondary_outcomes', 'other_outcomes']:
