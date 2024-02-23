@@ -18,11 +18,25 @@ If you appreciate this work and would like to suppport it, please remit donation
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 - [I AM ALS](https://www.iamals.org/give/)
 
+## Local Large Language Model (AI)
+### Introduction
+Due to the inconsistent quality and wide range of variability of description fields,  I am in the beginning stages of experimentig with a locally hosted large language model.
+
+### Hardware Limitations, Processing Time, and Data Output Quality
+I am using LM Studio on my home desktop computer, using it to host a local server. While my desktop does have an NVIDIA RTX GPU, it is a first-generation RTX model (RTX 2070). Therefore, the processing time and end results (due to having to run smaller models) may vary.
+
+### LLM Types and Approach
+I will start with small batches of records and have them save to a separate database table with a foreign key to the Trials table. I'll then evaluate the output before expanding further. Once area to tackle is using the LLM(s) to fill in missing data fields by using the text-input description fields that have been frequently used by trial sponsors. I'm evaluating which LLM model-types to use, though am notating the following:
+- `Zero-Shot Classification` - To interpret the Eligibility Criteria Description field and determine which, if any, of the existing null fields can be populated with data.
+- 'Text Classification' - To interpret the various Intervention fields and classify whether a drug/treatment intervention is occuring (i.e., the hypothesis). If the class retruend is 'entailment' (hypothesis is true), then the database updates a 'DRUG_INTERVENTION' as 'TRUE'.
+- 'Summarization' - To interpret and summarize Eligibility Criteria Descrptions and output in a consistent, reader-friendly format.
+
 ## Public API
 To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single API end-point is created. However, at a later date in the near future, additional API end-points will be created.
 
-## Noteworthy Changse to Data Structure
+Once additional API endpoints have been created, I will update this section with the appropraite API information.
 
+## Noteworthy Changse to Data Structure
 ### Expanded Access Field, Study Phase Field
 Opposed to two separate fields, I have included a function that will change a given record's indicated study phase (if NA or null) to 'EAP' if its Expanded Access field is equal to TRUE.
 
