@@ -24,7 +24,7 @@ To allow others to easily obtain and customize the same dataset built here, I ha
 ## How are you creating a genetic mutation field?
 **Note: Web scrapping permission has been receivd from Dr. Al-Chalabi at Kings College.** Within the utils.py file is a function that scrapes the ALS online Database's HTML table to obtain the Gene Symbol, Gene Name, and Category data. Within a separate function, a 'search and match' of the 'keywords' field occurs using the Gene Symbols and the Gene Name. If a match is found, the Gene Symbol is added to the 'Genes' JSON array.
 
-The web scrapping will only occur every 30 days. When the cron-job occurs at 3:00 AM every morning, triggering the function, if the current date is less than 30 days from the date of the last web scrap, the function will intead retrieve existing data saved to the database. To avoid confusion, the API pull will continue to occur each morning due to the frequency of ClinicalTrials.gov updates.
+The web scrapping will only occur every 30 days. When the cron-job occurs at 3:00 AM every morning, triggering the function, if the current date is less than 30 days from the date of the last web scrap, the function will instead retrieve existing data saved to the database. To avoid confusion, the API pull will continue to occur each morning due to the frequency of ClinicalTrials.gov updates.
 
 **Citation:** ALSoD. (n.d.). *Amyotrophic Lateral Sclerosis online Database*  from [ALSoD](https://alsod.ac.uk/).
 
