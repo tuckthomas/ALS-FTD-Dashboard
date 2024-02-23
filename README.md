@@ -36,7 +36,7 @@ To allow others to easily obtain and customize the same dataset built here, I ha
 
 Once additional API endpoints have been created, I will update this section with the appropraite API information.
 
-# Noteworthy Changse to Data Structure
+# Noteworthy Changes to Data Structure
 ## Expanded Access Field, Study Phase Field
 Opposed to two separate fields, I have included a function that will change a given record's indicated study phase (if NA or null) to 'EAP' if its Expanded Access field is equal to TRUE.
 
