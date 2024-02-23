@@ -5,11 +5,12 @@
 <h1 align="center">Clinical Trial Research Dashboard</h1>
 <h2 align="center"><a href="https://www.f-als.com">f-ALS.com</a></h2>
 
+## Introduction
 As part of a non-profit/volunteer contribution, this is the repository to a Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on familial ALS/FTD; allowing for further data exploration.
 
 **This is a work in progress.** The API functionaltiy retrieving ClinicalTrials.gov fields, performing initial data normalization and validation, and saving the data to the database is working for the intitial identified fields. Additional fields will continue to be added, when appropriate. Furthermore, API fetches of clinical trial data from other countries will be included at a later date. **Lastly, I still have quite a bit of data cleanup, normalization, and validation to complete.** I am sharing this as-is in case anyone is interested in contributing. If you are interested, please contact me at tuckerolson13@gmail.com.
 
-## fALS: Personal Impact Summary
+### fALS: Personal Impact Summary
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.iamals.org/stories/tucker-olson-2/)
 
 If you appreciate this work and would like to suppport it, please remit donations to one of the following charities charities listed below. ***Also, I'm available for full-time employment, as well as contract opportunities.***
