@@ -20,7 +20,7 @@ If you appreciate this work and would like to suppport it, please remit donation
 ## Public API
 To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single API end-point is created. However, at a later date in the near future, additional API end-points will be created.
 
-### Noteworthy Changse to Data Structure
+## Noteworthy Changse to Data Structure
 
 ### Expanded Access Field, Study Phase Field
 Opposed to two separate fields, I have included a function that will change a given record's indicated study phase (if NA or null) to 'EAP' if its Expanded Access field is equal to TRUE.
