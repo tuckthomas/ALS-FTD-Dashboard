@@ -45,7 +45,7 @@ This project depends on several Python packages. Below is a breakdown of the req
 
 **Python Version:** 3.9.2
 
-## Django and Core Dependencies
+### Django and Core Dependencies
 These packages are required for the project to run:
 
 - `Django==4.2.10` - The web framework used.
@@ -61,7 +61,7 @@ These packages are required for the project to run:
 - `fuzzywuzzy==0.18.0 ` - For fuzzy string matching, useful in scenarios where you need to find close matches to strings.
 - `python-Levenshtein` - Provides a faster, C-based extension for the FuzzyWuzzy library to speed up string comparison operations.
 
-## Optional Metabase Front-End Requirements
+### Optional Metabase Front-End Requirements
 **What is Metabase?** [Metabase](https://github.com/metabase/metabase) is open-source business intelligence tool that enables users to explore, visualize, and share data insights without the need for extensive technical knowledge. It allows for easy querying through a user-friendly interface, making it accessible for users to generate reports and dashboards from their data sources.
 
 To use Metabase as the dashboard front-end, Docker is required for installation. Ensure Docker is installed and running on your system. I am running Debian 12 within a Proxmox LXC. If using a similar setup or Debian-based system, here's how to install Metabase using Docker:
@@ -88,13 +88,13 @@ Here is an early example of a dashboard using Metabase:
 
 ![Early-Metabase-Dashboard-Example](media/Early-Metabase-Dashboard-Example.jpg)
 
-## Database Drivers
+### Database Drivers
 I opted to use my existing PostgreSQL database. Depending on your database choice, you might need specific drivers:
 
 - `mysqlclient==1.4.4` - A MySQL driver (Optional, only if using MySQL).
 - `psycopg2-binary==2.9.9` - A PostgreSQL driver (Optional, specifically for PostgreSQL users).
 
-## Other Dependencies
+### Other Dependencies
 The following packages might be used for specific functionalities within the project. They are not strictly required for the core functionality but may enhance the project's capabilities or are dependencies of the above packages:
 
 - `asgiref==3.7.2`
@@ -107,7 +107,7 @@ The following packages might be used for specific functionalities within the pro
 - `sqlparse==0.4.1`
 - `urllib3==1.26.5`
 
-## Optional Packages
+### Optional Packages
 These packages are optional and might be required under specific circumstances or for development purposes:
 
 - `ipython_genutils==0.2.0`, `jedi==0.18.0`, `parso==0.8.1`, `pexpect==4.8.0`, `pickleshare==0.7.5`, `prompt-toolkit==3.0.14`, `Pygments==2.7.1`, `traitlets==5.0.5`, `wcwidth==0.1.9` - For enhanced IPython interaction.
