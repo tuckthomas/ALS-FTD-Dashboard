@@ -31,6 +31,9 @@ I will start with small batches of records and have them save to a separate data
 - `Text Classification` - To interpret the various Intervention fields and classify whether a drug/treatment intervention is occuring (i.e., the hypothesis). If the class returned is 'entailment' (i.e., hypothesis is true), then the database updates the record's custom added field, 'DRUG_INTERVENTION', as 'TRUE'.
 - `Summarization` - To interpret and summarize Eligibility Criteria Descrptions and output in a consistent, reader-friendly format.
 
+## Initial LLM Test Data
+- I am currently actively testing the Gemma IT 2b by having it provide me two separate JSON lists of inclusion and exclusion criteria when providing the AI with the eligibility_description (text field).
+
 # Public API
 To allow others to easily obtain and customize the same dataset built here, I have chosen Django Ninja API. Currently, only a single API end-point is created. However, at a later date in the near future, additional API end-points will be created.
 
