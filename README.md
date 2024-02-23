@@ -28,7 +28,7 @@ I am using LM Studio on my home desktop computer, using it to host a local serve
 ### LLM Types and Approach
 I will start with small batches of records and have them save to a separate database table with a foreign key to the Trials table. I'll then evaluate the output before expanding further. One area to tackle is using the LLM(s) to fill in missing data fields by using the text-input description fields that have been frequently used by trial sponsors. I'm evaluating which LLM model-types to use, though am notating the following:
 - `Zero-Shot Classification` - To interpret the Eligibility Criteria Description field and determine which, if any, of the existing null fields can be populated with data.
-- `Text Classification` - To interpret the various Intervention fields and classify whether a drug/treatment intervention is occuring (i.e., the hypothesis). If the class retruend is 'entailment' (hypothesis is true), then the database updates a 'DRUG_INTERVENTION' as 'TRUE'.
+- `Text Classification` - To interpret the various Intervention fields and classify whether a drug/treatment intervention is occuring (i.e., the hypothesis). If the class returned is 'entailment' (i.e., hypothesis is true), then the database updates the record's custom added field, 'DRUG_INTERVENTION', as 'TRUE'.
 - `Summarization` - To interpret and summarize Eligibility Criteria Descrptions and output in a consistent, reader-friendly format.
 
 ## Public API
