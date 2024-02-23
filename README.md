@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/fals-logo.png" alt="fals-logo">
+  <img src="media/fals-logo.png" alt="fals-logo" width="450" height="450">
 </p>
 
 <h1 align="center">Clinical Trial Research Dashboard</h1>
