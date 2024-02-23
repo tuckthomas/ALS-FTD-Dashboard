@@ -23,7 +23,7 @@ If you appreciate this work and would like to suppport it, please remit donation
 Due to the inconsistent quality and wide range of variability of description fields,  I am in the beginning stages of experimentig with a locally hosted large language model.
 
 ### Hardware Limitations, Processing Time, and Data Output Quality
-I am using LM Studio on my home desktop computer, using it to host a local server. While my desktop does have an NVIDIA RTX GPU, it is a first-generation RTX model (MSI RTX 2070 Gaming Z; 8GB VRAM). Therefore, the processing time and end results (due to having to run smaller models) may vary.
+I am using LM Studio on my home desktop computer, using it to host a local server. While my desktop does have an NVIDIA RTX GPU, it is a first-generation RTX model (MSI RTX 2070; 8GB VRAM). Therefore, the processing time and end results (due to having to run smaller models) may vary. If it is determined that multiple LLM models will need to be utilized, I might allocate my media server's GPU (GTX 1070 TI; 8 GB VRAM) during the daily cron-job occurence.
 
 ### LLM Types and Approach
 I will start with small batches of records and have them save to a separate database table with a foreign key to the Trials table. I'll then evaluate the output before expanding further. One area to tackle is using the LLM(s) to fill in missing data fields by using the text-input description fields that have been frequently used by trial sponsors. I'm evaluating which LLM model-types to use, though am notating the following:
