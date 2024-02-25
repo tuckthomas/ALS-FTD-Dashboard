@@ -3,7 +3,7 @@ from django.db import models
 # Table Update Log Update
 class Update_Log(models.Model):
     database_table_name = models.CharField(max_length=255, primary_key=True)
-    table_update_date = models.DateField(null=True, blank=True) 
+    table_update_date = models.DateTimeField(null=True, blank=True) 
 
 # Model for Gene List Information
 class Gene(models.Model):
@@ -28,6 +28,12 @@ class Trial(models.Model):
         ('', '')
     ]
 
+    ELIGIBILITY_CRITERIA_HEALTHY_VOLUNTEERS_CHOICES = [
+        ('TRUE', 'True'),
+        ('FALSE', 'False'),
+        ('', '')
+    ]
+
     unique_protocol_id = models.CharField(max_length=255, primary_key=True)  # Primary Key
     nct_id = models.CharField(max_length=255)
     brief_title = models.TextField(null=True, blank=True)
@@ -46,6 +52,7 @@ class Trial(models.Model):
     condition = models.JSONField(null=True, blank=True)
     collaborators = models.TextField(null=True, blank=True)
     keyword = models.JSONField(null=True, blank=True)
+    intervention_types = models.JSONField(null=True, blank=True)
     intervention_name = models.JSONField(null=True, blank=True)
     study_population = models.TextField(null=True, blank=True)
     enrollment_count = models.IntegerField(null=True, blank=True)
@@ -58,6 +65,13 @@ class Trial(models.Model):
     clinical_trial_url = models.CharField(max_length=255, null=True, blank=True)
     study_location = models.JSONField(null=True, blank=True)
     genes = models.JSONField(null=True, blank=True)
+    eligibility_criteria_generic_description = models.TextField(null=True, blank=True)
+    eligibility_criteria_inclusion_description = models.JSONField(null=True, blank=True)
+    eligibility_criteria_exclusion_description = models.JSONField(null=True, blank=True)
+    eligibility_criteria_healthy_volunteers = models.CharField(max_length=5, choices=ELIGIBILITY_CRITERIA_HEALTHY_VOLUNTEERS_CHOICES, default='', blank=True)
+    eligibility_criteria_sex = models.CharField(max_length=255, null=True, blank=True)
+    eligibility_criteria_min_age_years = models.CharField(max_length=255, null=True, blank=True)
+    eligibility_criteria_max_age_years = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.brief_title
