@@ -2,6 +2,7 @@ import requests
 import os
 import re
 import ast
+from openai import OpenAI
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -10,13 +11,15 @@ from bs4 import BeautifulSoup
 from django.db import models
 from django.db.models import Q
 import numpy as np
-from .models import Trial, Gene
-from datetime import datetime
+from .models import Trial, Gene, Update_Log
+from datetime import datetime, timedelta
 from dateutil import parser as date_parser
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from fuzzywuzzy import process
 import json
+
 
 # This function is designed to update the database with trial and gene data.
 # It iterates over each trial, updating or creating trial records, and associates genes by creating or fetching gene records.
@@ -140,12 +143,19 @@ def save_to_xls(gene_df, trial_df):
 
 
 
+
 # This function creates a column for the URL of each trial record based upon ClinicalTrial.gov's URL schema.
 def enhanced_fetch_trial_data():
     # Fetch trial data
     trials_data_df = fetch_trial_data()
     print(f"Type of trials_data_raw before conversion: {type(trials_data_df).__name__}")
 
+    # Initialize new columns with empty lists (conceptually similar to empty JSON arrays)
+    # This is done in preperation for OpenAI's interpreting the eligibility_criteria_generic_description field and separating inclusion/exclusion criteria
+    trials_data_df['eligibility_criteria_inclusion_description'] = [list() for _ in range(len(trials_data_df))]
+    trials_data_df['eligibility_criteria_exclusion_description'] = [list() for _ in range(len(trials_data_df))]
+
+    # Obtain Gene List
     gene_list_df = scrape_alsod_gene_list()
     gene_symbols = gene_list_df['Gene Symbol'].tolist()
     gene_names = gene_list_df['Gene Name'].tolist()  # Assuming this column exists
@@ -180,6 +190,7 @@ def enhanced_fetch_trial_data():
     print("Records with expanded_access 'TRUE' before update:", trials_data_df[trials_data_df['expanded_access'] == 'TRUE'].shape[0])
     trials_data_df['fda_regulated_drug'] = trials_data_df['fda_regulated_drug'].apply(validate_and_transform_choice_field)
     trials_data_df['fda_regulated_device'] = trials_data_df['fda_regulated_device'].apply(validate_and_transform_choice_field)
+    trials_data_df['eligibility_criteria_healthy_volunteers'] = trials_data_df['eligibility_criteria_healthy_volunteers'].apply(validate_and_transform_choice_field)
 
     # Update study_phase based on expanded_access being 'TRUE'
     trials_data_df['study_phase'] = trials_data_df.apply(lambda row: 'EAP' if row['expanded_access'] == 'TRUE' else row['study_phase'], axis=1)
@@ -209,7 +220,7 @@ def convert_study_phase(study_phase_list):
         (): 'NA',
         (None,): 'NA',
         ('NA',): 'NA',
-        ('Early_Phase1',): 'Early Phase 1',
+        ('EARLY_Phase1',): 'Early Phase 1',
         ('Phase1',): 'Phase 1',
         ('Phase1', 'Phase2'): 'Phase 1/2',
         ('Phase2',): 'Phase 2',
@@ -230,6 +241,7 @@ def convert_study_phase(study_phase_list):
     print(f"Mapped value: {mapped_value}")  # Debug print
 
     return mapped_value
+
 
 
 # Data validation for TRUE, FALSE, or BLANK/NULL Choice Fields
@@ -307,7 +319,6 @@ def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol
     return json.dumps(list(matched_genes))  # Convert set back to list for JSON serialization
 
 
-
 # This function scrapes gene information from Dr. Al-Chalabi's ALSoD.ac.uk HTML table.
 # It processes it into a structured format, ready for database insertion or association with trials, while handling text sanitization.
 def scrape_alsod_gene_list():
@@ -320,7 +331,7 @@ def scrape_alsod_gene_list():
         last_update_date = None
 
     # Calculate the difference or set a default to proceed with scraping
-    if last_update_date is None or (timezone.now().date() - last_update_date >= timedelta(days=30)):
+    if last_update_date is None or (timezone.now().date() - last_update_date.date() >= timedelta(days=30)):
         url = "https://alsod.ac.uk/"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
@@ -356,7 +367,7 @@ def scrape_alsod_gene_list():
         # Update the Update_Log table with the current date as the last update date for 'Dashboard_gene'
         Update_Log.objects.update_or_create(
             database_table_name='Dashboard_gene', 
-            defaults={'table_update_date': timezone.now().date()}
+            defaults={'table_update_date': timezone.now()}
         )
     else:
         # Query the 'Dashboard_gene' table directly
@@ -368,7 +379,6 @@ def scrape_alsod_gene_list():
 
     print("DataFrame shape:", df.shape)
     return df
-
 
 
 # This function fetches trial data from ClinicalTrials.gov's API.
@@ -394,12 +404,13 @@ def fetch_trial_data():
         "OrgStudyId", "NCTId", "BriefTitle", "StudyType", "OverallStatus",
         "StatusVerifiedDate", "CompletionDate", "LeadSponsorName",
         "ResponsiblePartyType", "ResponsiblePartyInvestigatorFullName",
-        "Condition", "Keyword", "InterventionName", "InterventionDescription",
+        "Condition", "Keyword", "InterventionType", "InterventionDescription",
         "StudyPopulation", "EnrollmentCount", "EnrollmentType", "Phase",
         "StartDate", "StartDateType", "StudyFirstSubmitDate",
         "StudyFirstSubmitQCDate", "HasExpandedAccess", "IsFDARegulatedDrug",
         "IsFDARegulatedDevice", "Location", "PrimaryOutcome", "SecondaryOutcome",
-        "OtherOutcome"
+        "OtherOutcome", "EligibilityCriteria", "HealthyVolunteers", "Sex",
+        "MinimumAge", "MaximumAge"
     ]
     query_params = {
         "format": "json",
@@ -575,7 +586,7 @@ def fetch_trial_data():
         "SPATA5 Disorder", "SPATA5L* Related Disorder", "Kennedy's Disease", "Sialorrhea", "Fibromyalgia", "Fertility Issues", "Asmd, Visceral Type",
         "Sphingomyelin Lipidosis", "Cholangiocarcinoma", "Stage III Gallbladder Cancer AJCC v7", "Stage IIIA Gallbladder Cancer AJCC v7",
         "Stage IIIB Gallbladder Cancer AJCC v7", "Stage IV Gallbladder Cancer AJCC v7", "Stage IVA Gallbladder Cancer AJCC v7",
-        "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia", "Psychiatric Adults Patients", "Alzheimer Disease",
+        "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia", "Psychiatric Adults Patients", "Alzheimer Disease", "Alzheimer's Disease",
         "Postpoliomyelitis", "Duchenne Muscular Dystrophy", "Inherited Metabolic Diseases", "Lysosomal Storage Disorders", "Peroxisomal Storage Diseases",
         "Inborn Errors of Metabolism", "Mucopolysaccharidosis", "Spinal Cord Injuries", "Death, Sudden, Cardiac", "Out-Of-Hospital Cardiac Arrest",
         "Ventricular Fibrillation", "Cardiopulmonary Arrest With Successful Resuscitation", "Insomnia", "Depression", "Distal Hereditary Motor Neuropathy, Type II",
@@ -587,7 +598,7 @@ def fetch_trial_data():
         "Myotonic Dystrophy Type 1 (DM1)", "Myotonic Dystrophy Type 2", "IGF-1 Deficiency" "Stage III Gallbladder Cancer AJCC v7",
         "Stage IIIA Gallbladder Cancer AJCC v7", "Stage IIIB Gallbladder Cancer AJCC v7", "Stage IV Gallbladder Cancer AJCC v7",
         "Stage IVA Gallbladder Cancer AJCC v7", "Stage IVB Gallbladder Cancer AJCC v7", "Hemiplegic Cerebral Palsy", "Tetraplegia",
-        "Psychiatric Adults Patients", "Advanced solid tumors", "IGF-1 Deficiency",
+        "Psychiatric Adults Patients", "Advanced solid tumors", "IGF-1 Deficiency", "Fabry Disease", "Lysosomal Storage Diseases"
     ]
 
     # Post-processing of fetched API data to apply exclusion criteria:
@@ -608,7 +619,8 @@ def fetch_trial_data():
                 match, score = process.extractOne(cond, include_conditions)
                 
                 # Define a threshold for considering a match good enough (e.g., 80 out of 100)
-                if score >= 80:  # Adjust the threshold as needed
+                # I am using a more forgiving threshold due to the explicit exclusion criteria defined
+                if score >= 75:  # Adjust the threshold as needed
                     filtered_studies_details.append(study)
                     break  # If a match is found, no need to check other conditions for this study
 
@@ -621,8 +633,8 @@ def fetch_trial_data():
         print("DataFrame structure:")
         print(df_studies)
 
-    # Print all column names
-    print("Column names:", df_studies.columns)
+    # Print statement for column remapping
+    print("Before renaming, headers:", df_studies.columns.tolist())
 
     # Replace 'nan' strings with actual NaN values
     df_studies.replace('nan', np.nan, inplace=True)
@@ -650,6 +662,7 @@ def fetch_trial_data():
         "protocolSection.conditionsModule.conditions": "condition",
         "protocolSection.sponsorCollaboratorsModule.collaborators": "collaborators",
         "protocolSection.conditionsModule.keywords": "keyword",
+        "protocolSection.armsInterventionsModule.interventions": "intervention_types",
         "protocolSection.armsInterventionsModule.interventions": "intervention_name",
         "protocolSection.eligibilityModule.studyPopulation": "study_population",
         "protocolSection.designModule.enrollmentInfo.count": "enrollment_count",
@@ -660,13 +673,25 @@ def fetch_trial_data():
         "protocolSection.oversightModule.isFdaRegulatedDevice": "fda_regulated_device",
         "protocolSection.outcomesModule.primaryOutcomes": "primary_outcomes",
         "protocolSection.outcomesModule.secondaryOutcomes": "secondary_outcomes",
-        "protocolSection.outcomesModule.otherOutcomes": "other_outcomes"
+        "protocolSection.outcomesModule.otherOutcomes": "other_outcomes",
+        "protocolSection.eligibilityModule.eligibilityCriteria": "eligibility_criteria_generic_description",
+        "protocolSection.eligibilityModule.healthyVolunteers": "eligibility_criteria_healthy_volunteers",
+        "protocolSection.eligibilityModule.sex": "eligibility_criteria_sex",
+        "protocolSection.eligibilityModule.minimumAge": "eligibility_criteria_min_age_years",
+        "protocolSection.eligibilityModule.maximumAge": "eligibility_criteria_max_age_years",
     }
 
     df_studies.rename(columns=column_mappings, inplace=True)
     print("After renaming, headers:", df_studies.columns.tolist())
     if not df_studies.empty:
         print("Sample record after renaming:", df_studies.iloc[0])
+
+    # Additional print statements for debugging
+    if 'nct_id' in df_studies.columns:
+        print("First ten records' 'nct_id' field:")
+        print(df_studies['nct_id'].head(10))
+    else:
+        print("The 'nct_id' column does not exist in the DataFrame.")
 
     # Update the Update_Log table with the current date as the last update date for 'Dashboard_trial'
         Update_Log.objects.update_or_create(
@@ -683,3 +708,63 @@ def fetch_trial_data():
 
     # Directly return the DataFrame
     return df_studies
+
+# AI Utility Functions Referenced within views.py File
+def parse_criteria_from_response(response_text):
+    # Split the response into two parts: inclusion and exclusion criteria
+    parts = response_text.split("**Exclusion Criteria:**")
+    inclusion_text = parts[0].split("**Inclusion Criteria:**")[1] if "**Inclusion Criteria:**" in parts[0] else ""
+    exclusion_text = parts[1] if len(parts) > 1 else ""
+
+    # Extract list items from each part
+    inclusion_criteria = extract_list_items(inclusion_text)
+    exclusion_criteria = extract_list_items(exclusion_text)
+
+    return inclusion_criteria, exclusion_criteria
+
+def extract_list_items(text):
+    # Define a regex pattern that matches lines starting with "-", "*", or a number followed by "."
+    pattern = re.compile(r'^(\d+\.\s*|\-\s*|\*\s*)')
+    list_items = []
+
+    for line in text.split('\n'):
+        if pattern.match(line.strip()):
+            # Remove the list item prefix (numbers, dashes, or asterisks) and any following whitespace
+            item = pattern.sub('', line).strip()
+            list_items.append(item)
+    
+    return list_items
+
+def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
+    print(f"Preparing to send data for unique_protocol_id: {unique_protocol_id}")
+    
+    # Configure OpenAI
+    client = OpenAI(base_url="http://REPLACE_WITH_YOUR_CLIENT_CHOICE_WHETHER_LOCAL_OR_3RD_PARTY", api_key="ENTER IF NEEDED")
+    criteria_responses = {"inclusion": [], "exclusion": []}
+
+    prompt = f"###\nInstruction: Provide a detailed list of inclusion and exclusion criteria.\n###\nEligibility Criteria: {eligibility_criteria}\n###\nResponse:"
+
+    try:
+        completion = client.completions.create(
+            model="local-model",
+            prompt=prompt,
+            temperature=0.7,
+            max_tokens=1024
+        )
+
+        if completion.choices and len(completion.choices) > 0:
+            response_text = completion.choices[0].text
+            print(f"Extracted response text for {unique_protocol_id}: {response_text}")
+            
+            # Parse the combined response to extract inclusion and exclusion criteria
+            inclusion_criteria, exclusion_criteria = parse_criteria_from_response(response_text)
+            criteria_responses["inclusion"] = inclusion_criteria
+            criteria_responses["exclusion"] = exclusion_criteria
+        else:
+            print(f"No choices found in the response for {unique_protocol_id}.")
+
+    except Exception as e:
+        print(f"Error processing criteria for {unique_protocol_id}: {e}")
+
+    return criteria_responses
+
