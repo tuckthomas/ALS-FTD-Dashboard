@@ -29,6 +29,7 @@ class TrialSchema(BaseModel):
     responsible_party_investigator_full_name: Optional[str] = None
     condition: Optional[Union[str, List[str]]] = None
     keyword: Optional[Union[str, List[str]]] = None
+    intervention: Optional[Union[str, List[dict]]] = None
     intervention_name: Optional[Union[str, List[dict]]] = None
     study_population: Optional[str] = None
     enrollment_count: Optional[int] = None
@@ -41,6 +42,13 @@ class TrialSchema(BaseModel):
     clinical_trial_url: Optional[str] = None
     study_location: Optional[Union[str, List[dict]]] = None
     genes: Optional[List[str]] = None
+    eligibility_criteria_generic_description: Optional[str] = None
+    eligibility_criteria_inclusion_description: Optional[List[str]] = None
+    eligibility_criteria_exclusion_description: Optional[List[str]] = None
+    eligibility_criteria_healthy_volunteers: Optional[str] = None
+    eligibility_criteria_sex: Optional[str] = None
+    eligibility_criteria_min_age_years: Optional[str] = None
+    eligibility_criteria_max_age_years: Optional[str] = None
 
 
     # Prepare URL for JSON serialization
@@ -87,7 +95,7 @@ def get_serialized_trials():
         trial_dict = model_to_dict(trial, exclude=['id', 'genes']) 
 
         # Convert the JSON string fields to dictionaries, if needed
-        for field in ['study_phase', 'condition', 'keyword', 'intervention_name', 'study_location', 'primary_outcomes', 'secondary_outcomes', 'other_outcomes']:
+        for field in ['study_phase', 'condition', 'keyword', 'intervention_types', 'intervention_name', 'study_location', 'primary_outcomes', 'secondary_outcomes', 'other_outcomes']:
             field_value = getattr(trial, field, None)
             if isinstance(field_value, str):
                 # If the field is a string, attempt to load it as JSON
@@ -108,3 +116,12 @@ def get_serialized_trials():
         serialized_trials.append(trial_schema.dict())
 
     return serialized_trials
+
+class CriteriaSchema(BaseModel):
+    inclusion_criteria: Optional[List[str]]
+    exclusion_criteria: Optional[List[str]]
+
+class ProcessedCriteriaSchema(BaseModel):
+    unique_protocol_id: str
+    inclusion_criteria: List[str] = []
+    exclusion_criteria: List[str] = []
