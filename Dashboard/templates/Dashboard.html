@@ -10,44 +10,53 @@
     <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap.min.css?h=cd822b7fd22c8a95a68470c795adea69">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins&amp;display=swap">
     <link rel="stylesheet" href="/static/assets/css/fals.css">
+    <style>
+        /* Style for fullscreen mode */
+        #dashboardFrame.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+        }
+    </style>
 </head>
 
 <body id="page-top" class="body">
     <div id="wrapper">
-        <div class="d-flex flex-column" id="content-wrapper"><section class="navbar-top">
-    <div class="container navbar-container">
-        <div class="row navbar-row-icon">
-            <div class="col-md-6 navbar-column-icon">
-                    <img class="logo" src="/static/assets/img/fals-blue-logo.png" width="100px" height="100px" alt="Logo">
-            </div>
-        </div>
-        <div class="row navbar-row-menu">
-            <div class="row navbar-row-icon">
-                <div class="col-md-6 navbar-column-icon">
-                    <svg class="fs-2 text-white hamburger-menu-icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 30 30" fill="none">
-                        <path d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z" fill="currentColor"></path>
-                        <path d="M2 12.0322C2 11.4799 2.44772 11.0322 3 11.0322H21C21.5523 11.0322 22 11.4799 22 12.0322C22 12.5845 21.5523 13.0322 21 13.0322H3C2.44772 13.0322 2 12.5845 2 12.0322Z" fill="currentColor"></path>
-                        <path d="M3 17.0645C2.44772 17.0645 2 17.5122 2 18.0645C2 18.6167 2.44772 19.0645 3 19.0645H21C21.5523 19.0645 22 18.6167 22 18.0645C22 17.5122 21.5523 17.0645 21 17.0645H3Z" fill="currentColor"></path>
-                    </svg>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <section class="navbar-top" id="navbar">
+                <div class="container navbar-container">
+                    <div class="row navbar-row-icon">
+                        <div class="col-md-6 navbar-column-icon">
+                            <img class="logo" src="/static/assets/img/fals-blue-logo.png" width="100px" height="100px" alt="Logo">
+                        </div>
+                    </div>
+                    <div class="row navbar-row-menu">
+                        <div class="row navbar-row-icon">
+                            <div class="col-md-6 navbar-column-icon">
+                                <svg class="fs-2 text-white hamburger-menu-icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 30 30" fill="none">
+                                    <path d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z" fill="currentColor"></path>
+                                    <path d="M2 12.0322C2 11.4799 2.44772 11.0322 3 11.0322H21C21.5523 11.0322 22 11.4799 22 12.0322C22 12.5845 21.5523 13.0322 21 13.0322H3C2.44772 13.0322 2 12.5845 2 12.0322Z" fill="currentColor"></path>
+                                    <path d="M3 17.0645C2.44772 17.0645 2 17.5122 2 18.0645C2 18.6167 2.44772 19.0645 3 19.0645H21C21.5523 19.0645 22 18.6167 22 18.0645C22 17.5122 21.5523 17.0645 21 17.0645H3Z" fill="currentColor"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-		</div>
-	</section>
+            </section>
             <main class="primary-content-div">
                 <div class="container-fluid">
-				<!-- Embedded Dashboard -->
-					<iframe
-						src="{{iframeUrl}}"
-						frameborder="0"
-						width="100%"
-						style="min-height: 100vh;"
-						allowtransparency
-					></iframe>
-				</div>
+                    <!-- Embedded Dashboard -->
+                    <iframe id="dashboardFrame" src="{{iframeUrl}}" frameborder="0" width="100%" style="min-height: 100vh;" allowtransparency></iframe>
+                    <button id="toggleFullScreen">Toggle Fullscreen</button>
+                </div>
             </main>
         </div>
-    </div><!-- Start: Footer Multi Column -->
-    <footer class="sticky-footer">
+    </div>
+    <!-- Start: Footer Multi Column -->
+    <footer class="sticky-footer" id="footer">
         <div class="container footer-container">
             <div class="row justify-content-center">
                 <!-- Start: Services -->
@@ -75,7 +84,37 @@
                 <ul class="list-inline mb-0"></ul>
             </div>
         </div>
+    </footer>
     <script src="/static/assets/bootstrap/js/bootstrap.min.js?h=e55bde7d6e36ebf17ba0b8c1e80e4065"></script>
+    <script>
+        const toggleFullScreenButton = document.getElementById('toggleFullScreen');
+        const dashboardFrame = document.getElementById('dashboardFrame');
+        const navbar = document.getElementById('navbar');
+        const footer = document.getElementById('footer');
+
+        toggleFullScreenButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Listen for fullscreen change event and adjust navbar and footer visibility
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement === document.documentElement) {
+                navbar.style.display = 'none'; // Hide navbar
+                footer.style.display = 'none'; // Hide footer
+                dashboardFrame.style.backgroundColor = 'transparent'; // Set background color to transparent
+            } else {
+                navbar.style.display = 'block'; // Show navbar
+                footer.style.display = 'block'; // Show footer
+                dashboardFrame.style.backgroundColor = 'white'; // Set background color to white
+            }
+        });
+    </script>
 </body>
 
 </html>
