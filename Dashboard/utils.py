@@ -738,8 +738,12 @@ def extract_list_items(text):
 def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
     print(f"Preparing to send data for unique_protocol_id: {unique_protocol_id}")
     
-    # Configure OpenAI
-    client = OpenAI(base_url="http://REPLACE_WITH_YOUR_CLIENT_CHOICE_WHETHER_LOCAL_OR_3RD_PARTY", api_key="ENTER IF NEEDED")
+    # Note from Tucker: You must configure your client to your. You can explore HuggingFace for open source models or use a (paid) API key from OpenAI.
+    # I am using Google Gemma 2b, a free, open-source model.
+    # For consistent, factual output, I've reduced the temperature to 0.3
+    # Due to the length of some of the text inputs, I've incresed the max tokens to 8192
+    # You are free to edit this as you wish.
+    client = OpenAI(base_url="http://INPUT_YOUR_AI_SERVER_OR_3RD_PARTY_SERVER_HERE", api_key="INPUT IF NEEDED; REFERENCE YOUR SERVER'S INSTRUCTIONS")
     criteria_responses = {"inclusion": [], "exclusion": []}
 
     prompt = f"###\nInstruction: Provide a detailed list of inclusion and exclusion criteria.\n###\nEligibility Criteria: {eligibility_criteria}\n###\nResponse:"
@@ -748,8 +752,8 @@ def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
         completion = client.completions.create(
             model="local-model",
             prompt=prompt,
-            temperature=0.7,
-            max_tokens=1024
+            temperature=0.3,
+            max_tokens=8192
         )
 
         if completion.choices and len(completion.choices) > 0:
@@ -765,6 +769,9 @@ def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
 
     except Exception as e:
         print(f"Error processing criteria for {unique_protocol_id}: {e}")
+
+    return criteria_responses
+
 
     return criteria_responses
 
