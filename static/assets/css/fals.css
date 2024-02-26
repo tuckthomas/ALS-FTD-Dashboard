@@ -1,22 +1,27 @@
 .navbar-top {
     position: fixed;
-    background-color: rgb(118,171,210);
+    background-color: rgb(88, 135, 168);
     width: 100%;
     top: 0;
-    height: 7.5vh;
+    min-height: 7.5vh;
+    max-height: auto;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    border-style: ridge;
+    border-color: #000000;
   }
   
   .sticky-footer {
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
     border-color: #21313c;
-    background: rgb(118,171,210);
-    height: 5vh;
+    background: rgb(88, 135, 168);
+    height: auto;
     position: fixed;
     bottom: 0;
     width: 100%;
+    border-style: ridge;
+    border-color: #000000;
   }
   
   .navbar-container {
@@ -30,7 +35,7 @@
   }
   
   .footer-links {
-    color: var(--bs-body-bg);
+    color: #ffffff;
   }
   
   .primary-content-div {
@@ -53,8 +58,9 @@
   }
   
   .logo {
-    position: relative;
-    top: -10px;
+    position: absolute;
+    top: -12.5px;
+    left: 50px;
     filter: drop-shadow(0 0 1px white);
   }
   
@@ -68,7 +74,12 @@
     height: 1.5em;
     stroke: white;
     stroke-width: 0.2;
+    cursor: pointer;
+    position: absolute; /* or 'fixed' depending on your layout */
+    right: 50px; /* Adjust this value to move the icon further to the right */
+    top: 15px; /* Adjust if you also want to change the vertical position */
   }
+  
   
   .hamburger-menu-icon path {
     fill: #21313c;
