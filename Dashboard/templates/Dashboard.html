@@ -106,7 +106,7 @@
         const contentWrapper = document.getElementById('primary-content-div');
         const navbar = document.getElementById('navbar');
         const footer = document.getElementById('footer');
-
+      
         toggleFullScreenButton.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
@@ -116,26 +116,28 @@
                 document.exitFullscreen();
             }
         });
-
-        // Listen for fullscreen change event and adjust navbar and footer visibility
+      
+        // Listen for fullscreen change event and adjust navbar, footer visibility, and toggle button image
         document.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement === document.documentElement) {
                 navbar.style.display = 'none'; // Hide navbar
                 footer.style.display = 'none'; // Hide footer
                 dashboardFrame.classList.add('fullscreen'); // Add fullscreen class to iframe
-                // Adjust primary content div to fill available space
                 contentWrapper.style.height = '100vh';
                 contentWrapper.style.marginTop = '0';
+                // Change toggle button image for full-screen mode
+                toggleFullScreenButton.style.backgroundImage = "url('/static/assets/img/full-screen-toggle.png')";
             } else {
                 navbar.style.display = 'block'; // Show navbar
                 footer.style.display = 'block'; // Show footer
                 dashboardFrame.classList.remove('fullscreen'); // Remove fullscreen class from iframe
-                // Reset primary content div to original size
                 contentWrapper.style.height = 'calc(100vh - 10vh - 12.5vh)';
                 contentWrapper.style.marginTop = '10vh';
+                // Revert toggle button image when exiting full-screen
+                toggleFullScreenButton.style.backgroundImage = "url('/static/assets/img/full-screen-toggle-inverse-color.png')";
             }
         });
-    </script>
+      </script>
 </body>
 
 </html>
