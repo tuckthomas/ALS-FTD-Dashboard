@@ -20,6 +20,20 @@
             height: 100%;
             z-index: 9999;
         }
+        /* Added style for the toggle button */
+        #toggleFullScreen {
+            position: fixed; /* Position the button relative to the viewport */
+            bottom: 20px;    /* Distance from the bottom of the viewport */
+            right: 50px;     /* Distance from the right of the viewport */
+            z-index: 10000;  /* Ensure it sits above other content */
+            background-image: url('/static/assets/img/full-screen-toggle-inverse-color.png'); /* Path to the image */
+            background-size: cover; /* Cover the entire area of the button */
+            background-color: transparent;
+            border: none; /* Remove any default border */
+            width: 50px; /* Adjust based on the actual size of your image */
+            height: 50px; /* Adjust based on the actual size of your image */
+            cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+        }
     </style>
 </head>
 
@@ -46,11 +60,11 @@
                     </div>
                 </div>
             </section>
-            <main class="primary-content-div">
+            <main class="primary-content-div" id="primary-content-div">
                 <div class="container-fluid">
                     <!-- Embedded Dashboard -->
                     <iframe id="dashboardFrame" src="{{iframeUrl}}" frameborder="0" width="100%" style="min-height: 100vh;" allowtransparency></iframe>
-                    <button id="toggleFullScreen">Toggle Fullscreen</button>
+                    <button id="toggleFullScreen"></button>
                 </div>
             </main>
         </div>
@@ -89,6 +103,7 @@
     <script>
         const toggleFullScreenButton = document.getElementById('toggleFullScreen');
         const dashboardFrame = document.getElementById('dashboardFrame');
+        const contentWrapper = document.getElementById('primary-content-div');
         const navbar = document.getElementById('navbar');
         const footer = document.getElementById('footer');
 
@@ -107,11 +122,17 @@
             if (document.fullscreenElement === document.documentElement) {
                 navbar.style.display = 'none'; // Hide navbar
                 footer.style.display = 'none'; // Hide footer
-                dashboardFrame.style.backgroundColor = 'transparent'; // Set background color to transparent
+                dashboardFrame.classList.add('fullscreen'); // Add fullscreen class to iframe
+                // Adjust primary content div to fill available space
+                contentWrapper.style.height = '100vh';
+                contentWrapper.style.marginTop = '0';
             } else {
                 navbar.style.display = 'block'; // Show navbar
                 footer.style.display = 'block'; // Show footer
-                dashboardFrame.style.backgroundColor = 'white'; // Set background color to white
+                dashboardFrame.classList.remove('fullscreen'); // Remove fullscreen class from iframe
+                // Reset primary content div to original size
+                contentWrapper.style.height = 'calc(100vh - 10vh - 12.5vh)';
+                contentWrapper.style.marginTop = '10vh';
             }
         });
     </script>
