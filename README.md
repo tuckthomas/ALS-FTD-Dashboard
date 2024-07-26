@@ -3,7 +3,6 @@
 </p>
 
 <h1 align="center">Clinical Trial Research Dashboard</h1>
-<h2 align="center"><a href="https://www.f-als.com">f-ALS.com</a></h2>
 
 # Introduction
 As part of a non-profit/volunteer contribution, this is the repository to a Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on interventional drug research with data exploration regarding familial (genetic) ALS/FTD.
