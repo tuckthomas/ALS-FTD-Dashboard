@@ -10,3 +10,14 @@ declare namespace JSX {
         };
     }
 }
+
+
+interface Window {
+    metabaseConfig: {
+        theme: {
+            preset: string;
+        };
+        isGuest: boolean;
+        instanceUrl: string;
+    };
+}

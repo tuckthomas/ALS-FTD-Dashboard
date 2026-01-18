@@ -22,9 +22,17 @@ router = Router()
 
 @router.get("/", tags=["ClinicalTrials.gov API Fetch; Updated Nightly"])
 def get_trials(request):
-    update_data()  # Update the database records first
+    # update_data()  # REMOVED: Blocking call caused 504 timeouts. Use /sync-trials instead.
     trials = get_serialized_trials()
     return trials
+
+@router.post("/sync-trials", tags=["Trigger Data Scrape (Manual/Cron)"])
+def sync_trials(request):
+    try:
+        update_data()
+        return JsonResponse({"message": "Data synchronization complete."})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @router.post("/AI-Eligibility-Descriptions", response=List[ProcessedCriteriaSchema], tags=["Testing Local AI's Classification of Eligibility Criteria"])
 def ai_eligibility_description(request):

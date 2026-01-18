@@ -389,8 +389,7 @@ def scrape_alsod_gene_list():
         last_update_date = None
 
     # Calculate the difference or set a default to proceed with scraping
-    # Calculate the difference or set a default to proceed with scraping
-    if last_update_date is None or (timezone.now().date() - last_update_date.date() >= timedelta(days=30)):
+    if Gene.objects.count() == 0 or last_update_date is None or (timezone.now().date() - last_update_date.date() >= timedelta(days=30)):
         url = "https://alsod.ac.uk/"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -835,15 +834,65 @@ def extract_list_items(text):
     
     return json.dumps(list_items, ensure_ascii=False)
 
+# JSON Schemas for Local LLM
+CRITERIA_SCHEMA = {
+    "name": "clinical_criteria",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "inclusion": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of inclusion criteria"
+            },
+            "exclusion": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of exclusion criteria"
+            }
+        },
+        "required": ["inclusion", "exclusion"],
+        "additionalProperties": False
+    }
+}
+
+FACILITY_SCHEMA = {
+    "name": "facility_location",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "city": {"type": "string"},
+            "zip_code": {"type": "string"},
+            "country": {"type": "string"},
+            "latitude": {"type": "number"},
+            "longitude": {"type": "number"}
+        },
+        "required": ["city", "zip_code", "country", "latitude", "longitude"],
+        "additionalProperties": False
+    }
+}
+
 def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
     llm_logger.info(f"Preparing to send data for unique_protocol_id: {unique_protocol_id}")
     
     api_key = os.environ.get("LLM_API_KEY")
+    base_url = os.environ.get("LLM_BASE_URL")
+    model_name = os.environ.get("LLM_MODEL")
+
+    # Priority: Check for Local LLM overrides
+    local_url = os.environ.get("LOCAL_LLM_URL")
+    if local_url:
+        llm_logger.info(f"Using Local LLM at {local_url}")
+        base_url = local_url
+        api_key = "lm-studio" # Dummy key for local
+        model_name = os.environ.get("LOCAL_LLM_MODEL", "local-model")
+
     if not api_key:
         llm_logger.error("❌ LLM_API_KEY not found in environment variables.")
         return {"inclusion": [], "exclusion": []}
 
-    base_url = os.environ.get("LLM_BASE_URL")
     if not base_url:
         llm_logger.error("❌ LLM_BASE_URL not found in environment variables.")
         return {"inclusion": [], "exclusion": []}
@@ -870,15 +919,23 @@ def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
     max_retries = 3
     base_delay = 20 # seconds
 
+    # Determine response format based on backend
+    resp_format = {"type": "json_object"}
+    if os.environ.get("LOCAL_LLM_URL"):
+        resp_format = {
+            "type": "json_schema",
+            "json_schema": CRITERIA_SCHEMA
+        }
+
     for attempt in range(max_retries):
         try:
             completion = client.chat.completions.create(
-                model=os.environ.get("LLM_MODEL"),
+                model=model_name,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that extracts clinical trial criteria as JSON."},
                     {"role": "user", "content": prompt}
                 ],
-                response_format={"type": "json_object"},
+                response_format=resp_format,
                 temperature=0.1,
                 max_tokens=4096
             )
@@ -888,8 +945,11 @@ def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
                 llm_logger.info(f"Extracted JSON for {unique_protocol_id} (snippet): {response_text[:100]}...")
                 
                 try:
+                    # Clean potential markdown formatting often returned by local models
+                    clean_json_text = response_text.replace("```json", "").replace("```", "").strip()
+                    
                     # Directly parse the JSON response
-                    data = json.loads(response_text)
+                    data = json.loads(clean_json_text)
                     
                     # Ensure the keys exist, defaulting to empty list if not
                     criteria_responses["inclusion"] = data.get("inclusion", [])
@@ -977,11 +1037,21 @@ def enrich_facility_data(facility, state):
     llm_logger.info(f"Preparing to enrich data for facility: {facility} in {state}")
 
     api_key = os.environ.get("LLM_API_KEY")
+    base_url = os.environ.get("LLM_BASE_URL")
+    model_name = os.environ.get("LLM_MODEL")
+
+    # Priority: Check for Local LLM overrides
+    local_url = os.environ.get("LOCAL_LLM_URL")
+    if local_url:
+        llm_logger.info(f"Using Local LLM at {local_url}")
+        base_url = local_url
+        api_key = "lm-studio"
+        model_name = os.environ.get("LOCAL_LLM_MODEL", "local-model")
+
     if not api_key:
         llm_logger.error("❌ LLM_API_KEY not found. Skipping facility enrichment.")
         return {}
 
-    base_url = os.environ.get("LLM_BASE_URL")
     if not base_url:
         llm_logger.error("❌ LLM_BASE_URL not found. Skipping facility enrichment.")
         return {}
@@ -1000,14 +1070,21 @@ def enrich_facility_data(facility, state):
         "JSON Response:"
     )
 
+    resp_format = {"type": "json_object"}
+    if os.environ.get("LOCAL_LLM_URL"):
+         resp_format = {
+            "type": "json_schema",
+            "json_schema": FACILITY_SCHEMA
+        }
+
     try:
         completion = client.chat.completions.create(
-            model=os.environ.get("LLM_MODEL"),
+            model=model_name,
             messages=[
                 {"role": "system", "content": "You are a helpful location assistant. Output valid JSON only."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
+            response_format=resp_format,
             temperature=0.1,
             max_tokens=1024
         )

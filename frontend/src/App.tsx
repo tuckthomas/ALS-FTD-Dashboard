@@ -8,6 +8,15 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    if (window.metabaseConfig && window.metabaseConfig.theme) {
+      window.metabaseConfig.theme.preset = newTheme;
+    }
+  };
 
   const handleGifLoad = () => {
     // Only start the timer once the GIF has actually loaded
@@ -52,7 +61,7 @@ function App() {
         </div>
       </div>
 
-      <MainLayout>
+      <MainLayout theme={theme} onThemeToggle={toggleTheme}>
         {error ? (
           <div className="flex h-full items-center justify-center p-8">
             <Card className="p-6 text-red-500 border-red-200 bg-red-50">
@@ -67,8 +76,9 @@ function App() {
                 Using createElement to bypass TypeScript IntrinsicElements check
              */}
             {React.createElement('metabase-dashboard', {
+              key: theme,
               token: token,
-              'with-title': 'true',
+              'with-title': 'false',
               'with-downloads': 'true',
               theme: 'transparent',
               style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }
