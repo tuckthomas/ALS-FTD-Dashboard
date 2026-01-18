@@ -5,7 +5,7 @@
 # Clinical Trial Research Dashboard
 > **Note**: This project is a work in progress.
 
-A comprehensive research dashboard focused on ALS/FTD interventional drug research, integrating automated data pipelines, a modern React frontend, and business intelligence analytics.
+A comprehensive research dashboard focused on ALS/FTD interventional drug research, integrating automated data pipelines, and data analytics.
 
 ## Introduction
 As part of a non-profit/volunteer contribution, this repository contains a Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on interventional drug research and familial (genetic) ALS/FTD data exploration.
