@@ -5,8 +5,16 @@ import axios from 'axios';
 
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleGifLoad = () => {
+    // Only start the timer once the GIF has actually loaded
+    setTimeout(() => {
+      setShowSplash(false);
+    }, 4500); // Increased display time
+  };
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -28,36 +36,47 @@ function App() {
   }, []);
 
   return (
-    <MainLayout>
-      {error ? (
-        <div className="flex h-full items-center justify-center p-8">
-          <Card className="p-6 text-red-500 border-red-200 bg-red-50">
-            <h3 className="font-bold">Analytics Error</h3>
-            <p>{error}</p>
-          </Card>
+    <>
+      <div
+        className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black ${showSplash ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ transition: 'opacity 5s ease-in-out' }}
+      >
+        <img
+          src="/f-als.gif"
+          alt="Loading..."
+          className="w-full max-w-4xl h-auto object-contain opacity-80"
+          onLoad={handleGifLoad}
+        />
+        <div className="text-slate-400 text-2xl font-light tracking-[0.2em] mt-8 uppercase animate-pulse">
+          Preparing your dashboard
         </div>
-      ) : token ? (
-        <div className="flex-1 w-full h-full bg-slate-50 relative">
+      </div>
 
-
-          {/* 
-              Metabase Web Component 
-              Using createElement to bypass TypeScript IntrinsicElements check
-           */}
-          {React.createElement('metabase-dashboard', {
-            token: token,
-            'with-title': 'true',
-            'with-downloads': 'true',
-            theme: 'transparent',
-            style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }
-          })}
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse text-slate-400">Loading Analytics...</div>
-        </div>
-      )}
-    </MainLayout>
+      <MainLayout>
+        {error ? (
+          <div className="flex h-full items-center justify-center p-8">
+            <Card className="p-6 text-red-500 border-red-200 bg-red-50">
+              <h3 className="font-bold">Analytics Error</h3>
+              <p>{error}</p>
+            </Card>
+          </div>
+        ) : token ? (
+          <div className="flex-1 w-full h-full bg-slate-50 relative">
+            {/* 
+                Metabase Web Component 
+                Using createElement to bypass TypeScript IntrinsicElements check
+             */}
+            {React.createElement('metabase-dashboard', {
+              token: token,
+              'with-title': 'true',
+              'with-downloads': 'true',
+              theme: 'transparent',
+              style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }
+            })}
+          </div>
+        ) : null}
+      </MainLayout>
+    </>
   )
 }
 
