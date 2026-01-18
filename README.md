@@ -3,7 +3,7 @@
 </p>
 
 # Clinical Trial Research Dashboard
-> **Note**: This project is a work in progress.
+> **Note**: This project is a work in progress. It was stagnant for nearly two years before I picked it up again effective 01/17/2026. There is a lot of work to do, but I am making progress.
 
 A comprehensive research dashboard focused on ALS/FTD interventional drug research, integrating automated data pipelines, and data analytics.
 
