@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALS/FTD Research Dashboard</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script defer src="https://dashboard.f-als.com/app/embed.js"></script>
+  <script>
+    function defineMetabaseConfig(config)
+    {
+      window.metabaseConfig = config;
+    }
+  </script>
+
+  <script>
+    defineMetabaseConfig({
+      "theme": {
+        "preset": "light"
+      },
+      "isGuest": true,
+      "instanceUrl": "https://dashboard.f-als.com"
+    });
+  </script>
+</body>
+
+</html>
