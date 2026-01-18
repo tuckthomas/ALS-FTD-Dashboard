@@ -1,0 +1,54 @@
+# .env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.docker_temp/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+.metabase.db.mv.db
+.metabase.db.trace.db
+metabase.db.mv.db
+metabase.db.trace.db

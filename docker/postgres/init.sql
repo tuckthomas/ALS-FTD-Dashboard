@@ -1,0 +1,2 @@
+CREATE DATABASE superset;
+CREATE DATABASE als_data;
