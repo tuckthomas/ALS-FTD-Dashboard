@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/public/f-als.gif" alt="fals-logo" width="200">
+  <img src="frontend/public/f-als-ftd-dashboard.png" alt="fals-logo" width="200">
 </p>
 
 # Clinical Trial Research Dashboard
