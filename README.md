@@ -3,7 +3,7 @@
 </p>
 
 # Clinical Trial Research Dashboard
-> **Note**: This project is a work in progress. It was stagnant for nearly two years before I picked it up again effective 01/17/2026. There is a lot of work to do, but I am making progress.
+> **Note**: This project is a work in progress. It was dormant for nearly two years before I picked it up again effective 01/17/2026. There is a lot of work to do, but I am making progress.
 
 A comprehensive research dashboard focused on ALS/FTD interventional drug research, integrating automated data pipelines, and data analytics.
 
@@ -13,11 +13,12 @@ As part of a non-profit/volunteer contribution, this repository contains a Dashb
 ### fALS: Personal Impact Summary
 Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.iamals.org/stories/tucker-olson-2/)
 
-If you appreciate this work and would like to suppport it, please remit donations to:
+If you appreciate this work and would like to suppport ALS research, please remit donations to:
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 - [I AM ALS](https://www.iamals.org/give/)
 
+If you are interested in my work on this or other projects, I am available for hire: tuckerolson13@gmail.com
 ---
 
 ## Technology Stack

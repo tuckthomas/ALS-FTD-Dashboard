@@ -66,6 +66,7 @@ class Trial(models.Model):
     clinical_trial_url = models.CharField(max_length=255, null=True, blank=True)
     study_location = models.JSONField(null=True, blank=True)
     genes = models.JSONField(null=True, blank=True)
+    related_genes = models.ManyToManyField(Gene, related_name='trials', blank=True)
     eligibility_criteria_generic_description = models.TextField(null=True, blank=True)
     eligibility_criteria_inclusion_description = models.JSONField(null=True, blank=True)
     eligibility_criteria_exclusion_description = models.JSONField(null=True, blank=True)

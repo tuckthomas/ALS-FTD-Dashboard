@@ -119,6 +119,23 @@ def update_data():
         )
         updated_trials += (1 if created else 0)
 
+        # Sync related_genes M2M field
+        if trial_defaults.get('genes'):
+            gene_symbols = trial_defaults['genes']
+            if isinstance(gene_symbols, list):
+                # match_genes returns a list of symbols (strings)
+                genes_to_link = Gene.objects.filter(gene_symbol__in=gene_symbols)
+                trial_obj.related_genes.set(genes_to_link)
+            elif isinstance(gene_symbols, str):
+                try:
+                    gene_list = json.loads(gene_symbols)
+                    if isinstance(gene_list, list):
+                         genes_to_link = Gene.objects.filter(gene_symbol__in=gene_list)
+                         trial_obj.related_genes.set(genes_to_link)
+                except:
+                    pass
+
+
         # Process intervention_name fields
         if 'intervention_name' in trial_defaults and trial_defaults['intervention_name']:
             for intervention_data in trial_defaults['intervention_name']:
@@ -905,15 +922,21 @@ def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
     criteria_responses = {"inclusion": [], "exclusion": []}
 
     # Enhanced Prompt for JSON Extraction
+    # Enhanced Prompt for JSON Extraction
     prompt = (
-        "You are a clinical trial data specialist. Extract and organize the eligibility criteria from the text below.\n"
-        "Output MUST be valid JSON with two keys: 'inclusion' (array of strings) and 'exclusion' (array of strings).\n"
+        "You are an expert Clinical Data Curator. Your task is to extract, clean, and structure eligibility criteria from the provided text.\n"
+        "The input text contains Inclusion and Exclusion criteria, often mixed or poorly formatted.\n\n"
         "Instructions:\n"
-        "1. Simplify complex sentences but keep all medical details.\n"
-        "2. If a section is missing, return an empty array for that key.\n"
-        "3. Do not include markdown formatting like ```json ... ```, just the raw JSON object.\n\n"
-        f"Eligibility Criteria Text:\n{eligibility_criteria}\n\n"
-        "JSON Response:"
+        "1. **Analyze** the text to clearly identify the boundary between 'Inclusion Criteria' and 'Exclusion Criteria'.\n"
+        "2. **Extract** each distinct criterion as a separate string in the respective array.\n"
+        "3. **Refine**: Process each criterion:\n"
+        "   - Remove bullet points, numbering (e.g., '1.', '-'), and extra whitespace.\n"
+        "   - Split long, complex paragraphs into individual, atomic requirements.\n"
+        "   - Simplify wording where possible without losing medical precision.\n"
+        "4. **Format**: Return ONLY valid JSON with keys 'inclusion' and 'exclusion'.\n"
+        "5. If a section is completely missing, return an empty array for that key.\n\n"
+        f"Input Text:\n{eligibility_criteria}\n\n"
+        "Structured JSON Response:"
     )
 
     max_retries = 3
