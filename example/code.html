@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interactive Trial Finder | ALS/FTD Research</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4f46e5","accent-blue": "#0ea5e9","accent-teal": "#2dd4bf","accent-purple": "#a855f7","background-light": "#f9fafb",
+                        "background-dark": "#0f172a","surface-dark": "#1e293b",
+                        "border-dark": "#334155",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --primary-color: #4f46e5;
+            --accent-blue: #0ea5e9;
+            --accent-teal: #2dd4bf;
+            --accent-purple: #a855f7;
+        }
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+        .logo-gradient-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 w-full border-b border-border-dark bg-background-dark/80 backdrop-blur-md px-6 py-3">
+<div class="max-w-[1600px] mx-auto flex items-center justify-between gap-8">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-3">
+<div class="logo-gradient-bg p-1.5 rounded-lg text-white flex items-center justify-center shadow-lg shadow-accent-blue/20">
+<span class="material-symbols-outlined text-2xl">genetics</span>
+</div>
+<h2 class="text-white text-xl font-bold tracking-tight uppercase">ALS/FTD <span class="logo-gradient-text">Trial Finder</span></h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-accent-blue text-sm font-medium border-b-2 border-accent-blue pb-1" href="#">Trial Finder</a>
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Gene Viewer</a>
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Resources</a>
+</nav>
+</div>
+<div class="flex items-center gap-6 flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full bg-surface-dark border-border-dark focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-lg pl-10 text-sm text-white placeholder:text-slate-500 py-2" placeholder="Search trials, drugs, or PIs..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-white hover:bg-surface-dark rounded-lg transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-9 w-9 rounded-full bg-accent-blue/20 border border-accent-blue/40 flex items-center justify-center text-accent-blue font-bold overflow-hidden">
+<img alt="User avatar researcher" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIWOh7h4aXDxcKrfZCzuIMXLxw4zVujjF07iU5cfLY-Csyz3badyXEOhNKqWh_ziohaBTJulTVU-u28-7rzqAXS7RDZvnxHgEu285OM7-CRe_2tuEQOXXLb5moIcPWpOCNUeCGKhjjajJub54-H8cQr4cNylZ2rNcq0vcQUtJGLhjLYC3UhUTUx0Sk9Yc7q23juBClifojVC2GUgMvsCPQG_k84E4agCJ4OmALiD-E6rz0PhlsLA22jhEtJQCl2bSzqyvg9Zae6rY"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 max-w-[1600px] mx-auto w-full gap-6 p-6 overflow-hidden">
+<aside class="w-72 flex-shrink-0 flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-blue">filter_list</span> Filters
+            </h3>
+<button class="text-xs text-accent-blue hover:text-accent-purple transition-colors font-medium">Reset All</button>
+</div>
+<div class="glass-panel p-4 rounded-xl space-y-3">
+<div class="flex items-center gap-2 text-slate-300 mb-2">
+<span class="material-symbols-outlined text-sm text-accent-teal">layers</span>
+<span class="text-xs font-bold uppercase tracking-wider">Clinical Phase</span>
+</div>
+<div class="space-y-1">
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-transparent text-accent-blue focus:ring-accent-blue focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">Phase I</span>
+</label>
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-transparent text-accent-blue focus:ring-accent-blue focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">Phase II</span>
+</label>
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input class="rounded border-border-dark bg-transparent text-accent-blue focus:ring-accent-blue focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">Phase III</span>
+</label>
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input class="rounded border-border-dark bg-transparent text-accent-blue focus:ring-accent-blue focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">Phase IV</span>
+</label>
+</div>
+</div>
+<div class="glass-panel p-4 rounded-xl space-y-3">
+<div class="flex items-center gap-2 text-slate-300 mb-2">
+<span class="material-symbols-outlined text-sm text-accent-purple">genetics</span>
+<span class="text-xs font-bold uppercase tracking-wider">Genetic Markers</span>
+</div>
+<div class="grid grid-cols-1 gap-1">
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-transparent text-accent-purple focus:ring-accent-purple focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">C9orf72 Mutation</span>
+</label>
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input class="rounded border-border-dark bg-transparent text-accent-purple focus:ring-accent-purple focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">SOD1 Mutation</span>
+</label>
+<label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+<input class="rounded border-border-dark bg-transparent text-accent-purple focus:ring-accent-purple focus:ring-offset-background-dark" type="checkbox"/>
+<span class="text-sm text-slate-300 group-hover:text-white transition-colors">Sporadic ALS</span>
+</label>
+</div>
+</div>
+<div class="glass-panel p-4 rounded-xl space-y-4">
+<div class="flex items-center gap-2 text-slate-300">
+<span class="material-symbols-outlined text-sm text-accent-blue">distance</span>
+<span class="text-xs font-bold uppercase tracking-wider">Location Radius</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between text-xs font-mono text-accent-blue">
+<span>0 mi</span>
+<span>500 mi</span>
+</div>
+<div class="relative h-1.5 bg-border-dark rounded-full">
+<div class="absolute inset-0 bg-accent-blue/30 rounded-full w-3/4"></div>
+<div class="absolute h-4 w-4 bg-accent-blue rounded-full -top-1.5 shadow-lg shadow-accent-blue/40 left-3/4 -translate-x-1/2 cursor-pointer border-2 border-white"></div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-[10px] text-slate-500 uppercase font-bold">Zip Code</label>
+<input class="bg-background-dark border-border-dark focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded px-2 py-1.5 text-xs text-white" placeholder="e.g. 02138" type="text"/>
+</div>
+</div>
+</div>
+<div class="glass-panel p-4 rounded-xl space-y-3">
+<div class="flex items-center gap-2 text-slate-300 mb-2">
+<span class="material-symbols-outlined text-sm text-accent-teal">monitoring</span>
+<span class="text-xs font-bold uppercase tracking-wider">Primary Outcome</span>
+</div>
+<select class="w-full bg-surface-dark border-border-dark focus:border-accent-teal focus:ring-1 focus:ring-accent-teal rounded-lg text-xs text-slate-300 py-2">
+<option>All Outcomes</option>
+<option>Survival Rate</option>
+<option>Functional Improvement</option>
+<option>Biomarker Reduction</option>
+<option>Safety/Tolerability</option>
+</select>
+</div>
+</aside>
+<main class="flex-1 flex flex-col gap-6 overflow-hidden">
+<div class="flex items-end justify-between">
+<div>
+<h1 class="text-3xl font-bold text-white tracking-tight">Clinical Studies</h1>
+<p class="text-slate-400 text-sm mt-1">Found <span class="text-accent-teal font-bold">42 active trials</span> matching your criteria</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-dark hover:bg-border-dark border border-border-dark rounded-lg text-sm text-white transition-all">
+<span class="material-symbols-outlined text-lg">download</span> Export CSV
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-accent-blue hover:bg-accent-blue/90 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-accent-blue/20">
+<span class="material-symbols-outlined text-lg">add</span> Submit Study
+                </button>
+</div>
+</div>
+<div class="flex-1 flex flex-col glass-panel rounded-xl overflow-hidden">
+<div class="overflow-x-auto custom-scrollbar flex-1">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-dark bg-white/5">
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Trial Title &amp; Identifier</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Status</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Phase</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Primary Focus</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Last Updated</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-dark/50">
+<tr class="group hover:bg-accent-blue/5 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-white group-hover:text-accent-blue transition-colors">Tofersen Long-term Extension in SOD1-ALS</span>
+<span class="text-[10px] font-mono text-slate-500 mt-1 uppercase">NCT02623699 | Biogen</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent-teal/20 text-accent-teal text-[10px] font-bold uppercase tracking-tighter">
+<span class="h-1.5 w-1.5 rounded-full bg-accent-teal animate-pulse"></span> Recruiting
+                                </span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-300 font-medium">Phase III</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400 bg-surface-dark px-2 py-0.5 rounded">Antisense Oligonucleotide</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400">Oct 12, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-blue transition-all">expand_more</span>
+</td>
+</tr>
+<tr class="bg-accent-blue/5 border-l-4 border-accent-blue">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-accent-blue">HEALEY ALS Platform Trial - Regimen G</span>
+<span class="text-[10px] font-mono text-slate-500 mt-1 uppercase">NCT04297683 | MGH Neurology</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent-teal/20 text-accent-teal text-[10px] font-bold uppercase tracking-tighter">
+<span class="h-1.5 w-1.5 rounded-full bg-accent-teal"></span> Recruiting
+                                </span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-300 font-medium">Phase II/III</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400 bg-surface-dark px-2 py-0.5 rounded">Platform Study</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400">Nov 04, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-accent-blue rotate-180">expand_more</span>
+</td>
+</tr>
+<tr class="bg-accent-blue/5">
+<td class="px-12 py-6 border-t border-accent-blue/20" colspan="6">
+<div class="grid grid-cols-3 gap-8">
+<div class="col-span-2 space-y-4">
+<h4 class="text-xs font-bold uppercase text-slate-500 tracking-widest">Study Summary</h4>
+<p class="text-sm text-slate-300 leading-relaxed">
+                                            This regimen evaluates the safety and efficacy of ABBV-CLS-726, a therapeutic antibody, in patients with Amyotrophic Lateral Sclerosis (ALS). The HEALEY ALS Platform Trial is designed to evaluate multiple investigational treatments simultaneously to accelerate the development of effective therapies.
+                                        </p>
+<div class="flex gap-4 pt-2">
+<button class="bg-accent-blue/20 hover:bg-accent-blue/30 text-accent-blue text-xs font-bold px-4 py-2 rounded-lg transition-colors border border-accent-blue/30">Detailed Protocol</button>
+<button class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors">Contact PI</button>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="text-xs font-bold uppercase text-slate-500 tracking-widest">Eligibility Highlight</h4>
+<ul class="space-y-2">
+<li class="flex items-start gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                                                Sporadic or Familial ALS diagnosis
+                                            </li>
+<li class="flex items-start gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                                                Symptoms onset &lt; 36 months
+                                            </li>
+<li class="flex items-start gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                                                SVC ≥ 50% of predicted
+                                            </li>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-accent-blue/5 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-white group-hover:text-accent-blue transition-colors">NurOwn® in ALS Patients - Phase III</span>
+<span class="text-[10px] font-mono text-slate-500 mt-1 uppercase">NCT03280056 | BrainStorm Cell Therapeutics</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-500/20 text-slate-400 text-[10px] font-bold uppercase tracking-tighter">
+                                    Active, Not Recruiting
+                                </span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-300 font-medium">Phase III</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400 bg-surface-dark px-2 py-0.5 rounded">Cell Therapy</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400">Sep 28, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-blue transition-all">expand_more</span>
+</td>
+</tr>
+<tr class="group hover:bg-accent-blue/5 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-white group-hover:text-accent-blue transition-colors">Study of Oral Edaravone in ALS</span>
+<span class="text-[10px] font-mono text-slate-500 mt-1 uppercase">NCT04165824 | Mitsubishi Tanabe</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent-blue/20 text-accent-blue text-[10px] font-bold uppercase tracking-tighter">
+                                    Completed
+                                </span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-300 font-medium">Phase III</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400 bg-surface-dark px-2 py-0.5 rounded">Small Molecule</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-400">Oct 30, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-blue transition-all">expand_more</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="border-t border-border-dark bg-white/5 px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="text-xs text-slate-500">Rows per page:</span>
+<select class="bg-surface-dark border-border-dark focus:border-accent-blue rounded text-xs text-slate-300 py-1">
+<option>10</option>
+<option selected="">25</option>
+<option>50</option>
+</select>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-xs text-slate-400">Page 1 of 4</span>
+<div class="flex gap-2">
+<button class="p-1.5 rounded border border-border-dark bg-surface-dark text-slate-500 cursor-not-allowed">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="p-1.5 rounded border border-border-dark bg-surface-dark text-white hover:bg-border-dark hover:text-accent-blue transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-8 right-8 z-50">
+<button class="flex items-center gap-2 bg-gradient-to-r from-accent-blue via-primary to-accent-purple text-white font-bold py-3 px-5 rounded-full shadow-2xl shadow-primary/40 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">smart_toy</span>
+            AI Research Assistant
+        </button>
+</div>
+</div>
+
+</body></html>

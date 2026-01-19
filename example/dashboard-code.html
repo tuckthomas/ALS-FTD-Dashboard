@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Data Analytics Dashboard Beta</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19c3e6",
+                        "accent-purple": "#9338db",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0e1315",
+                        "card-dark": "#1a2629",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(26, 38, 41, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(25, 195, 230, 0.1);
+        }
+        .marker-gradient {
+            background: linear-gradient(135deg, rgba(25, 195, 230, 0.1) 0%, rgba(147, 56, 219, 0.05) 100%);
+        }
+        .map-glow {
+            filter: drop-shadow(0 0 15px rgba(25, 195, 230, 0.3));
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 border-b border-primary/10 bg-background-dark/80 backdrop-blur-md px-6 py-3">
+<div class="max-w-[1600px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary text-2xl">biotech</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight flex items-center gap-2">
+                            Clinical Data Analytics
+                            <span class="bg-primary/10 text-primary text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-primary/20">Beta</span>
+</h1>
+<p class="text-xs text-slate-500 font-medium">ALS/FTD Research Consortium v2.4</p>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-6 ml-10">
+<a class="text-sm font-medium text-primary border-b-2 border-primary pb-1" href="#">Dashboard</a>
+<a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#">Global Trials</a>
+<a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#">Genetic Mapping</a>
+<a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#">Cohort Builder</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+<input class="bg-card-dark border border-primary/10 rounded-lg pl-10 pr-4 py-1.5 text-xs w-64 focus:ring-1 focus:ring-primary focus:outline-none" placeholder="Quick Trial Search..." type="text"/>
+</div>
+<button class="p-2 hover:bg-primary/10 rounded-lg text-slate-400">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-accent-purple p-0.5">
+<div class="h-full w-full rounded-full bg-background-dark bg-cover bg-center" data-alt="User profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDEAXmUlS-zwWoPgMgQZK6YI2mo_8MQttztjPTdFdWVhn9g77W0g-XN5t-yAwKOFQEtgu8yoPZU0H27Ors7Audpe7VuJD7Q09QCwYR8_DfFFbu0EC2iH1z6ALNda6e5I1NJ3zy8HvZZLtN2ZbxlqY-3fGl7UazU5Ic-rXbf1j74OD1ivid9vJ9qnRvFicBz_aR5PVDFf2Q1lmT4DBdf-7EuyBpOjWDcDboWkh971p2a2LC_ETmZOIESxGVbZoz-BuyB-DOI102ckbQ')"></div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1600px] mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Main Stage (Left 9 columns) -->
+<div class="lg:col-span-9 space-y-6">
+<!-- Stats Bar -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="glass-panel p-5 rounded-xl">
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Trials Observed</p>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-3xl font-bold">1,284</span>
+<span class="text-emerald-400 text-xs font-medium mb-1">+5.2%</span>
+</div>
+</div>
+<div class="glass-panel p-5 rounded-xl">
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Participants</p>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-3xl font-bold">42.5k</span>
+<span class="text-emerald-400 text-xs font-medium mb-1">+12.8%</span>
+</div>
+</div>
+<div class="glass-panel p-5 rounded-xl">
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Clinical Sites</p>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-3xl font-bold">892</span>
+<span class="text-slate-500 text-xs font-medium mb-1">Stable</span>
+</div>
+</div>
+<div class="glass-panel p-5 rounded-xl">
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Avg. Enrollment</p>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-3xl font-bold">84%</span>
+<span class="text-rose-400 text-xs font-medium mb-1">-2.1%</span>
+</div>
+</div>
+</div>
+<!-- Complex Charts Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Trial Status Donut -->
+<div class="glass-panel p-6 rounded-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-lg font-bold">Trial Status Distribution</h3>
+<p class="text-slate-500 text-xs">Current operational phases across global registry</p>
+</div>
+<span class="material-symbols-outlined text-slate-500">info</span>
+</div>
+<div class="flex items-center justify-around h-64">
+<div class="relative size-48">
+<svg class="size-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-slate-800" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<!-- Recruiting -->
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="100.48" stroke-width="8"></circle>
+<!-- Active -->
+<circle class="text-accent-purple/60" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="180.86" stroke-width="8"></circle>
+<!-- Completed -->
+<circle class="text-emerald-500/40" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="220.12" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-bold">1,284</span>
+<span class="text-[10px] text-slate-500 uppercase">Total Trials</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-primary"></div>
+<span class="text-xs text-slate-300">Recruiting (42%)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-accent-purple/60"></div>
+<span class="text-xs text-slate-300">Active (32%)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-emerald-500/40"></div>
+<span class="text-xs text-slate-300">Completed (16%)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-slate-700"></div>
+<span class="text-xs text-slate-300">Withdrawn (10%)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Funding Sources Bar Chart -->
+<div class="glass-panel p-6 rounded-xl">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-lg font-bold">Primary Funding Sources</h3>
+<p class="text-slate-500 text-xs">Analysis of capital injection by sector</p>
+</div>
+<button class="text-primary text-xs font-semibold hover:underline">Export CSV</button>
+</div>
+<div class="space-y-6 pt-4">
+<div class="space-y-2">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-300">NIH / Federal</span>
+<span class="font-bold">42%</span>
+</div>
+<div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary/40 to-primary rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-300">Industry (Pharma)</span>
+<span class="font-bold">38%</span>
+</div>
+<div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-accent-purple/40 to-accent-purple rounded-full" style="width: 38%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-300">Academic / Foundations</span>
+<span class="font-bold">14%</span>
+</div>
+<div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/20 rounded-full" style="width: 14%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-300">Philanthropic</span>
+<span class="font-bold">6%</span>
+</div>
+<div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-slate-600 rounded-full" style="width: 6%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Geographic Density Map -->
+<div class="glass-panel p-6 rounded-xl relative overflow-hidden h-[400px]">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent-purple/5 pointer-events-none"></div>
+<div class="relative z-10 flex justify-between items-center mb-4">
+<div>
+<h3 class="text-lg font-bold">Global Trial Density Map</h3>
+<p class="text-slate-500 text-xs">Geographic hotspots for recruiting Phase III trials</p>
+</div>
+<div class="flex gap-2">
+<div class="flex items-center gap-1.5 bg-background-dark/60 px-3 py-1 rounded border border-primary/10">
+<div class="size-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] text-slate-300 uppercase tracking-tighter">High Density</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center h-full pb-10">
+<div class="relative w-full max-w-3xl aspect-[2/1] bg-center bg-no-repeat bg-contain map-glow" data-alt="Abstract world map with clinical trial density hotspots in teal" data-location="World Map" style="background-image: url('https://placeholder.pics/svg/300')">
+<!-- Simulated Hotspots -->
+<div class="absolute top-[30%] left-[20%] size-12 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
+<div class="absolute top-[30%] left-[22%] size-3 bg-primary rounded-full shadow-[0_0_10px_#19c3e6]"></div>
+<div class="absolute top-[25%] left-[50%] size-8 bg-accent-purple/20 rounded-full blur-lg"></div>
+<div class="absolute top-[26%] left-[51%] size-2 bg-accent-purple rounded-full shadow-[0_0_10px_#9338db]"></div>
+<div class="absolute top-[40%] left-[80%] size-16 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="absolute top-[42%] left-[82%] size-3 bg-primary rounded-full shadow-[0_0_10px_#19c3e6]"></div>
+</div>
+</div>
+<div class="absolute bottom-6 left-6 flex gap-8">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase tracking-widest">North America</span>
+<span class="text-sm font-bold">542 Trials</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase tracking-widest">Europe</span>
+<span class="text-sm font-bold">411 Trials</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase tracking-widest">Asia Pacific</span>
+<span class="text-sm font-bold">298 Trials</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar (Right 3 columns) -->
+<aside class="lg:col-span-3 space-y-6">
+<!-- Quick Trial Search Widget -->
+<div class="glass-panel p-6 rounded-xl marker-gradient">
+<h3 class="text-md font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">search_spark</span>
+                    Trial Discovery
+                </h3>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Molecular Target</label>
+<select class="w-full bg-background-dark border border-primary/20 rounded-lg py-2 px-3 text-sm text-slate-300 focus:ring-primary focus:border-primary">
+<option>All Markers</option>
+<option>SOD1</option>
+<option>C9orf72</option>
+<option>TARDBP</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Trial Phase</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 bg-primary/10 border border-primary/20 rounded text-xs font-medium text-primary">Phase II</button>
+<button class="py-2 px-3 bg-background-dark border border-white/5 rounded text-xs font-medium text-slate-400 hover:border-primary/40 transition-colors">Phase III</button>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary text-background-dark font-bold rounded-lg text-sm mt-2 hover:bg-white transition-all shadow-lg shadow-primary/20">
+                        Generate Report
+                    </button>
+</div>
+</div>
+<!-- Trending Genetic Markers -->
+<div class="glass-panel p-6 rounded-xl">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-md font-bold">Genetic Markers</h3>
+<span class="material-symbols-outlined text-slate-500 text-lg">trending_up</span>
+</div>
+<div class="space-y-3">
+<!-- Marker Item -->
+<div class="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-sm font-bold tracking-tight text-primary">C9orf72</span>
+<span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">+12%</span>
+</div>
+<p class="text-[10px] text-slate-500 leading-tight">Hexanucleotide repeat expansions. Most common genetic cause of ALS.</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">science</span>
+<span class="text-[10px] text-slate-400">42 Trials</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">link</span>
+<span class="text-[10px] text-slate-400">8 Drugs</span>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-sm font-bold tracking-tight text-white">SOD1</span>
+<span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">+8%</span>
+</div>
+<p class="text-[10px] text-slate-500 leading-tight">Superoxide dismutase 1. Classic target for antisense therapies.</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">science</span>
+<span class="text-[10px] text-slate-400">28 Trials</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">link</span>
+<span class="text-[10px] text-slate-400">5 Drugs</span>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-sm font-bold tracking-tight text-white">TARDBP</span>
+<span class="text-[10px] font-bold text-slate-500 bg-slate-500/10 px-1.5 py-0.5 rounded">STABLE</span>
+</div>
+<p class="text-[10px] text-slate-500 leading-tight">TDP-43 pathology. Critical for non-genetic ALS forms.</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">science</span>
+<span class="text-[10px] text-slate-400">15 Trials</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">link</span>
+<span class="text-[10px] text-slate-400">3 Drugs</span>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-sm font-bold tracking-tight text-white">FUS</span>
+<span class="text-[10px] font-bold text-rose-400 bg-rose-400/10 px-1.5 py-0.5 rounded">-2%</span>
+</div>
+<p class="text-[10px] text-slate-500 leading-tight">Fused in Sarcoma. Emerging early-onset juvenile variant.</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">science</span>
+<span class="text-[10px] text-slate-400">12 Trials</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-slate-500">link</span>
+<span class="text-[10px] text-slate-400">2 Drugs</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-xs font-semibold text-slate-500 hover:text-primary transition-colors flex items-center justify-center gap-2">
+                    View All Markers
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Real-time Feed -->
+<div class="glass-panel p-5 rounded-xl">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Live Updates</h3>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="mt-1 size-1.5 rounded-full bg-emerald-400 shrink-0"></div>
+<p class="text-xs text-slate-300 leading-relaxed">
+<span class="font-bold text-white">NCT04849741</span> transitioned to Phase III recruiting in Tokyo site.
+                        </p>
+</div>
+<div class="flex gap-3">
+<div class="mt-1 size-1.5 rounded-full bg-primary shrink-0"></div>
+<p class="text-xs text-slate-300 leading-relaxed">
+                            New industry partner <span class="font-bold text-white">NeuroGenix</span> added for SOD1 study.
+                        </p>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Footer Stats Layer -->
+<footer class="max-w-[1600px] mx-auto px-6 py-8 border-t border-primary/5 mt-6 mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-8">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">System Health</span>
+<span class="text-xs text-emerald-400 font-medium">Nominal / 99.9% Sync</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Last Data Ingest</span>
+<span class="text-xs text-slate-300 font-medium">14 mins ago</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="px-4 py-2 rounded-lg border border-primary/10 bg-primary/5 text-primary text-xs font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                Secure Environment
+            </div>
+<div class="px-4 py-2 rounded-lg border border-white/5 bg-white/5 text-slate-400 text-xs font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+                API access
+            </div>
+</div>
+</footer>
+</body></html>
