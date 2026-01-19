@@ -27,6 +27,7 @@ import csv
 from io import StringIO
 import logging
 import time
+import duckdb
 
 # Configure Logging
 log_dir = os.path.join(settings.BASE_DIR, 'logs')
@@ -39,6 +40,36 @@ file_handler = logging.FileHandler(os.path.join(log_dir, 'llm_classification.log
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 llm_logger.addHandler(file_handler)
+
+def run_analytical_query(query: str):
+    """
+    Executes an analytical query using DuckDB against the Postgres database.
+    """
+    try:
+        # Connect to an in-memory DuckDB
+        con = duckdb.connect(database=':memory:')
+        
+        # Install and load the postgres extension for DuckDB
+        con.sql("INSTALL postgres; LOAD postgres;")
+        
+        # Construct connection string from Django settings
+        db_settings = settings.DATABASES['default']
+        conn_str = f"dbname={db_settings['NAME']} user={db_settings['USER']} password={db_settings['PASSWORD']} host={db_settings['HOST']} port={db_settings['PORT']}"
+        
+        # Attach Postgres
+        con.sql(f"ATTACH '{conn_str}' AS db (TYPE POSTGRES);")
+        
+        # Execute Query
+        # Note: The query should reference tables as db.public.table_name or similar logic
+        # We can set the search path or just expect the user to qualify
+        con.sql("USE db;") 
+        
+        result_df = con.sql(query).df()
+        return result_df
+    except Exception as e:
+        print(f"DuckDB Query Error: {e}")
+        return pd.DataFrame()
+
 
 
 # This function is designed to update the database with trial and gene data.

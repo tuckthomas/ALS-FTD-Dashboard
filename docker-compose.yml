@@ -29,7 +29,10 @@ services:
   # PostgreSQL (Unified Database: Superset + App)
   # ---------------------------------------------------------------------------
   db:
-    image: postgres:latest
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile.db
+    # image: postgres:latest
     container_name: postgres_db
     ports:
       - "${POSTGRES_PORT}:5432"

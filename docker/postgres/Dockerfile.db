@@ -1,0 +1,20 @@
+FROM postgres:latest
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-server-dev-all \
+    postgresql-common \
+    make \
+    gcc \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build pgvector
+RUN cd /tmp && \
+    git clone https://github.com/pgvector/pgvector.git && \
+    cd pgvector && \
+    make && \
+    make install
+
+# Cleanup
+RUN rm -rf /tmp/pgvector

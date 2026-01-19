@@ -56,7 +56,7 @@ function App() {
           className="w-full max-w-4xl h-auto object-contain opacity-80"
           onLoad={handleGifLoad}
         />
-        <div className="text-slate-400 text-2xl font-light tracking-[0.2em] mt-8 uppercase animate-pulse">
+        <div className="text-slate-400 text-2xl font-light tracking-[0.2em] mt-8 uppercase animate-pulse text-center px-4">
           Preparing your dashboard
         </div>
       </div>
