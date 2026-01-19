@@ -19,6 +19,7 @@ If you appreciate this work and would like to suppport ALS research, please remi
 - [I AM ALS](https://www.iamals.org/give/)
 
 If you are interested in my work on this or other projects, I am available for hire: tuckerolson13@gmail.com
+
 ---
 
 ## Technology Stack
