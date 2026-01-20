@@ -11,7 +11,7 @@ import {
     SortingState,
     OnChangeFn,
 } from "@tanstack/react-table"
-import { ChevronDown, ChevronUp, ChevronsUpDown, Loader2, Search, SlidersHorizontal } from "lucide-react"
+import { ChevronDown, ChevronRight, ChevronUp, ChevronsUpDown, Loader2, Search, SlidersHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -94,33 +94,79 @@ export function DataTable<TData, TValue>({
         return () => observer.disconnect()
     }, [hasMore, isLoading, onLoadMore])
 
-    // Add selection column if selectable
-    const allColumns = React.useMemo(() => {
-        if (!selectable) return columns
+    // Toggle expansion handler
+    const toggleRowExpanded = React.useCallback((rowId: string) => {
+        setExpandedRows((prev) => ({
+            ...prev,
+            [rowId]: !prev[rowId],
+        }))
+    }, [])
 
-        const selectColumn: ColumnDef<TData, TValue> = {
-            id: "select",
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-                    aria-label="Select row"
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
+    // Add selection and expander columns
+    const allColumns = React.useMemo(() => {
+        let finalColumns = [...columns]
+
+        // Add Expander Column if expandedContent is provided
+        if (expandedContent) {
+            const expanderColumn: ColumnDef<TData, TValue> = {
+                id: "expander",
+                header: () => null,
+                size: 40,
+                enableSorting: false,
+                enableHiding: false,
+                cell: ({ row }) => {
+                    const rowId = (row.original as { id?: string })?.id || row.id
+                    const isExpanded = expandedRows[rowId]
+                    
+                    return (
+                        <div className="flex items-center justify-center w-full">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleRowExpanded(rowId)
+                                }}
+                                className="transition-colors group"
+                            >
+                                <ChevronRight 
+                                    className={cn(
+                                        "h-6 w-6 text-muted-foreground transition-all duration-200 group-hover:text-primary",
+                                        isExpanded && "rotate-90 text-primary"
+                                    )} 
+                                />
+                            </button>
+                        </div>
+                    )
+                },
+            }
+            finalColumns = [expanderColumn, ...finalColumns]
         }
 
-        return [selectColumn, ...columns]
-    }, [columns, selectable])
+        if (selectable) {
+            const selectColumn: ColumnDef<TData, TValue> = {
+                id: "select",
+                header: ({ table }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+                        aria-label="Select row"
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            }
+            finalColumns = [selectColumn, ...finalColumns]
+        }
+
+        return finalColumns
+    }, [columns, selectable, expandedContent, expandedRows, toggleRowExpanded])
 
     const table = useReactTable({
         data,
@@ -144,13 +190,6 @@ export function DataTable<TData, TValue>({
         },
     })
 
-    const toggleRowExpanded = (rowId: string) => {
-        setExpandedRows((prev) => ({
-            ...prev,
-            [rowId]: !prev[rowId],
-        }))
-    }
-
     return (
         <div className={cn("flex flex-col gap-4", className)}>
             {/* Toolbar */}
@@ -164,7 +203,7 @@ export function DataTable<TData, TValue>({
                         className="pl-10 bg-white dark:bg-secondary/50 border-border focus:border-primary text-foreground"
                     />
                 </div>
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                         <button className="flex items-center gap-2 px-3 py-2 bg-secondary/50 border border-border rounded-lg text-sm text-foreground hover:bg-secondary transition-colors">
                             <SlidersHorizontal className="h-4 w-4" />
@@ -199,13 +238,17 @@ export function DataTable<TData, TValue>({
                                     {headerGroup.headers.map((header) => (
                                         <TableHead
                                             key={header.id}
-                                            className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+                                            className={cn(
+                                                "text-xs font-bold uppercase tracking-widest text-muted-foreground",
+                                                header.id !== "title" && "text-center"
+                                            )}
                                             style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                                         >
                                             {header.isPlaceholder ? null : (
                                                 <div
                                                     className={cn(
                                                         "flex items-center gap-2",
+                                                        header.id !== "title" && "justify-center",
                                                         header.column.getCanSort() && "cursor-pointer select-none hover:text-foreground"
                                                     )}
                                                     onClick={header.column.getToggleSortingHandler()}
@@ -251,7 +294,7 @@ export function DataTable<TData, TValue>({
                                                 }}
                                             >
                                                 {row.getVisibleCells().map((cell) => (
-                                                    <TableCell key={cell.id} className="text-foreground">
+                                                    <TableCell key={cell.id} className={cn("text-foreground", cell.column.id !== "title" && "text-center")}>
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 ))}

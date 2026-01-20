@@ -1,4 +1,4 @@
-import { TrendingUp, FlaskConical, Link, ArrowRight } from 'lucide-react';
+import { TrendingUp, FlaskConical, Link, ArrowRight, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface GeneticMarker {
@@ -50,19 +50,9 @@ export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
 
     const markerData = markers || defaultMarkers;
 
-    const getTrendStyles = (direction: 'up' | 'down' | 'stable') => {
-        switch (direction) {
-            case 'up':
-                return 'text-emerald-400 bg-emerald-400/10';
-            case 'down':
-                return 'text-rose-400 bg-rose-400/10';
-            default:
-                return 'text-muted-foreground bg-secondary';
-        }
-    };
 
-    const handleDrugClick = (e: React.MouseEvent, geneName: string) => {
-        e.stopPropagation();
+
+    const handleMarkerClick = (geneName: string) => {
         navigate(`/trials?gene=${encodeURIComponent(geneName)}`);
     };
 
@@ -77,31 +67,31 @@ export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
                 {markerData.map((marker) => (
                     <div
                         key={marker.name}
-                        className="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all"
+                        className="group cursor-pointer rounded-lg border border-primary/20 bg-slate-100 dark:bg-primary/5 transition-all flex items-stretch shadow-sm hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 relative hover:z-10"
+                        onClick={() => handleMarkerClick(marker.name)}
                     >
-                        <div className="flex justify-between items-start mb-1">
-                            <span className={`text-sm font-bold tracking-tight ${marker.isPrimary ? 'text-primary' : 'text-foreground'}`}>
-                                {marker.name}
-                            </span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getTrendStyles(marker.trend.direction)}`}>
-                                {marker.trend.value}
-                            </span>
+                        <div className="flex-1 p-3">
+                            <div className="flex justify-between items-start mb-1">
+                                <span className={`text-sm font-bold tracking-tight ${marker.isPrimary ? 'text-primary' : 'text-foreground'}`}>
+                                    {marker.name}
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-tight">
+                                {marker.description}
+                            </p>
+                            <div className="flex items-center gap-4 mt-2">
+                                <div className="flex items-center gap-1">
+                                    <FlaskConical className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-[10px] text-muted-foreground">{marker.trials} Trials</span>
+                                </div>
+                                <div className="flex items-center gap-1 transition-colors">
+                                    <Link className="h-3 w-3 text-muted-foreground transition-colors" />
+                                    <span className="text-[10px] text-muted-foreground transition-colors">{marker.drugs} Drugs</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-[10px] text-muted-foreground leading-tight">
-                            {marker.description}
-                        </p>
-                        <div className="flex items-center gap-4 mt-2">
-                            <div className="flex items-center gap-1">
-                                <FlaskConical className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-[10px] text-muted-foreground">{marker.trials} Trials</span>
-                            </div>
-                            <div
-                                className="flex items-center gap-1 cursor-pointer transition-colors"
-                                onClick={(e) => handleDrugClick(e, marker.name)}
-                            >
-                                <Link className="h-3 w-3 text-muted-foreground transition-colors" />
-                                <span className="text-[10px] text-muted-foreground transition-colors">{marker.drugs} Drugs</span>
-                            </div>
+                        <div className="flex items-center justify-center px-2">
+                            <ChevronRight className="h-6 w-6 text-muted-foreground/50 group-hover:text-primary transition-all group-hover:translate-x-1 stroke-[3]" />
                         </div>
                     </div>
                 ))}

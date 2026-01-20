@@ -1,18 +1,23 @@
-import { Github, Database, Activity, Search } from 'lucide-react';
+import { Github, Database, Activity, Search, Info } from 'lucide-react';
 
 export function AboutPage() {
     return (
         <div className="max-w-[1000px] mx-auto p-6 space-y-12">
 
             {/* Hero Section */}
-            <div className="text-center space-y-4 py-8">
-                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                    <span className="logo-gradient-text">Familial ALS & FTD</span> Research Analytics
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    A specialized analytics platform focused on tracking clinical trials for familial
-                    (genetic/hereditary) forms of Amyotrophic Lateral Sclerosis and Frontotemporal Dementia.
-                </p>
+            <div className="flex items-center gap-6 py-8">
+                <div className="p-3 bg-primary/10 rounded-xl shrink-0">
+                    <Info className="h-10 w-10 text-primary" />
+                </div>
+                <div className="space-y-2">
+                    <h1 className="text-4xl font-bold tracking-tight logo-gradient-text sm:text-5xl">
+                        Familial ALS & FTD Research Analytics
+                    </h1>
+                    <p className="text-lg text-muted-foreground italic">
+                        A specialized analytics platform focused on tracking clinical trials for familial
+                        (genetic/hereditary) forms of Amyotrophic Lateral Sclerosis and Frontotemporal Dementia.
+                    </p>
+                </div>
             </div>
 
             {/* Mission Grid */}

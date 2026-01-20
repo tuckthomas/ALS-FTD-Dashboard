@@ -107,3 +107,45 @@ class HealeyTrial(models.Model):
     def __str__(self):
         return f"{self.facility}, {self.state}, {self.country}"
 
+# User Contact/Feedback Submissions
+class ContactSubmission(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.subject} - {self.email}"
+
+# Issue/Bug Reports
+class IssueReport(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    steps_to_reproduce = models.TextField(blank=True, null=True)
+    browser_info = models.CharField(max_length=255, blank=True, null=True)
+    reported_by = models.EmailField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, default='open') # open, in_progress, resolved
+
+    def __str__(self):
+        return self.title
+
+# ALS/FTD News Articles
+class NewsArticle(models.Model):
+    title = models.CharField(max_length=500)
+    summary = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True) # Full content if available
+    source_name = models.CharField(max_length=255) # e.g., "ALS News Today", "Nature"
+    url = models.URLField(unique=True)
+    image_url = models.URLField(blank=True, null=True)
+    publication_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    tags = models.JSONField(default=list, blank=True) # e.g., ["Research", "Clinical Trial", "ALS"]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-publication_date']
+

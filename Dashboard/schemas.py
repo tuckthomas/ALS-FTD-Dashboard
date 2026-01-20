@@ -169,3 +169,29 @@ class HealeyTrialSchema(BaseModel):
     state: Optional[str] = None
     enrollment_status: Optional[str] = None
     trial_contact_info: List[HealeyContactInfoSchema]
+
+class ContactSubmissionSchema(BaseModel):
+    name: str
+    email: str
+    subject: str
+    message: str
+
+class IssueReportSchema(BaseModel):
+    title: str
+    description: str
+    steps_to_reproduce: Optional[str] = None
+    browser_info: Optional[str] = None
+    reported_by: Optional[str] = None # Email address
+
+class NewsArticleSchema(BaseModel):
+    id: int
+    title: str
+    summary: Optional[str] = None
+    source_name: str
+    url: str
+    image_url: Optional[str] = None
+    publication_date: datetime
+    tags: List[str] = []
+
+    class Config:
+        from_attributes = True

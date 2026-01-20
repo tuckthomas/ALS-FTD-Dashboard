@@ -71,6 +71,7 @@ export function TrialsByYearChart({ data: propData, filters }: TrialsByYearChart
                             dy={10}
                         />
                         <YAxis
+                            width={40}
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}

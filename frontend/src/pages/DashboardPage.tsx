@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Activity, History } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 import { TrialStatusChart } from '../components/dashboard/TrialStatusChart';
 import { FundingSourcesChart } from '../components/dashboard/FundingSourcesChart';
@@ -52,6 +53,7 @@ interface DashboardPackage {
     gene_data: GeneData[];
     year_data: any[];
     map_data: any[];
+    news_data: any[];
 }
 
 export function DashboardPage() {
@@ -117,8 +119,21 @@ export function DashboardPage() {
                 <div className="lg:col-span-9 space-y-6">
                     {/* Section: Current Landscape */}
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold text-foreground tracking-tight">Current Landscape</h2>
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Activity className="h-8 w-8 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-semibold text-foreground tracking-tight">
+                                        Current Landscape
+                                    </h2>
+                                    <p className="text-muted-foreground italic text-sm">
+                                        Real-time overview of active clinical trials and global research sites.
+                                    </p>
+                                </div>
+                            </div>
+                            
                             <div className="flex items-center space-x-2">
                                 <span className={`text-sm font-medium ${!isFamilial ? 'text-foreground' : 'text-muted-foreground'}`}>All</span>
                                 <Switch checked={isFamilial} onCheckedChange={setIsFamilial} />
@@ -156,7 +171,19 @@ export function DashboardPage() {
 
                     {/* Section: Historical Trends */}
                     <div className="space-y-4 pt-4">
-                        <h2 className="text-xl font-semibold text-foreground tracking-tight">Historical Trends</h2>
+                        <div className="flex items-center gap-4">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <History className="h-8 w-8 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold text-foreground tracking-tight">
+                                    Historical Trends
+                                </h2>
+                                <p className="text-muted-foreground italic text-sm">
+                                    Long-term analysis of trial volume, funding sources, and enrollment data.
+                                </p>
+                            </div>
+                        </div>
 
                         {/* Historical Stats Bar */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -205,7 +232,7 @@ export function DashboardPage() {
                         trials: g.trials,
                         drugs: g.drugs,
                     }))} />
-                    <LiveUpdatesWidget />
+                    <LiveUpdatesWidget news={currentData.news_data} />
                 </aside>
             </div>
         </div>

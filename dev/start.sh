@@ -8,24 +8,6 @@ echo "Starting ALS/FTD Research Dashboard Development Environment..."
 # Ensure logs directory exists
 mkdir -p logs
 
-# Function to kill process on port
-kill_port() {
-    PORT=$1
-    PID=$(lsof -ti :$PORT)
-    if [ ! -z "$PID" ]; then
-        echo "Port $PORT is in use by PID $PID. Killing..."
-        kill -9 $PID
-    fi
-}
-
-# Cleanup existing processes
-echo "Checking for existing processes..."
-kill_port 8000
-kill_port 5173
-kill_port 3000
-kill_port 6379
-
-
 # 1. Start Docker Containers
 echo "Starting Docker containers (Postgres, Redis, Adminer)..."
 docker-compose up -d
@@ -36,13 +18,12 @@ fi
 echo "Docker containers are up."
 
 
-
 # Function to kill background processes on script exit
 cleanup() {
     echo ""
     echo "Stopping servers..."
-    kill $DJANGO_PID 2>/dev/null
-    kill $FRONTEND_PID 2>/dev/null
+    if [ ! -z "$DJANGO_PID" ]; then kill $DJANGO_PID 2>/dev/null; fi
+    if [ ! -z "$FRONTEND_PID" ]; then kill $FRONTEND_PID 2>/dev/null; fi
     exit
 }
 
@@ -51,13 +32,28 @@ trap cleanup SIGINT
 
 # 2. Start Django Backend
 echo "Starting Django Backend (0.0.0.0:8000)..."
-# Using 0.0.0.0 to ensure accessibility if running on a remote server/VM
+
+# Force kill any process holding port 8000
+PID_8000=$(lsof -ti :8000)
+if [ ! -z "$PID_8000" ]; then
+    echo "Freeing port 8000 (PID $PID_8000)..."
+    kill -9 $PID_8000 2>/dev/null
+fi
+
 # Redirect output to console log
 python3 manage.py runserver 0.0.0.0:8000 2>&1 | tee logs/console.log &
 DJANGO_PID=$!
 
 # 3. Start React Frontend
 echo "Starting React Frontend..."
+
+# Force kill any process holding port 5173
+PID_5173=$(lsof -ti :5173)
+if [ ! -z "$PID_5173" ]; then
+    echo "Freeing port 5173 (PID $PID_5173)..."
+    kill -9 $PID_5173 2>/dev/null
+fi
+
 cd frontend
 # Using --host to ensure accessibility
 # Append output to console log
@@ -74,6 +70,5 @@ echo "   - Metabase:   http://localhost:3000"
 echo ""
 echo "Press Ctrl+C to stop servers."
 
-# Wait for processes using the `wait` command, 
-# but simply waiting on PIDs allows the trap to catch SIGINT immediately.
+# Wait for processes
 wait $DJANGO_PID $FRONTEND_PID

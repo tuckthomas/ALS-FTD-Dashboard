@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ColumnDef, SortingState } from '@tanstack/react-table';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, MapPin, User, Calendar, Info } from 'lucide-react';
 import axios from 'axios';
 import { DataTable } from '@/components/ui/data-table';
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface Trial {
     id: string;
@@ -19,6 +21,10 @@ interface Trial {
     url?: string;
     genes?: string[];
     interventionTypes?: string[];
+    startDate?: string;
+    completionDate?: string;
+    locations?: any[];
+    investigator?: string;
 }
 
 interface TrialsTableProps {
@@ -30,6 +36,7 @@ interface TrialsTableProps {
         interventionTypes?: string[];
         search?: string;
     };
+    onDataUpdate?: (data: Trial[]) => void;
 }
 
 const statusStyles: Record<string, string> = {
@@ -89,12 +96,14 @@ const columns: ColumnDef<Trial>[] = [
             };
             const showIndicator = ['recruiting', 'active', 'suspended', 'pending'].includes(status);
             return (
-                <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter whitespace-nowrap ${statusStyles[status] || statusStyles.unknown}`}>
-                    {showIndicator && (
-                        <span className={`h-1.5 w-1.5 rounded-full ${indicatorColors[status]} ${status === 'recruiting' ? 'animate-pulse' : ''}`} />
-                    )}
-                    {statusLabels[status] || status}
-                </span>
+                <div className="flex items-center justify-center w-full">
+                    <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-tighter whitespace-nowrap ${statusStyles[status] || statusStyles.unknown}`}>
+                        {showIndicator && (
+                            <span className={`h-1.5 w-1.5 rounded-full ${indicatorColors[status]} ${status === 'recruiting' ? 'animate-pulse' : ''}`} />
+                        )}
+                        {statusLabels[status] || status}
+                    </span>
+                </div>
             );
         },
     },
@@ -105,20 +114,19 @@ const columns: ColumnDef<Trial>[] = [
         cell: ({ row }) => {
             const types = row.original.interventionTypes || [];
             if (types.length === 0) {
-                return <span className="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">N/A</span>;
+                return (
+                    <div className="flex items-center justify-center w-full">
+                        <span className="text-sm bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">NA</span>
+                    </div>
+                );
             }
-            // Show only the first one if multiple, or map all? Space is limited.
-            // Let's show up to 2 badges.
             return (
-                <div className="flex flex-wrap gap-1">
-                    {types.slice(0, 2).map((type, i) => (
-                        <span key={i} className="text-[10px] bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">
-                            {type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                <div className="flex flex-wrap items-center justify-center gap-1 max-w-[180px] mx-auto">
+                    {types.map((type, i) => (
+                        <span key={i} className="text-sm bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight whitespace-nowrap">
+                            {type.replace(/_/g, ' ').toLowerCase() === 'na' ? 'NA' : type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
                         </span>
                     ))}
-                    {types.length > 2 && (
-                        <span className="text-[10px] text-slate-500 font-medium">+{types.length - 2}</span>
-                    )}
                 </div>
             );
         },
@@ -128,7 +136,9 @@ const columns: ColumnDef<Trial>[] = [
         header: 'Phase',
         size: 100,
         cell: ({ row }) => (
-            <span className="text-sm text-slate-700 dark:text-slate-400 font-medium">{row.original.phase}</span>
+            <div className="flex items-center justify-center w-full">
+                <span className="text-sm text-slate-700 dark:text-slate-400 font-medium">{row.original.phase}</span>
+            </div>
         ),
     },
     {
@@ -140,9 +150,11 @@ const columns: ColumnDef<Trial>[] = [
             // Normalize for style lookup (e.g., "Expanded Access" -> "expanded_access")
             const styleKey = type.toLowerCase().replace(/ /g, '_');
             return (
-                <span className={`text-[10px] px-2.5 py-1 rounded-full uppercase font-bold tracking-tight whitespace-nowrap ${studyTypeStyles[styleKey] || studyTypeStyles.unknown}`}>
-                    {type}
-                </span>
+                <div className="flex items-center justify-center w-full">
+                    <span className={`text-sm px-2.5 py-1 rounded-full uppercase font-bold tracking-tight whitespace-nowrap ${studyTypeStyles[styleKey] || studyTypeStyles.unknown}`}>
+                        {type}
+                    </span>
+                </div>
             );
         },
     },
@@ -151,12 +163,14 @@ const columns: ColumnDef<Trial>[] = [
         header: 'Last Updated',
         size: 120,
         cell: ({ row }) => (
-            <span className="text-xs text-slate-600 dark:text-slate-400">{row.original.lastUpdated}</span>
+            <div className="flex items-center justify-center w-full">
+                <span className="text-sm text-slate-600 dark:text-slate-400">{row.original.lastUpdated}</span>
+            </div>
         ),
     },
 ];
 
-export function TrialsTable({ filters }: TrialsTableProps) {
+export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
     const [allTrials, setAllTrials] = useState<Trial[]>([]);
     const [displayedTrials, setDisplayedTrials] = useState<Trial[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -271,6 +285,11 @@ export function TrialsTable({ filters }: TrialsTableProps) {
         return result;
     }, [allTrials, filters, sorting]);
 
+    // Notify parent of data changes
+    useEffect(() => {
+        onDataUpdate?.(processedTrials);
+    }, [processedTrials, onDataUpdate]);
+
     // Pagination Logic
     useEffect(() => {
         // When filters or sorting change, reset page
@@ -290,52 +309,150 @@ export function TrialsTable({ filters }: TrialsTableProps) {
 
     const hasMore = displayedTrials.length < processedTrials.length;
 
-    const renderExpandedContent = (trial: Trial) => (
-        <div className="px-6 py-4 space-y-4">
-            <div className="grid grid-cols-3 gap-8">
-                <div className="col-span-2 space-y-4">
-                    <h4 className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">
-                        Study Summary
-                    </h4>
-                    <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
-                        {trial.summary || 'No summary available for this trial.'}
-                    </p>
-                    <div className="flex gap-4 pt-2">
+    const renderExpandedContent = (trial: Trial) => {
+        const hasLocations = trial.locations && trial.locations.length > 0;
+        const validCoords = (trial.locations || [])
+            .map(l => l.geoPoint)
+            .filter(g => g && g.lat && g.lon);
+
+        return (
+            <div className="px-6 py-6 space-y-8 bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Header Info / Timeline */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-border/50">
+                    <div className="flex items-center gap-6">
+                        <div className="space-y-1 text-left">
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1.5">
+                                <Calendar className="h-3 w-3" /> Study Period
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-foreground">
+                                    {trial.startDate ? new Date(trial.startDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'Unknown'}
+                                </span>
+                                <div className="h-px w-8 bg-border" />
+                                <span className="text-sm font-semibold text-foreground">
+                                    {trial.completionDate ? new Date(trial.completionDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'Ongoing'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="h-10 w-px bg-border hidden md:block" />
+
+                        <div className="space-y-1 text-left">
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1.5">
+                                <User className="h-3 w-3" /> Principal Investigator
+                            </span>
+                            <div className="text-sm font-semibold text-foreground">
+                                {trial.investigator || 'Not Specified'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
                         {trial.url && (
                             <a
                                 href={trial.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                                className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold px-4 py-2.5 rounded-lg transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <ExternalLink className="h-3 w-3" />
-                                View on ClinicalTrials.gov
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                Study Details
                             </a>
                         )}
                     </div>
                 </div>
-                {trial.eligibility && trial.eligibility.length > 0 && (
-                    <div className="col-span-1 space-y-4">
-                        <h4 className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">
-                            Eligibility Criteria
-                        </h4>
-                        <ul className="space-y-3">
-                            {trial.eligibility.slice(0, 5).map((item, i) => (
-                                <li key={i} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
-                                    <svg className="w-4 h-4 text-teal-600 dark:text-[#0bf3d8] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22,4 12,14.01 9,11.01" />
-                                    </svg>
-                                    {typeof item === 'string' ? item : JSON.stringify(item)}
-                                </li>
-                            ))}
-                        </ul>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
+                    {/* Left: Summary & Stats */}
+                    <div className="lg:col-span-4 space-y-6">
+                        <div className="space-y-3">
+                            <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                                <Info className="h-3.5 w-3.5" /> Summary
+                            </h4>
+                            <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                                {trial.summary || 'No summary available for this trial.'}
+                            </p>
+                        </div>
+
+                        {trial.genes && trial.genes.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest">
+                                    Genetic Targets
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {trial.genes.map(g => (
+                                        <span key={g} className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded uppercase">
+                                            {g}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
+
+                    {/* Middle: Eligibility */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                            <Info className="h-3.5 w-3.5" /> Eligibility Criteria
+                        </h4>
+                        {trial.eligibility && trial.eligibility.length > 0 ? (
+                            <ul className="space-y-3">
+                                {trial.eligibility.slice(0, 6).map((item, i) => (
+                                    <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground font-medium bg-background/40 p-2 rounded-lg border border-border/30">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                        {typeof item === 'string' ? item : JSON.stringify(item)}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-xs text-muted-foreground italic">No criteria details available.</p>
+                        )}
+                    </div>
+
+                    {/* Right: Mini Map */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5" /> Study Locations ({trial.locations?.length || 0})
+                        </h4>
+                        <div className="h-[250px] rounded-xl overflow-hidden border border-border bg-secondary/20 relative z-0">
+                            {validCoords.length > 0 ? (
+                                <MapContainer
+                                    center={[validCoords[0].lat, validCoords[0].lon]}
+                                    zoom={3}
+                                    style={{ height: '100%', width: '100%' }}
+                                    scrollWheelZoom={false}
+                                    zoomControl={false}
+                                    attributionControl={false}
+                                >
+                                    <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                                    {validCoords.map((loc, i) => (
+                                        <CircleMarker
+                                            key={i}
+                                            center={[loc.lat, loc.lon]}
+                                            pathOptions={{ color: '#19c3e6', fillColor: '#19c3e6', fillOpacity: 0.8 }}
+                                            radius={4}
+                                        >
+                                            <LeafletTooltip direction="top" opacity={1}>
+                                                <span className="text-[10px] font-bold">Site Location</span>
+                                            </LeafletTooltip>
+                                        </CircleMarker>
+                                    ))}
+                                </MapContainer>
+                            ) : (
+                                <div className="h-full w-full flex flex-col items-center justify-center text-center p-6 space-y-2">
+                                    <MapPin className="h-8 w-8 text-muted-foreground/30" />
+                                    <p className="text-[10px] text-muted-foreground italic leading-tight">
+                                        Geographic coordinates not available for this study's sites.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <DataTable

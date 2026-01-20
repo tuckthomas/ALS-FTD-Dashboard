@@ -2,7 +2,7 @@ from ninja import Router, Schema, Query
 from django.db.models import Count, Q, Sum, Avg
 from django.db.models.functions import ExtractYear
 from django.core.cache import cache
-from .models import Trial, HealeyTrial, Gene
+from .models import Trial, HealeyTrial, Gene, NewsArticle
 from typing import List, Dict, Any, Optional
 import datetime
 import json
@@ -177,8 +177,8 @@ def get_full_trials_dataset():
             "title": t.brief_title or t.unique_protocol_id,
             "sponsor": t.lead_sponsor_name or 'Unknown',
             "status": mapped_status, 
-            "phase": t.study_phase or 'N/A',
-            "studyType": (t.study_type or 'N/A').replace('_', ' ').title(),
+            "phase": 'NA' if not t.study_phase or t.study_phase.upper() == 'NA' else t.study_phase,
+            "studyType": ('NA' if not t.study_type or t.study_type.upper() == 'NA' else t.study_type).replace('_', ' ').title(),
             "interventionTypes": sorted(list(intervention_types)),
             "lastUpdated": last_updated,
             "genes": sorted(list(cleaned_genes)),
@@ -186,6 +186,10 @@ def get_full_trials_dataset():
             "eligibility": eligibility,
             "enrollment": t.enrollment_count,
             "url": t.clinical_trial_url,
+            "startDate": str(t.study_start_date) if t.study_start_date else None,
+            "completionDate": str(t.completion_date) if t.completion_date else None,
+            "locations": t.study_location if isinstance(t.study_location, list) else [],
+            "investigator": t.responsible_party_investigator_full_name,
         })
         
     response_data = {
@@ -497,6 +501,20 @@ def get_enrollment_stats(request, status: List[str] = None, phase: List[str] = N
     return formatted
 
 
+@router.get("/latest-news")
+def get_latest_news(request):
+    """Returns the 3 most recent news articles."""
+    articles = NewsArticle.objects.order_by('-publication_date')[:3]
+    return [
+        {
+            "title": a.title,
+            "source": a.source_name,
+            "date": a.publication_date.strftime('%b %d'),
+            "url": a.url
+        }
+        for a in articles
+    ]
+
 @router.get("/dashboard-package")
 def get_dashboard_package(request, familial: bool = False):
     """Returns all data needed for the dashboard in a single request."""
@@ -507,14 +525,15 @@ def get_dashboard_package(request, familial: bool = False):
         return cached_data
 
     data = {
-        "stats": get_dashboard_stats(request, familial=familial),
-        "active_stats": get_dashboard_stats(request, status=['active_all'], familial=familial),
-        "status_data": get_trials_by_status(request, familial=familial),
-        "funding_data": get_funding_sources(request, familial=familial),
-        "geo_data": get_geographic_distribution(request, familial=familial),
-        "gene_data": get_genetic_markers(request, familial=familial),
-        "year_data": get_trials_by_year(request, familial=familial),
-        "map_data": get_global_map_data(request, familial=familial)
+        "stats": get_dashboard_stats(request, status=None, phase=None, gene=None, familial=familial),
+        "active_stats": get_dashboard_stats(request, status=['active_all'], phase=None, gene=None, familial=familial),
+        "status_data": get_trials_by_status(request, status=None, phase=None, gene=None, familial=familial),
+        "funding_data": get_funding_sources(request, status=None, phase=None, gene=None, familial=familial),
+        "geo_data": get_geographic_distribution(request, status=None, phase=None, gene=None, familial=familial),
+        "gene_data": get_genetic_markers(request, status=None, phase=None, gene=None, familial=familial),
+        "year_data": get_trials_by_year(request, status=None, phase=None, gene=None, country=None, familial=familial),
+        "map_data": get_global_map_data(request, status=None, phase=None, gene=None, familial=familial),
+        "news_data": get_latest_news(request)
     }
     
     # Cache indefinitely (until next manual refresh)

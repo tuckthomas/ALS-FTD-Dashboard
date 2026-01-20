@@ -6,8 +6,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 from ninja.errors import ValidationError
 from django.shortcuts import get_object_or_404
-from .models import Trial, Gene, HealeyTrial
-from .schemas import get_serialized_trials, GeneSchema, TrialSchema, ProcessedCriteriaSchema, HealeyTrialSchema, HealeyContactInfoSchema
+from .models import Trial, Gene, HealeyTrial, ContactSubmission, IssueReport, NewsArticle
+from .schemas import get_serialized_trials, GeneSchema, TrialSchema, ProcessedCriteriaSchema, HealeyTrialSchema, HealeyContactInfoSchema, ContactSubmissionSchema, IssueReportSchema, NewsArticleSchema
 from .utils import update_data, parse_criteria_from_response, extract_list_items, scrape_healey_platform_trial, send_criteria_to_ai_server
 from .api_analytics import router as analytics_router
 import os 
@@ -19,6 +19,25 @@ from typing import Any
 
 router = Router()
 
+@router.get("/news", response=List[NewsArticleSchema], tags=["News Aggregator"])
+def get_news(request):
+    return NewsArticle.objects.all()[:50]
+
+@router.post("/contact", tags=["User Feedback"])
+def submit_contact_form(request, data: ContactSubmissionSchema):
+    try:
+        ContactSubmission.objects.create(**data.dict())
+        return {"success": True, "message": "Thank you for your message. We will be in touch shortly."}
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@router.post("/report-issue", tags=["User Feedback"])
+def report_issue(request, data: IssueReportSchema):
+    try:
+        IssueReport.objects.create(**data.dict())
+        return {"success": True, "message": "Issue reported successfully. Thank you for your feedback."}
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @router.get("/", tags=["ClinicalTrials.gov API Fetch; Updated Nightly"])
 def get_trials(request):

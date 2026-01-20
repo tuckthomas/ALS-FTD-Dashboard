@@ -6,8 +6,8 @@ interface Filters {
     phases: string[];
     genes: string[];
     status: string;
-    studyType?: string;
-    interventionTypes?: string[];
+    studyType: string;
+    interventionTypes: string[];
     search: string;
 }
 

@@ -40,7 +40,7 @@ export function StatCard({ label, value, trend }: StatCardProps) {
                 {label}
             </p>
             <div className="flex items-end gap-2 mt-1">
-                <span className="text-3xl font-bold text-foreground">{value}</span>
+                <span className="text-3xl font-bold text-foreground w-[110px] inline-block tabular-nums">{value}</span>
                 {trend && (
                     <span className={`flex items-center gap-1 text-xs font-medium mb-1 ${getTrendColor()}`}>
                         {getTrendIcon()}
