@@ -21,13 +21,13 @@ kill_port() {
 # Cleanup existing processes
 echo "Checking for existing processes..."
 kill_port 8000
-kill_port 8000
 kill_port 5173
 kill_port 3000
+kill_port 6379
 
 
 # 1. Start Docker Containers
-echo "Starting Docker containers..."
+echo "Starting Docker containers (Postgres, Redis, Adminer)..."
 docker-compose up -d
 if [ $? -ne 0 ]; then
     echo "Failed to start Docker containers. Make sure Docker is running."
@@ -35,9 +35,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "Docker containers are up."
 
-# 1.5 Configure Metabase (Async)
-echo "Launching Metabase auto-configuration..."
-python3 dev/setup_metabase.py &
 
 
 # Function to kill background processes on script exit

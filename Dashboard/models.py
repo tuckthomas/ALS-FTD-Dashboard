@@ -15,8 +15,17 @@ class Gene(models.Model):
     def __str__(self):
         return self.gene_symbol
 
+# Normalized Status Model
+class TrialStatus(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
 # Model for ClinicalTrials.gov Data
 class Trial(models.Model):
+    # Choices definitions remain the same...
     FDA_REGULATED_DRUG_CHOICES = [
         ('TRUE', 'True'),
         ('FALSE', 'False'),
@@ -38,9 +47,11 @@ class Trial(models.Model):
     unique_protocol_id = models.CharField(max_length=255, primary_key=True)  # Primary Key
     nct_id = models.CharField(max_length=255)
     brief_title = models.TextField(null=True, blank=True)
+    brief_description = models.TextField(null=True, blank=True)
     study_type = models.CharField(max_length=255, null=True, blank=True)
     study_phase = models.CharField(max_length=50, null=True, blank=True)
     overall_status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.ManyToManyField(TrialStatus, related_name='trials', blank=True) # New normalized relation
     study_submitance_date = models.DateField(null=True, blank=True)
     study_submitance_date_qc = models.DateField(null=True, blank=True)
     study_start_date = models.DateField(null=True, blank=True)
@@ -67,6 +78,7 @@ class Trial(models.Model):
     study_location = models.JSONField(null=True, blank=True)
     genes = models.JSONField(null=True, blank=True)
     related_genes = models.ManyToManyField(Gene, related_name='trials', blank=True)
+
     eligibility_criteria_generic_description = models.TextField(null=True, blank=True)
     eligibility_criteria_inclusion_description = models.JSONField(null=True, blank=True)
     eligibility_criteria_exclusion_description = models.JSONField(null=True, blank=True)
@@ -81,6 +93,7 @@ class Trial(models.Model):
 # Flattens the Intervention_Name field from ClinicalTrials.gov API data
 class Intervention(models.Model):
     trial = models.ForeignKey(Trial, related_name='interventions', on_delete=models.CASCADE)
+    intervention_name = models.CharField(max_length=500, null=True, blank=True)
     intervention_type = models.CharField(max_length=255)
     intervention_description = models.TextField()
 

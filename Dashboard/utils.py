@@ -2,6 +2,8 @@ import requests
 import os
 import re
 import ast
+import html
+import unicodedata
 from openai import OpenAI
 import pandas as pd
 from openpyxl import Workbook
@@ -11,7 +13,7 @@ from bs4 import BeautifulSoup
 from django.db import models
 from django.db.models import Q
 import numpy as np
-from .models import Trial, Gene, Update_Log, HealeyTrial, Intervention
+from .models import Trial, Gene, Update_Log, HealeyTrial, Intervention, TrialStatus
 from .schemas import HealeyTrialSchema, HealeyContactInfoSchema
 from datetime import datetime, timedelta
 from dateutil import parser as date_parser
@@ -148,6 +150,52 @@ def update_data():
             unique_protocol_id=trial_defaults['unique_protocol_id'],
             defaults=trial_defaults
         )
+
+        # Sync Status M2M field
+        raw_status = trial_defaults.get('overall_status', '')
+        if raw_status:
+            # Helper map for known variations
+            status_map_keys = {
+                'not_yet_recruiting': 'Not Yet Recruiting',
+                'recruiting': 'Recruiting',
+                'enrolling_by_invitation': 'Enrolling By Invitation',
+                'active_not_recruiting': 'Active, Not Recruiting',
+                'active, not recruiting': 'Active, Not Recruiting',
+                'suspended': 'Suspended',
+                'terminated': 'Terminated',
+                'completed': 'Completed',
+                'withdrawn': 'Withdrawn',
+                'unknown': 'Unknown'
+            }
+            
+            clean_status = str(raw_status).lower().strip().replace('  ', ' ')
+            key_variant = clean_status.replace(' ', '_')
+            
+            target_name = status_map_keys.get(key_variant)
+            if not target_name:
+                 target_name = status_map_keys.get(clean_status)
+            
+            # If mapped
+            if target_name:
+                try:
+                    status_obj = TrialStatus.objects.get(name=target_name)
+                    trial_obj.status.add(status_obj)
+                except TrialStatus.DoesNotExist:
+                    print(f"Warning: Mapped status '{target_name}' not found in DB.")
+            else:
+                # Fallback: Try case-insensitive match on the raw text
+                try:
+                    status_obj = TrialStatus.objects.get(name__iexact=raw_status)
+                    trial_obj.status.add(status_obj)
+                except TrialStatus.DoesNotExist:
+                    # Try Title Case as last resort for simple statuses
+                    try:
+                        status_obj = TrialStatus.objects.get(name=raw_status.title())
+                        trial_obj.status.add(status_obj)
+                    except TrialStatus.DoesNotExist:
+                        # Log if it's a completely new status (e.g. "Available" from expanded access)
+                        pass
+
         updated_trials += (1 if created else 0)
 
         # Sync related_genes M2M field
@@ -169,9 +217,12 @@ def update_data():
 
         # Process intervention_name fields
         if 'intervention_name' in trial_defaults and trial_defaults['intervention_name']:
+            # Clear existing interventions to prevent massive duplication
+            Intervention.objects.filter(trial=trial_obj).delete()
             for intervention_data in trial_defaults['intervention_name']:
                 Intervention.objects.create(
                     trial=trial_obj,
+                    intervention_name=intervention_data.get('name', 'Not specified'),
                     intervention_type=intervention_data.get('type', 'Not specified'),
                     intervention_description=intervention_data.get('description', 'No description provided')
                 )
@@ -188,29 +239,6 @@ def update_data():
 
     print(f"Total trials updated or created: {updated_trials}")
     
-    # Trigger AI Classification for a sample (to demonstrate log activity)
-    print("Starting AI Classification for updated trials (Sample of 3)...")
-    llm_logger.info("Starting AI Classification for updated trials (Sample of 3)...")
-    
-    # Fetch trials that need processing (or just the ones we updated)
-    # For now, just pick 3 distinct ones to show it works
-    sample_trials = Trial.objects.all().order_by('-study_start_date')[:3]
-    
-    for trial in sample_trials:
-        if trial.eligibility_criteria_generic_description:
-            llm_logger.info(f"Processing Trial {trial.unique_protocol_id} with Gemini...")
-            response = send_criteria_to_ai_server(trial.unique_protocol_id, trial.eligibility_criteria_generic_description)
-            if response:
-                trial.eligibility_criteria_inclusion_description = json.dumps(response.get('inclusion', []), cls=DjangoJSONEncoder)
-                trial.eligibility_criteria_exclusion_description = json.dumps(response.get('exclusion', []), cls=DjangoJSONEncoder)
-                trial.save()
-                llm_logger.info(f"Saved AI criteria for {trial.unique_protocol_id}")
-            # Rate limit politeness
-            time.sleep(5)
-
-    print("AI Sample Processing Complete. Check logs/llm_classification.log")
-    llm_logger.info("AI Sample Processing Complete.")
-
     # After processing, you might want to save data into Excel or perform additional actions
     gene_df = pd.DataFrame(list(Gene.objects.all().values()))
     trial_df = pd.DataFrame(list(Trial.objects.all().values()))
@@ -256,10 +284,11 @@ def enhanced_fetch_trial_data():
     trials_data_df = fetch_trial_data()
     print(f"Type of trials_data_raw before conversion: {type(trials_data_df).__name__}")
 
-    # Initialize new columns with empty lists (conceptually similar to empty JSON arrays)
-    # This is done in preperation for OpenAI's interpreting the eligibility_criteria_generic_description field and separating inclusion/exclusion criteria
-    trials_data_df['eligibility_criteria_inclusion_description'] = [list() for _ in range(len(trials_data_df))]
-    trials_data_df['eligibility_criteria_exclusion_description'] = [list() for _ in range(len(trials_data_df))]
+    # Parse eligibility criteria locally
+    print("Parsing eligibility criteria locally...")
+    parsed_results = trials_data_df['eligibility_criteria_generic_description'].apply(parse_criteria_locally)
+    trials_data_df['eligibility_criteria_inclusion_description'] = parsed_results.apply(lambda x: x['inclusion'])
+    trials_data_df['eligibility_criteria_exclusion_description'] = parsed_results.apply(lambda x: x['exclusion'])
 
     # Obtain Gene List
     gene_list_df = scrape_alsod_gene_list()
@@ -342,7 +371,7 @@ def convert_study_phase(study_phase_list):
     print(f"Converted study_phase_key: {study_phase_key}")  # Debug print
 
     # Attempt to get the mapped value
-    mapped_value = phase_mapping.get(study_phase_key, 'Unknown')
+    mapped_value = phase_mapping.get(study_phase_key, 'NA')
     
     print(f"Mapped value: {mapped_value}")  # Debug print
 
@@ -548,7 +577,7 @@ def fetch_trial_data():
     query_cond = " OR ".join(include_conditions)
 
     fields = [
-        "OrgStudyId", "NCTId", "BriefTitle", "StudyType", "OverallStatus",
+        "OrgStudyId", "NCTId", "BriefTitle", "BriefSummary", "StudyType", "OverallStatus",
         "StatusVerifiedDate", "CompletionDate", "LeadSponsorName",
         "ResponsiblePartyType", "ResponsiblePartyInvestigatorFullName",
         "Condition", "Keyword", "InterventionType", "InterventionDescription",
@@ -794,6 +823,7 @@ def fetch_trial_data():
         "protocolSection.identificationModule.orgStudyIdInfo.id": "unique_protocol_id", # Primary Key from models.py
         "protocolSection.identificationModule.nctId": "nct_id",
         "protocolSection.identificationModule.briefTitle": "brief_title",
+        "protocolSection.descriptionModule.briefSummary": "brief_description", # New; Unsur if this id is correct, I'm guessing
         "protocolSection.designModule.studyType": "study_type",
         "protocolSection.designModule.phases": "study_phase",
         "protocolSection.statusModule.overallStatus": "overall_status",
@@ -882,6 +912,57 @@ def extract_list_items(text):
     
     return json.dumps(list_items, ensure_ascii=False)
 
+
+def sanitize_and_standardize_criteria(criteria_data):
+    """
+    Sanitizes and standardizes eligibility criteria lists.
+    
+    Args:
+        criteria_data: Can be a JSON string, a list of strings, or None.
+    
+    Returns:
+        A list of sanitized strings.
+    """
+    if not criteria_data:
+        return []
+    
+    # Ensure we have a list
+    if isinstance(criteria_data, str):
+        try:
+            criteria_list = json.loads(criteria_data)
+        except json.JSONDecodeError:
+            # If it's a plain string, treat as single item list
+            criteria_list = [criteria_data]
+    elif isinstance(criteria_data, list):
+        criteria_list = criteria_data
+    else:
+        return []
+        
+    sanitized_list = []
+    for item in criteria_list:
+        if not isinstance(item, str):
+            continue
+            
+        # 1. Unescape HTML entities (e.g., &gt; -> >)
+        text = html.unescape(item)
+        
+        # 2. Normalize Unicode (e.g. \u2265 -> ≥)
+        # NFKC (Normalization Form Compatibility Composition) is good for standardizing characters
+        text = unicodedata.normalize('NFKC', text)
+        
+        # 3. Strip whitespace
+        text = text.strip()
+        
+        # 4. Remove common starting bullets/numbers
+        # Removes leading "1.", "-", "*", etc.
+        text = re.sub(r'^[\s\-\*•\d\.]+', '', text).strip()
+        
+        if text:
+            sanitized_list.append(text)
+            
+    return sanitized_list
+
+
 # JSON Schemas for Local LLM
 CRITERIA_SCHEMA = {
     "name": "clinical_criteria",
@@ -922,6 +1003,78 @@ FACILITY_SCHEMA = {
     }
 }
 
+def parse_criteria_locally(text):
+    """
+    Parses eligibility criteria text into inclusion and exclusion lists using Regex.
+    Refined to handle 'Key Inclusion Criteria', bulleted lists without newlines, and other edge cases.
+    """
+    if not text:
+        return {"inclusion": [], "exclusion": []}
+
+    # 1. Split into sections based on headers
+    # Improved Regex:
+    # - Matches "Key Inclusion Criteria", "o Inclusion Criteria"
+    # - Case insensitive
+    # - Captures the *type* (Inclusion/Exclusion) to sort correctly
+    header_pattern = re.compile(
+        r'(?:^|\n)\s*(?:[\w\d\.\-\*•]*\s*)?((?:Inclusion|Exclusion).*?Criteria.*?)(?::|$|\n)', 
+        re.IGNORECASE
+    )
+    
+    matches = list(header_pattern.finditer(text))
+    
+    if not matches:
+        # Fallback: parsing failed to find headers. 
+        # If text contains "inclusion" or "exclusion" words, distinct enough, we might try another strategy.
+        # For now, if no headers, assume it's a raw description.
+        return {"inclusion": sanitize_and_standardize_criteria([text]), "exclusion": []}
+
+    criteria_raw = {"inclusion": [], "exclusion": []}
+
+    for i, match in enumerate(matches):
+        header_full = match.group(1).lower() # e.g. "key inclusion criteria"
+        start_pos = match.end()
+        end_pos = matches[i+1].start() if i+1 < len(matches) else len(text)
+        
+        section_content = text[start_pos:end_pos].strip()
+        
+        if "exclusion" in header_full:
+            criteria_raw["exclusion"].append(section_content)
+        elif "inclusion" in header_full:
+            criteria_raw["inclusion"].append(section_content)
+
+    # 2. Process content within sections
+    final_results = {"inclusion": [], "exclusion": []}
+    
+    # Improved Item Splitter:
+    # - Splits on Newlines that look like list items
+    # - Splits on explicit numbering "1.", "2." even if inline (careful not to split decimals)
+    # - Splits on bullets " * " or " - "
+    
+    # Pattern explanation:
+    # (?:^|\n)\s* -> Start of line (or string) followed by whitespace
+    # (?: ... )   -> Non-capturing group for the bullet types:
+    #   [\d]+\.   -> Numbers (1., 10.)
+    #   [\-\*•o]  -> Bullets (-, *, •, o)
+    item_splitter = re.compile(r'(?:^|\n)\s*(?:[\d]+\.|[\-\*•o])\s*')
+
+    for key in ["inclusion", "exclusion"]:
+        for block in criteria_raw[key]:
+            # First, try splitting by the explicit bullet/number pattern
+            if item_splitter.search(block):
+                items = [x.strip() for x in item_splitter.split(block) if x.strip()]
+                final_results[key].extend(sanitize_and_standardize_criteria(items))
+            else:
+                # If no clear bullets found, try splitting by newline
+                # This handles cases where it's just a list of lines without bullets
+                items = [x.strip() for x in block.split('\n') if x.strip()]
+                final_results[key].extend(sanitize_and_standardize_criteria(items))
+
+    return final_results
+
+
+# DEPRECATED: This function is currently replaced by parse_criteria_locally for better efficiency.
+# Keeping for potential future use or refinement of LLM-based extraction.
 def send_criteria_to_ai_server(unique_protocol_id, eligibility_criteria):
     llm_logger.info(f"Preparing to send data for unique_protocol_id: {unique_protocol_id}")
     

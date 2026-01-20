@@ -1,4 +1,5 @@
 import { TrendingUp, FlaskConical, Link, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface GeneticMarker {
     name: string;
@@ -14,6 +15,7 @@ interface GeneticMarkersWidgetProps {
 }
 
 export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
+    const navigate = useNavigate();
     const defaultMarkers: GeneticMarker[] = [
         {
             name: 'C9orf72',
@@ -55,49 +57,57 @@ export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
             case 'down':
                 return 'text-rose-400 bg-rose-400/10';
             default:
-                return 'text-slate-500 bg-slate-500/10';
+                return 'text-muted-foreground bg-secondary';
         }
+    };
+
+    const handleDrugClick = (e: React.MouseEvent, geneName: string) => {
+        e.stopPropagation();
+        navigate(`/trials?gene=${encodeURIComponent(geneName)}`);
     };
 
     return (
         <div className="glass-panel p-6 rounded-xl">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-md font-bold text-white">Genetic Markers</h3>
-                <TrendingUp className="h-4 w-4 text-slate-500" />
+                <h3 className="text-md font-bold text-foreground">Genetic Markers</h3>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </div>
 
             <div className="space-y-3">
                 {markerData.map((marker) => (
                     <div
                         key={marker.name}
-                        className="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-[#19c3e6]/20 hover:bg-[#19c3e6]/5 transition-all"
+                        className="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all"
                     >
                         <div className="flex justify-between items-start mb-1">
-                            <span className={`text-sm font-bold tracking-tight ${marker.isPrimary ? 'text-[#19c3e6]' : 'text-white'}`}>
+                            <span className={`text-sm font-bold tracking-tight ${marker.isPrimary ? 'text-primary' : 'text-foreground'}`}>
                                 {marker.name}
                             </span>
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getTrendStyles(marker.trend.direction)}`}>
                                 {marker.trend.value}
                             </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-tight">
+                        <p className="text-[10px] text-muted-foreground leading-tight">
                             {marker.description}
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                             <div className="flex items-center gap-1">
-                                <FlaskConical className="h-3 w-3 text-slate-500" />
-                                <span className="text-[10px] text-slate-400">{marker.trials} Trials</span>
+                                <FlaskConical className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] text-muted-foreground">{marker.trials} Trials</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <Link className="h-3 w-3 text-slate-500" />
-                                <span className="text-[10px] text-slate-400">{marker.drugs} Drugs</span>
+                            <div
+                                className="flex items-center gap-1 cursor-pointer transition-colors"
+                                onClick={(e) => handleDrugClick(e, marker.name)}
+                            >
+                                <Link className="h-3 w-3 text-muted-foreground transition-colors" />
+                                <span className="text-[10px] text-muted-foreground transition-colors">{marker.drugs} Drugs</span>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <button className="w-full mt-4 py-2 text-xs font-semibold text-slate-500 hover:text-[#19c3e6] transition-colors flex items-center justify-center gap-2">
+            <button className="w-full mt-4 py-2 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2">
                 View All Markers
                 <ArrowRight className="h-4 w-4" />
             </button>

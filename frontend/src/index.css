@@ -23,7 +23,8 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Darkened to 30% lightness (approx Slate 700) for better contrast on white backgrounds */
+    --muted-foreground: 215.4 16.3% 30%;
 
     --accent: 276 65% 54%;
     --accent-foreground: 210 40% 98%;
@@ -92,21 +93,27 @@
     @apply bg-background text-foreground;
     font-family: 'Space Grotesk', sans-serif;
   }
+
+  /* Global Checkbox Styling */
+  input[type="checkbox"] {
+    @apply w-5 h-5 cursor-pointer rounded-md border-border transition-all;
+  }
 }
 
 @layer components {
 
   /* Glass panel effect for cards */
+  /* Glass panel effect for cards */
   .glass-panel {
-    background: rgba(26, 38, 41, 0.4);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(25, 195, 230, 0.1);
-  }
-
-  .light .glass-panel {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .glass-panel {
+    background: rgba(26, 38, 41, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(25, 195, 230, 0.1);
   }
 
   /* Gradient backgrounds */

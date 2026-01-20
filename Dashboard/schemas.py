@@ -19,6 +19,7 @@ class TrialSchema(BaseModel):
     unique_protocol_id: str
     nct_id: Optional[str] = None
     brief_title: Optional[str] = None
+    brief_description: Optional[str] = None
     study_type: Optional[str] = None
     study_phase: Optional[str] = None
     overall_status: Optional[str] = None

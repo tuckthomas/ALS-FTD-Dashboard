@@ -1,62 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { MainLayout } from "@/components/layout/MainLayout";
 import { DashboardPage } from '@/pages/DashboardPage';
 import { TrialFinderPage } from '@/pages/TrialFinderPage';
-import { Card } from "@/components/ui/card";
-import axios from 'axios';
+import { QueryBuilderPage } from '@/pages/QueryBuilderPage';
+import { AboutPage } from '@/pages/AboutPage';
 
-// Home page component - keeps the existing Metabase dashboard
-function HomePage() {
-  const [token, setToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const response = await axios.get('/api/analytics/metabase-token');
-        if (response.data.token) {
-          setToken(response.data.token);
-        } else {
-          setError("Failed to retrieve authentication token.");
-        }
-      } catch (err) {
-        console.error("Error fetching Metabase token:", err);
-        setError("Could not connect to Analytics Server.");
-      }
-    };
-
-    fetchToken();
-  }, []);
-
-  return (
-    <>
-      {error ? (
-        <div className="flex h-full items-center justify-center p-8">
-          <Card className="p-6 text-red-500 border-red-200 bg-red-50">
-            <h3 className="font-bold">Analytics Error</h3>
-            <p>{error}</p>
-          </Card>
-        </div>
-      ) : token ? (
-        <div className="flex-1 w-full h-full bg-slate-50 relative">
-          {React.createElement('metabase-dashboard', {
-            token: token,
-            'with-title': 'false',
-            'with-downloads': 'true',
-            theme: 'transparent',
-            style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }
-          })}
-        </div>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <div className="animate-pulse text-slate-400">Loading analytics...</div>
-        </div>
-      )}
-    </>
-  );
-}
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -88,9 +38,10 @@ function App() {
       {/* Main App */}
       <MainLayout>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardPage />} />
           <Route path="/trials" element={<TrialFinderPage />} />
+          <Route path="/query" element={<QueryBuilderPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </MainLayout>
     </ThemeProvider>

@@ -52,3 +52,4 @@ yarn-error.log*
 .metabase.db.trace.db
 metabase.db.mv.db
 metabase.db.trace.db
+dev/cleanup_metabase_tables.py

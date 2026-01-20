@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { X, Github } from 'lucide-react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface NavLink {
     href: string;
@@ -33,22 +34,22 @@ export function MobileSidebar({ isOpen, onClose, navLinks }: MobileSidebarProps)
         };
     }, [isOpen]);
 
-    return (
+    return createPortal(
         <>
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={onClose}
             />
 
             {/* Sidebar */}
             <div
-                className={`fixed top-0 left-0 z-50 h-full w-72 bg-[#0e1315] border-r border-[#19c3e6]/10 transform transition-transform duration-300 ease-in-out md:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-[200] h-full w-72 bg-background border-r border-border transform transition-transform duration-300 ease-in-out md:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[#19c3e6]/10">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-3">
                         <img
                             src="/f-als-ftd-dashboard.png"
@@ -56,13 +57,13 @@ export function MobileSidebar({ isOpen, onClose, navLinks }: MobileSidebarProps)
                             className="h-8 w-auto"
                         />
                         <div>
-                            <h2 className="text-sm font-bold text-white">Research Analytics</h2>
-                            <p className="text-[10px] text-slate-500">ALS/FTD Research</p>
+                            <h2 className="text-sm font-bold text-foreground">Familial ALS & FTD</h2>
+                            <p className="text-[10px] text-muted-foreground">Research Analytics</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white transition-colors"
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="Close menu"
                     >
                         <X className="h-5 w-5" />
@@ -78,8 +79,8 @@ export function MobileSidebar({ isOpen, onClose, navLinks }: MobileSidebarProps)
                                 key={link.href}
                                 to={link.href}
                                 className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                                    ? 'bg-[#19c3e6]/10 text-[#19c3e6] border border-[#19c3e6]/20'
-                                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-primary/10 text-primary border border-primary/20'
+                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                                     }`}
                             >
                                 {link.label}
@@ -89,18 +90,19 @@ export function MobileSidebar({ isOpen, onClose, navLinks }: MobileSidebarProps)
                 </nav>
 
                 {/* Footer */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#19c3e6]/10">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
                     <a
                         href="https://github.com/tuckthomas/ALS-FTD-Dashboard.git"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
+                        className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                     >
                         <Github className="h-4 w-4" />
                         View on GitHub
                     </a>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }

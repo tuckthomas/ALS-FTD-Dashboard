@@ -18,7 +18,7 @@ export function StatCard({ label, value, trend }: StatCardProps) {
             case 'down':
                 return 'text-rose-400';
             default:
-                return 'text-slate-500';
+                return 'text-muted-foreground';
         }
     };
 
@@ -36,11 +36,11 @@ export function StatCard({ label, value, trend }: StatCardProps) {
 
     return (
         <div className="glass-panel p-5 rounded-xl">
-            <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
                 {label}
             </p>
             <div className="flex items-end gap-2 mt-1">
-                <span className="text-3xl font-bold text-white">{value}</span>
+                <span className="text-3xl font-bold text-foreground">{value}</span>
                 {trend && (
                     <span className={`flex items-center gap-1 text-xs font-medium mb-1 ${getTrendColor()}`}>
                         {getTrendIcon()}

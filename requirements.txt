@@ -13,8 +13,10 @@ python-Levenshtein
 openai
 whitenoise
 pydantic
-PyJWT
+
 djangorestframework
 urllib3
 duckdb>=0.9.2
 pgvector>=0.2.4
+django-redis
+redis
