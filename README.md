@@ -2,115 +2,199 @@
   <img src="frontend/public/f-als-ftd-dashboard.png" alt="fals-logo" width="200">
 </p>
 
-# Clinical Trial Research Dashboard
-> **Note**: This project is a work in progress. It was dormant for nearly two years before I picked it up again effective 01/17/2026. There is a lot of work to do, but I am making progress.
+# Familial ALS & FTD Research Dashboard
 
-A comprehensive research dashboard focused on ALS/FTD interventional drug research, integrating automated data pipelines, and data analytics.
+> A comprehensive research dashboard focused on familial ALS/FTD interventional drug research, featuring clinical trial analytics, gene-specific data, 3D protein structure visualization, and AI-powered data enrichment.
 
 ## Introduction
-As part of a non-profit/volunteer contribution, this repository contains a Dashboard summarizing the current and historical state of ALS/FTD research, with a preliminary focus on interventional drug research and familial (genetic) ALS/FTD data exploration.
 
-### fALS: Personal Impact Summary
-Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. Our greater extended family has also suffered losses. [Click here to learn more about fALS's impact on my family and I.](https://www.iamals.org/stories/tucker-olson-2/)
+This open-source dashboard aggregates and visualizes clinical trial data for the familial ALS and FTD research community. It provides researchers, patients, and caregivers with actionable insights into ongoing and historical interventional drug trials.
 
-If you appreciate this work and would like to suppport ALS research, please remit donations to:
+### Personal Impact
+
+Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. [Learn more about fALS's impact on my family.](https://www.iamals.org/stories/tucker-olson-2/)
+
+If you appreciate this work and would like to support ALS research, please consider donating to:
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 - [I AM ALS](https://www.iamals.org/give/)
 
-If you are interested in my work on this or other projects, I am available for hire: tuckerolson13@gmail.com
+---
+
+## Features
+
+### Dashboard & Analytics
+- **Interactive Dashboard**: Real-time statistics on trial phases, recruitment status, funding sources, and geographic distribution
+- **Trial Finder**: Advanced search and filtering with sortable tables, map visualization, and detailed trial cards
+- **Phase Distribution Charts**: Visual breakdown of trials by clinical phase
+- **Funding Analysis**: Breakdown by sponsor type (Industry, NIH, Academic, etc.)
+
+### Gene Pages
+- **Gene Overview**: Detailed information for 24+ ALS/FTD-related genes
+- **3D Protein Structure Viewer**: Interactive molecular visualization using PDBe Molstar
+- **PDB & AlphaFold Integration**: Experimental structures and AI-predicted models
+- **Gene-Specific Trials**: Filtered clinical trials targeting each gene
+- **Gene-Specific News**: Curated research news for each genetic marker
+
+### News Aggregator
+- **Multi-Source News Feed**: Aggregated articles from ALS News Today, research journals, and press releases
+- **Date Range Filtering**: Calendar-based article filtering
+- **Gene Tagging**: Articles tagged and linked to relevant genes
+
+### Data Pipeline
+- **ClinicalTrials.gov Integration**: Automated nightly data sync
+- **Local LLM Processing**: AI-powered eligibility criteria extraction and classification
+- **Gene-Trial Association**: Automatic linking of trials to genetic markers
 
 ---
 
 ## Technology Stack
 
 ### Frontend
-- **React 19**: Modern UI library for building interactive interfaces.
-- **Vite**: Next-generation frontend tooling.
-- **TailwindCSS**: Utility-first CSS framework.
-- **Shadcn/UI**: Re-usable components built using Radix UI and Tailwind CSS.
-- **Recharts**: Redefined chart library built with React and D3.
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | Modern UI library with hooks and concurrent features |
+| **Vite** | Next-generation frontend build tooling |
+| **TailwindCSS** | Utility-first CSS framework |
+| **shadcn/ui** | Accessible components built on Radix UI |
+| **Recharts** | React charting library built with D3 |
+| **React Leaflet** | Interactive maps for trial locations |
+| **PDBe Molstar** | 3D molecular structure visualization |
 
 ### Backend
-- **Django 4**: High-level Python web framework.
-- **Django Ninja**: Fast web framework for building APIs with Django and Python 3.6+ type hints.
-- **PostgreSQL**: Open source object-relational database system.
+| Technology | Purpose |
+|------------|---------|
+| **Django 4** | High-level Python web framework |
+| **Django Ninja** | Fast, async-ready API framework with type hints |
+| **PostgreSQL** | Primary database with full-text search |
+| **Redis** | Caching layer for API responses and rate limiting |
+| **Gunicorn** | Production WSGI server |
 
-### Infrastructure & Analytics
-- **Docker**: Containerization for Metabase, PostgreSQL, and Adminer.
-- **Metabase**: Open-source Business Intelligence tool, embedded into the React frontend.
-- **Adminer**: Database management in a single PHP file.
+### AI & Data Processing
+| Technology | Purpose |
+|------------|---------|
+| **LM Studio / Ollama** | Local LLM inference for data enrichment |
+| **OpenAI-Compatible API** | Structured JSON output for eligibility parsing |
+
+### Infrastructure
+| Technology | Purpose |
+|------------|---------|
+| **Docker Compose** | Container orchestration for development |
+| **Nginx** | Reverse proxy and static file serving (production) |
+
+---
 
 ## Architecture
-The application consists of three main components:
-1.  **Frontend (React/Vite)**: Serves the user interface and embeds Metabase dashboards.
-2.  **Backend (Django API)**: Manages data ingestion (ClinicalTrials.gov), processing, and serves API endpoints.
-3.  **Infrastructure (Docker)**: hosts the Persistence layer (PostgreSQL) and the Analytics engine (Metabase).
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Frontend (React/Vite)                    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │Dashboard │ │ Trial    │ │  Gene    │ │  News    │           │
+│  │ Page     │ │ Finder   │ │  Pages   │ │  Page    │           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│                    ↓ Axios API Calls ↓                          │
+├─────────────────────────────────────────────────────────────────┤
+│                     Backend (Django Ninja)                      │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │Analytics │ │ Trials   │ │  Genes   │ │  News    │           │
+│  │   API    │ │   API    │ │   API    │ │   API    │           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│                    ↓                ↓                           │
+│  ┌────────────────────┐    ┌────────────────────┐              │
+│  │   Redis Cache      │    │   PostgreSQL       │              │
+│  └────────────────────┘    └────────────────────┘              │
+├─────────────────────────────────────────────────────────────────┤
+│                     Data Pipeline                               │
+│  ClinicalTrials.gov → Django Management Commands → LLM → DB    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 - [Docker & Docker Compose](https://www.docker.com/products/docker-desktop/)
-- [Python 3.14.2+](https://www.python.org/downloads/)
-- [Node.js 18+](https://nodejs.org_en/)
+- [Python 3.11+](https://www.python.org/downloads/)
+- [Node.js 18+](https://nodejs.org/)
 
 ### 1. Environment Setup
-Copy the example environment file:
 ```bash
 cp .env.example .env
+# Update .env with your configuration
 ```
-Update `.env` with your specific configuration if necessary (the defaults work for local dev).
 
 ### 2. Infrastructure (Docker)
-Start the database and Metabase containers:
+Start PostgreSQL and Redis:
 ```bash
 docker-compose up -d
 ```
-> This starts PostgreSQL on port `5432`, Metabase on `3000`, and Adminer on `8080`.
+> This starts PostgreSQL on port `5432` and Redis on port `6379`.
 
 ### 3. Backend (Django)
-Create a virtual environment and install dependencies:
 ```bash
-# Create/Activate Virtual Env (Recommended)
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Install Dependencies
+# Install dependencies
 pip install -r requirements.txt
-```
 
-Run migrations and start the server:
-```bash
-# Run Database Migrations
+# Run migrations
 python manage.py migrate
 
-# Start Django Development Server
+# Sync gene structures (for 3D viewer)
+python manage.py sync_gene_structures
+
+# Start development server
 python manage.py runserver
 ```
-The API will be available at `http://localhost:8000/api/docs`.
+API documentation: `http://localhost:8000/api/docs`
 
 ### 4. Frontend (React)
-Navigate to the frontend directory and install dependencies:
 ```bash
 cd frontend
 npm install
-```
-
-Start the Vite development server:
-```bash
 npm run dev
 ```
-The application will be running at `http://localhost:5173`.
+Application: `http://localhost:5173`
 
 ---
 
-## Data Pipeline & LLM
-The project includes an automated pipeline to fetch data from ClinicalTrials.gov and enrich it using Local LLMs (via LM Studio or similar OpenAI-compatible endpoints) for:
-- **Zero-Shot Classification**: Determining eligibility criteria.
-- **Text Classification**: Identifying drug interventions.
-- **Summarization**: simplifying complex medical descriptions.
+## Environment Variables
 
-## Metabase Integration
-Metabase is used for advanced analytics and is embedded into the React Dashboard. 
-- Access the full Metabase instance at `http://localhost:3000`
-- Default credentials should be configured in `.env` or set up on first launch.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgres://...` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+| `LLM_API_URL` | Local LLM endpoint | `http://localhost:1234/v1` |
+| `LLM_MODEL` | Model name for LLM inference | `local-model` |
+| `DEBUG` | Django debug mode | `True` |
+
+---
+
+## Data Sources
+
+- **ClinicalTrials.gov**: Primary source for clinical trial data (public API)
+- **PDB (Protein Data Bank)**: Experimental 3D protein structures
+- **AlphaFold DB**: AI-predicted protein structures from DeepMind
+- **ALS News Today**: News aggregation (with permission)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## License
+
+This project is open-source and available under the MIT License.
+
+---
+
+## Contact
+
+For questions about this project or collaboration opportunities:
+- **Email**: tuckerolson13@gmail.com
+- **GitHub Issues**: [Open an issue](https://github.com/tuckthomas/ALS-FTD-Dashboard/issues)
