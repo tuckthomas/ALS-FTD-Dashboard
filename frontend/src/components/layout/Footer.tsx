@@ -22,39 +22,39 @@ export function Footer() {
         <footer className="w-full border-t border-border bg-slate-950 dark:bg-background/80 backdrop-blur-md mt-12 relative z-40 transition-colors duration-300">
             <div className="max-w-[1600px] mx-auto px-6 py-12 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-12">
-                                                                    {/* Brand & Status Column */}
-                                                                    <div className="col-span-1 lg:col-span-2 flex gap-8 items-center">
-                                                                        {/* Even Larger Logo to the Left */}
-                                                                        <Link to="/" className="shrink-0">
-                                                                            <img
-                                                                                src="/f-als-ftd-dashboard-helix.png"
-                                                                                alt="ALS/FTD Logo"
-                                                                                className="h-32 w-auto"
-                                                                            />
-                                                                        </Link>
-                                                                        
-                                                                        {/* Vertical Column for Text Content */}
-                                                                        <div className="space-y-6">                                                            <div className="flex flex-col gap-2">
-                                                                                            <Link to="/" className="font-bold text-lg tracking-tight logo-gradient-text hover:opacity-80 transition-opacity">
-                                                                                                ALS/FTD Research Analytics
-                                                                                            </Link>
-                                                                                            <p className="text-sm text-slate-400 dark:text-muted-foreground max-w-xs leading-relaxed">
-                                                                                                Aggregating and visualizing clinical trial data for the familial ALS and FTD research community.
-                                                                                            </p>
-                                                                                        </div>                                    
-                                                            <div className="flex flex-col gap-1">
-                                                                <span className="text-[10px] text-slate-500 dark:text-muted-foreground uppercase font-bold tracking-widest">
-                                                                    Last Data Ingest
-                                                                </span>
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                                    <span className="text-xs text-slate-200 dark:text-foreground font-medium">
-                                                                        {formattedDate}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                    {/* Brand & Status Column */}
+                    <div className="col-span-1 lg:col-span-2 flex gap-8 items-center">
+                        {/* Even Larger Logo to the Left */}
+                        <Link to="/" className="shrink-0">
+                            <img
+                                src="/f-als-ftd-dashboard-helix.png"
+                                alt="ALS/FTD Logo"
+                                className="h-32 w-auto"
+                            />
+                        </Link>
+
+                        {/* Vertical Column for Text Content */}
+                        <div className="space-y-6">                                                            <div className="flex flex-col gap-2">
+                            <Link to="/" className="font-bold text-lg tracking-tight logo-gradient-text hover:opacity-80 transition-opacity">
+                                ALS/FTD Research Analytics
+                            </Link>
+                            <p className="text-sm text-slate-400 dark:text-muted-foreground max-w-xs leading-relaxed">
+                                Aggregating and visualizing clinical trial data for the familial ALS and FTD research community.
+                            </p>
+                        </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-slate-500 dark:text-muted-foreground uppercase font-bold tracking-widest">
+                                    Last Data Ingest
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-xs text-slate-200 dark:text-foreground font-medium">
+                                        {formattedDate}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Sitemap Columns */}
                     <div>
@@ -77,13 +77,13 @@ export function Footer() {
                         </ul>
                     </div>
 
-                                    <div>
-                                        <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Connect</h4>
-                                        <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
-                                            <li><a href="#" className="hover:text-primary transition-colors">GitHub Repository</a></li>
-                                            <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Team</Link></li>
-                                            <li><Link to="/contact#report" onClick={() => window.location.hash = '#report'} className="hover:text-primary transition-colors">Report Issue</Link></li>
-                                            <li><div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-md bg-slate-800 dark:bg-secondary/50 w-fit text-slate-200 dark:text-foreground">                                <Terminal className="h-3 w-3" />
+                    <div>
+                        <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Connect</h4>
+                        <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
+                            <li><a href="https://github.com/tuckthomas/ALS-FTD-Dashboard" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub Repository</a></li>
+                            <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Team</Link></li>
+                            <li><Link to="/contact#report" onClick={() => window.location.hash = '#report'} className="hover:text-primary transition-colors">Report Issue</Link></li>
+                            <li><div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-md bg-slate-800 dark:bg-secondary/50 w-fit text-slate-200 dark:text-foreground">                                <Terminal className="h-3 w-3" />
                                 <span className="text-[10px] font-mono">v0.1</span>
                             </div></li>
                         </ul>
