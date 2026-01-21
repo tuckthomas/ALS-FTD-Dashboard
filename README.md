@@ -46,17 +46,21 @@ flowchart TB
 
     subgraph External["External Data Sources"]
         ClinicalTrials[ClinicalTrials.gov]
+        ALSoD[ALSoD Gene Database]
         PDB[Protein Data Bank]
         AlphaFold[AlphaFold DB]
     end
 
     subgraph Pipeline["Data Pipeline"]
         LLM[Local LLM]
+        Scraper[Web Scraper]
     end
 
     Frontend -->|Axios| Backend
     Backend --> DataLayer
     ClinicalTrials -->|Nightly Sync| Pipeline
+    ALSoD -->|Gene Scraping| Scraper
+    Scraper --> PostgreSQL
     Pipeline -->|Enriched Data| PostgreSQL
     PDB --> GenePages
     AlphaFold --> GenePages
