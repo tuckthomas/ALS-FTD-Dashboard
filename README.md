@@ -21,6 +21,49 @@ If you appreciate this work and would like to support ALS research, please consi
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend (React/Vite)"]
+        Dashboard[Dashboard]
+        TrialFinder[Trial Finder]
+        GenePages[Gene Pages]
+        NewsPage[News Page]
+    end
+
+    subgraph Backend["Backend (Django Ninja)"]
+        AnalyticsAPI[Analytics API]
+        TrialsAPI[Trials API]
+        GenesAPI[Genes API]
+        NewsAPI[News API]
+    end
+
+    subgraph DataLayer["Data Layer"]
+        PostgreSQL[(PostgreSQL)]
+        Redis[(Redis Cache)]
+    end
+
+    subgraph External["External Data Sources"]
+        ClinicalTrials[ClinicalTrials.gov]
+        PDB[Protein Data Bank]
+        AlphaFold[AlphaFold DB]
+    end
+
+    subgraph Pipeline["Data Pipeline"]
+        LLM[Local LLM]
+    end
+
+    Frontend -->|Axios| Backend
+    Backend --> DataLayer
+    ClinicalTrials -->|Nightly Sync| Pipeline
+    Pipeline -->|Enriched Data| PostgreSQL
+    PDB --> GenePages
+    AlphaFold --> GenePages
+```
+
+---
+
 ## Features
 
 ### Dashboard & Analytics
@@ -81,34 +124,6 @@ If you appreciate this work and would like to support ALS research, please consi
 |------------|---------|
 | **Docker Compose** | Container orchestration for development |
 | **Nginx** | Reverse proxy and static file serving (production) |
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Frontend (React/Vite)                    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │Dashboard │ │ Trial    │ │  Gene    │ │  News    │           │
-│  │ Page     │ │ Finder   │ │  Pages   │ │  Page    │           │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
-│                    ↓ Axios API Calls ↓                          │
-├─────────────────────────────────────────────────────────────────┤
-│                     Backend (Django Ninja)                      │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │Analytics │ │ Trials   │ │  Genes   │ │  News    │           │
-│  │   API    │ │   API    │ │   API    │ │   API    │           │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
-│                    ↓                ↓                           │
-│  ┌────────────────────┐    ┌────────────────────┐              │
-│  │   Redis Cache      │    │   PostgreSQL       │              │
-│  └────────────────────┘    └────────────────────┘              │
-├─────────────────────────────────────────────────────────────────┤
-│                     Data Pipeline                               │
-│  ClinicalTrials.gov → Django Management Commands → LLM → DB    │
-└─────────────────────────────────────────────────────────────────┘
-```
 
 ---
 
