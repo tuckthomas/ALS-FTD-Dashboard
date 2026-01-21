@@ -101,7 +101,7 @@ export function NewsFilters({ onFiltersChange }: NewsFiltersProps) {
                 </h3>
                 <button
                     onClick={resetAll}
-                    className="text-xs text-[#0ea5e9] hover:text-[#a855f7] transition-colors font-medium"
+                    className="text-xs text-primary hover:text-primary/80 transition-colors font-bold uppercase tracking-widest"
                 >
                     Reset All
                 </button>
@@ -111,26 +111,30 @@ export function NewsFilters({ onFiltersChange }: NewsFiltersProps) {
             <div className="glass-panel p-4 rounded-xl space-y-3">
                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-400 mb-2">
                     <Calendar className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Date Range</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Date Range</span>
                 </div>
-                <div className="space-y-2">
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[10px] uppercase text-muted-foreground font-semibold">Start Date</label>
-                        <input 
-                            type="date" 
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full bg-secondary/50 border border-input rounded px-2 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none"
-                        />
+                <div className="space-y-3">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-tight">From</label>
+                        <div className="relative group">
+                            <input 
+                                type="date" 
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="modern-date-input w-full bg-slate-100 dark:bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                            />
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[10px] uppercase text-muted-foreground font-semibold">End Date</label>
-                        <input 
-                            type="date" 
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full bg-secondary/50 border border-input rounded px-2 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none"
-                        />
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-tight">To</label>
+                        <div className="relative group">
+                            <input 
+                                type="date" 
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="modern-date-input w-full bg-slate-100 dark:bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

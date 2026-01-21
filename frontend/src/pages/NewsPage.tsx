@@ -165,7 +165,7 @@ export function NewsPage() {
 
                                     <div className="pt-4 border-t border-border flex items-center justify-between mt-auto">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <Calendar className="h-3.5 w-3.5" />
+                                            <Calendar className="h-3.5 w-3.5 text-primary" />
                                             {new Date(article.publication_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </div>
                                         <a 
