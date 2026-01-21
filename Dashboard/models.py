@@ -137,8 +137,8 @@ class NewsArticle(models.Model):
     summary = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True) # Full content if available
     source_name = models.CharField(max_length=255) # e.g., "ALS News Today", "Nature"
-    url = models.URLField(unique=True)
-    image_url = models.URLField(blank=True, null=True)
+    url = models.URLField(unique=True, max_length=2000)
+    image_url = models.URLField(blank=True, null=True, max_length=2000)
     publication_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     tags = models.JSONField(default=list, blank=True) # e.g., ["Research", "Clinical Trial", "ALS"]
