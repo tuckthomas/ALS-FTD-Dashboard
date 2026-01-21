@@ -9,6 +9,8 @@ import { AboutPage } from '@/pages/AboutPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ContactPage } from '@/pages/ContactPage';
 import { NewsPage } from '@/pages/NewsPage';
+import { GenesPage } from '@/pages/GenesPage';
+import { GenePage } from '@/pages/GenePage';
 import { CookieBanner } from '@/components/layout/CookieBanner';
 
 
@@ -20,28 +22,28 @@ function App() {
     // Splash Screen Timer
     const timer = setTimeout(() => {
       setShowSplash(false);
-      
+
       // Check for disclaimer cookie
       const cookies = document.cookie.split(';').reduce((acc, current) => {
-          const [key, value] = current.trim().split('=');
-          acc[key] = value;
-          return acc;
+        const [key, value] = current.trim().split('=');
+        acc[key] = value;
+        return acc;
       }, {} as Record<string, string>);
 
       if (cookies['disclaimerAccepted'] !== 'true') {
-          setTimeout(() => setShowDisclaimer(true), 1000);
+        setTimeout(() => setShowDisclaimer(true), 1000);
       }
     }, 4500);
 
     return () => clearTimeout(timer);
   }, []);
-  
+
   const handleAcceptDisclaimer = () => {
     // Set cookie for 30 days
     const date = new Date();
     date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
     document.cookie = `disclaimerAccepted=true; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
-    
+
     setShowDisclaimer(false);
   };
 
@@ -113,6 +115,8 @@ function App() {
           <Route path="/news" element={<NewsPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/genes" element={<GenesPage />} />
+          <Route path="/gene/:symbol" element={<GenePage />} />
         </Routes>
       </MainLayout>
       <CookieBanner />

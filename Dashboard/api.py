@@ -147,3 +147,60 @@ def get_genes(request, format: str = "json"):
 
     # Default to JSON
     return list(genes)
+
+
+@router.get("/genes/{symbol}", tags=["Gene Data"])
+def get_gene_detail(request, symbol: str):
+    """Get detailed information for a specific gene."""
+    from .models import GeneStructure
+    try:
+        gene = Gene.objects.get(gene_symbol__iexact=symbol)
+        structures = gene.structures.all()
+        return {
+            "gene_symbol": gene.gene_symbol,
+            "gene_name": gene.gene_name,
+            "gene_risk_category": gene.gene_risk_category,
+            "structures": [
+                {
+                    "id": s.id,
+                    "source_type": s.source_type,
+                    "external_id": s.external_id,
+                    "title": s.title,
+                    "is_primary": s.is_primary,
+                }
+                for s in structures
+            ]
+        }
+    except Gene.DoesNotExist:
+        return JsonResponse({"error": f"Gene {symbol} not found"}, status=404)
+
+
+@router.get("/genes/{symbol}/structure", tags=["Gene Data"])
+def get_gene_structure(request, symbol: str):
+    """Get the primary 3D structure for a gene."""
+    from .models import GeneStructure
+    try:
+        gene = Gene.objects.get(gene_symbol__iexact=symbol)
+        # Get primary structure, or first available
+        structure = gene.structures.filter(is_primary=True).first()
+        if not structure:
+            structure = gene.structures.first()
+        
+        if not structure:
+            return JsonResponse({"error": f"No structure available for {symbol}"}, status=404)
+        
+        return {
+            "gene": {
+                "symbol": gene.gene_symbol,
+                "name": gene.gene_name,
+            },
+            "structure": {
+                "id": structure.id,
+                "source_type": structure.source_type,
+                "external_id": structure.external_id,
+                "title": structure.title,
+                "componentProps": structure.get_component_props(),
+            }
+        }
+    except Gene.DoesNotExist:
+        return JsonResponse({"error": f"Gene {symbol} not found"}, status=404)

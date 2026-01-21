@@ -8,6 +8,7 @@ const navLinks = [
     { href: '/', label: 'Dashboard' },
     { href: '/about', label: 'About' },
     { href: '/trials', label: 'Trial Finder' },
+    { href: '/genes', label: 'Genes' },
     { href: '/news', label: 'News' },
     { href: '/query', label: 'Query Builder' },
 ];

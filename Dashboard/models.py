@@ -150,3 +150,43 @@ class NewsArticle(models.Model):
     class Meta:
         ordering = ['-publication_date']
 
+
+# 3D Structure data for genes
+class GeneStructure(models.Model):
+    SOURCE_PDB = 'pdb'
+    SOURCE_ALPHAFOLD = 'alphafold'
+    SOURCE_CHOICES = [
+        (SOURCE_PDB, 'PDB'),
+        (SOURCE_ALPHAFOLD, 'AlphaFold'),
+    ]
+
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE, related_name='structures')
+    source_type = models.CharField(max_length=20, choices=SOURCE_CHOICES)
+    external_id = models.CharField(max_length=50)  # PDB ID or UniProt accession
+    title = models.CharField(max_length=255, blank=True)
+    is_primary = models.BooleanField(default=False)
+    visual_style = models.CharField(max_length=50, blank=True, default='cartoon')
+    hide_controls = models.BooleanField(default=True)
+    alphafold_view = models.BooleanField(default=False)
+    custom_data_url = models.URLField(blank=True, null=True, max_length=500)
+    custom_data_format = models.CharField(max_length=20, blank=True, default='')
+
+    class Meta:
+        unique_together = ['gene', 'source_type', 'external_id']
+
+    def __str__(self):
+        return f"{self.gene.gene_symbol} - {self.source_type}:{self.external_id}"
+
+    def get_component_props(self):
+        """Returns props for the pdbe-molstar web component."""
+        props = {
+            'visual-style': self.visual_style or 'cartoon',
+            'hide-controls': 'true' if self.hide_controls else 'false',
+            'bg-color-r': '0', 'bg-color-g': '0', 'bg-color-b': '0',
+        }
+        if self.source_type == self.SOURCE_PDB:
+            props['molecule-id'] = self.external_id.lower()
+        elif self.custom_data_url:
+            props['custom-data-url'] = self.custom_data_url
+            props['custom-data-format'] = self.custom_data_format or 'cif'
+        return props
