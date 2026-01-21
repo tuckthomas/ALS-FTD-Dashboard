@@ -52,16 +52,16 @@ flowchart TB
     end
 
     subgraph Pipeline["Data Pipeline"]
-        LLM[Local LLM]
+        Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
     end
 
     Frontend -->|Axios| Backend
     Backend --> DataLayer
-    ClinicalTrials -->|Nightly Sync| Pipeline
+    ClinicalTrials -->|Nightly Sync| Sanitizer
     ALSoD -->|Gene Scraping| Scraper
     Scraper --> PostgreSQL
-    Pipeline -->|Enriched Data| PostgreSQL
+    Sanitizer -->|Clean Data| PostgreSQL
     PDB --> GenePages
     AlphaFold --> GenePages
 ```
@@ -117,11 +117,11 @@ flowchart TB
 | **Redis** | Caching layer for API responses and rate limiting |
 | **Gunicorn** | Production WSGI server |
 
-### AI & Data Processing
+### Data Processing
 | Technology | Purpose |
 |------------|---------|
-| **LM Studio / Ollama** | Local LLM inference for data enrichment |
-| **OpenAI-Compatible API** | Structured JSON output for eligibility parsing |
+| **Regex Patterns** | Multi-layer text sanitization and normalization |
+| **BeautifulSoup** | Web scraping for ALSoD gene data |
 
 ### Infrastructure
 | Technology | Purpose |
