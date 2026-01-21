@@ -1,4 +1,6 @@
 import feedparser
+import re
+from urllib.parse import quote
 from datetime import datetime, timedelta
 from django.utils.timezone import make_aware
 from .models import NewsArticle, Gene
@@ -8,14 +10,19 @@ logger = logging.getLogger(__name__)
 
 # List of RSS feeds to scrape
 RSS_FEEDS = [
+    # Specialized Medical Feeds
     "https://www.sciencedaily.com/rss/mind_brain/als.xml",
     "https://medicalxpress.com/rss/tags/amyotrophic+lateral+sclerosis/",
     "https://www.news-medical.net/tag/feed/Amyotrophic-Lateral-Sclerosis-ALS.aspx",
     "https://medicalxpress.com/rss/tags/frontotemporal+dementia/",
-    # Google News RSS (Real-time)
-    "https://news.google.com/rss/search?q=Amyotrophic+Lateral+Sclerosis+when:7d&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=Frontotemporal+Dementia+when:7d&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=Lou+Gehrig%27s+Disease+when:7d&hl=en-US&gl=US&ceid=US:en"
+    
+    # PubMed (Research Studies - High Volume)
+    "https://pubmed.ncbi.nlm.nih.gov/rss/search/?term=%28Amyotrophic+Lateral+Sclerosis%29+OR+%28Frontotemporal+Dementia%29+OR+%28Lou+Gehrig%27s+Disease%29&limit=50",
+
+    # Google News RSS (Broad Coverage - Removed time limits for better backfill)
+    "https://news.google.com/rss/search?q=Amyotrophic+Lateral+Sclerosis&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Frontotemporal+Dementia&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Lou+Gehrig%27s+Disease&hl=en-US&gl=US&ceid=US:en"
 ]
 
 def fetch_and_process_news():
@@ -29,7 +36,7 @@ def fetch_and_process_news():
     # Filter out 'Tenuous' risk genes
     gene_objects = Gene.objects.exclude(gene_risk_category='Tenuous')
     
-    # Base keywords (Using full names as requested)
+    # Base keywords (Using full names and abbreviations with safety)
     base_keywords = {
         "ALS", "Amyotrophic Lateral Sclerosis", 
         "FTD", "Frontotemporal Dementia", 
@@ -39,6 +46,9 @@ def fetch_and_process_news():
     # Map keywords to Gene objects for linking
     keyword_to_gene = {}
     all_keywords = base_keywords.copy()
+    
+    # Dynamic Feed Generation
+    dynamic_feeds = []
 
     for gene in gene_objects:
         # Use full gene name if available
@@ -52,12 +62,30 @@ def fetch_and_process_news():
             symbol = gene.gene_symbol.upper()
             keyword_to_gene[symbol] = gene
             all_keywords.add(symbol)
+            
+            # Generate PubMed Feed for this Gene + ALS/FTD context
+            # Query: (Gene) AND (ALS OR Amyotrophic Lateral Sclerosis OR FTD OR Frontotemporal Dementia)
+            raw_pubmed_query = f"({symbol}) AND (ALS OR Amyotrophic Lateral Sclerosis OR FTD OR Frontotemporal Dementia)"
+            encoded_pubmed_query = quote(raw_pubmed_query)
+            pubmed_url = f"https://pubmed.ncbi.nlm.nih.gov/rss/search/?term={encoded_pubmed_query}&limit=5"
+            dynamic_feeds.append(pubmed_url)
+            
+            # Generate Google News Feed for this Gene
+            # Query: Gene + "ALS"
+            raw_gnews_query = f"{symbol} ALS"
+            encoded_gnews_query = quote(raw_gnews_query)
+            gnews_url = f"https://news.google.com/rss/search?q={encoded_gnews_query}&hl=en-US&gl=US&ceid=US:en"
+            dynamic_feeds.append(gnews_url)
         
     logger.info(f"Loaded {len(all_keywords)} keywords for filtering.")
+    logger.info(f"Generated {len(dynamic_feeds)} gene-specific RSS feeds.")
 
     new_articles_count = 0
+    
+    # Combine static and dynamic feeds
+    all_feeds = RSS_FEEDS + dynamic_feeds
 
-    for feed_url in RSS_FEEDS:
+    for feed_url in all_feeds:
         try:
             feed = feedparser.parse(feed_url)
             logger.info(f"Parsing feed: {feed_url} ({len(feed.entries)} entries)")
@@ -75,8 +103,15 @@ def fetch_and_process_news():
                 # Combine text for searching
                 full_text = (title + " " + summary).upper()
                 
-                # Check if ANY keyword is present in the text
-                matched_keywords = [k for k in all_keywords if k in full_text]
+                # Check if ANY keyword is present in the text using Regex Word Boundaries
+                # This safely matches "ALS" but not "ALSO"
+                matched_keywords = []
+                for keyword in all_keywords:
+                    # Escape keyword for regex safety (though mostly alphanumeric)
+                    escaped_kw = re.escape(keyword)
+                    # Use \b for word boundaries
+                    if re.search(r'\b' + escaped_kw + r'\b', full_text):
+                        matched_keywords.append(keyword)
                 
                 if matched_keywords:
                     # Identify related genes
@@ -94,7 +129,8 @@ def fetch_and_process_news():
                         # Fallback to an old date instead of NOW to prevent it from showing as "Latest"
                         # Defaulting to Jan 1, 2000
                         pub_date = make_aware(datetime(2000, 1, 1))
-                        logger.warning(f"Could not parse date for article '{title}'. Defaulting to 2000-01-01.")
+                        # Only log warning if it's not a common occurrence to avoid log spam
+                        # logger.warning(f"Could not parse date for article '{title}'. Defaulting to 2000-01-01.")
 
                     # 4. Extract Image (if available in media_content or summary)
                     image_url = None
