@@ -463,12 +463,16 @@ def get_genetic_markers(request, status: List[str] = None, phase: List[str] = No
     active_trial_ids = list(queryset.values_list('unique_protocol_id', flat=True))
     
     # 2. Annotate Genes based on this specific trial set
-    genes = Gene.objects.filter(trials__unique_protocol_id__in=active_trial_ids).annotate(
+    genes = Gene.objects.filter(
+        trials__unique_protocol_id__in=active_trial_ids
+    ).exclude(
+        gene_risk_category__iexact='Tenuous'
+    ).annotate(
         # Number of unique trials for this gene in the active set
         trial_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids), distinct=True),
         # Number of unique trials for this gene that HAVE a Drug intervention
         drug_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids) & Q(trials__interventions__intervention_type__icontains='Drug'), distinct=True)
-    ).filter(trial_count__gt=0).order_by('-trial_count')[:10]
+    ).filter(trial_count__gt=0).order_by('-trial_count')
     
     result = []
     for gene in genes:
