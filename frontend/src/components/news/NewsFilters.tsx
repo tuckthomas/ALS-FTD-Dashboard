@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Calendar, Filter } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon, Filter } from 'lucide-react';
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Filters {
     genes: string[];
@@ -38,7 +47,7 @@ export function NewsFilters({ onFiltersChange }: NewsFiltersProps) {
     const [genes, setGenes] = useState<string[]>([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    
+
     const [geneOptions, setGeneOptions] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -110,31 +119,59 @@ export function NewsFilters({ onFiltersChange }: NewsFiltersProps) {
             {/* Date Range Filter */}
             <div className="glass-panel p-4 rounded-xl space-y-3">
                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-400 mb-2">
-                    <Calendar className="w-4 h-4 text-primary" />
+                    <CalendarIcon className="w-4 h-4 text-primary" />
                     <span className="text-xs font-bold uppercase tracking-wider text-foreground">Date Range</span>
                 </div>
                 <div className="space-y-3">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-tight">From</label>
-                        <div className="relative group">
-                            <input 
-                                type="date" 
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="modern-date-input w-full bg-slate-100 dark:bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                            />
-                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !startDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {startDate ? format(new Date(startDate), "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={startDate ? new Date(startDate) : undefined}
+                                    onSelect={(date) => setStartDate(date ? format(date, "yyyy-MM-dd") : '')}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-tight">To</label>
-                        <div className="relative group">
-                            <input 
-                                type="date" 
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="modern-date-input w-full bg-slate-100 dark:bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                            />
-                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !endDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {endDate ? format(new Date(endDate), "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={endDate ? new Date(endDate) : undefined}
+                                    onSelect={(date) => setEndDate(date ? format(date, "yyyy-MM-dd") : '')}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
             </div>

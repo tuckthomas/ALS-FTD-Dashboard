@@ -230,10 +230,10 @@ export function DashboardPage() {
 
                         {/* Timeline Chart and Gene Distribution Chart */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="w-full">
+                            <div className="w-full lg:col-span-2">
                                 <TrialsByYearChart data={currentData.year_data} />
                             </div>
-                            <div className="w-full">
+                            <div className="w-full lg:col-span-2">
                                 <GeneDistributionChart data={currentData.historical_gene_data} />
                             </div>
                         </div>
