@@ -53,7 +53,7 @@ export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
 
 
     const handleMarkerClick = (geneName: string) => {
-        navigate(`/trials?gene=${encodeURIComponent(geneName)}`);
+        navigate(`/gene/${encodeURIComponent(geneName)}`);
     };
 
     return (
