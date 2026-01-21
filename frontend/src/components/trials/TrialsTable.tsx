@@ -40,25 +40,20 @@ interface TrialsTableProps {
 }
 
 const statusStyles: Record<string, string> = {
-    recruiting: 'bg-emerald-500/10 text-emerald-600 dark:bg-[#2dd4bf]/20 dark:text-[#2dd4bf]',
-    active: 'bg-slate-500/20 text-slate-600 dark:text-slate-400',
-    completed: 'bg-blue-500/10 text-blue-600 dark:bg-[#0ea5e9]/20 dark:text-[#0ea5e9]',
-    terminated: 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400',
-    withdrawn: 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
-    suspended: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400',
-    pending: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-    unknown: 'bg-slate-500/10 text-slate-500 dark:bg-slate-600/20 dark:text-slate-500',
-};
-
-const statusLabels: Record<string, string> = {
-    recruiting: 'Recruiting',
-    active: 'Active, Not Recruiting',
-    completed: 'Completed',
-    terminated: 'Terminated',
-    withdrawn: 'Withdrawn',
-    suspended: 'Suspended',
-    pending: 'Not Yet Recruiting',
-    unknown: 'Unknown',
+    // User specified statuses
+    'recruiting': 'bg-emerald-500/10 text-emerald-600 dark:bg-[#2dd4bf]/20 dark:text-[#2dd4bf]',
+    'not yet recruiting': 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+    'enrolling by invitation': 'bg-blue-500/10 text-blue-600 dark:bg-[#0ea5e9]/20 dark:text-[#0ea5e9]',
+    'available': 'bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400',
+    'approved for marketing': 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+    
+    // Common fallbacks/others that might appear
+    'active, not recruiting': 'bg-slate-500/20 text-slate-600 dark:text-slate-400',
+    'completed': 'bg-slate-500/10 text-slate-500 dark:bg-slate-600/20 dark:text-slate-500',
+    'terminated': 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400',
+    'withdrawn': 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+    'suspended': 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400',
+    'unknown': 'bg-slate-500/10 text-slate-500 dark:bg-slate-600/20 dark:text-slate-500',
 };
 
 const studyTypeStyles: Record<string, string> = {
@@ -87,21 +82,14 @@ const columns: ColumnDef<Trial>[] = [
         header: 'Status',
         size: 160,
         cell: ({ row }) => {
-            const status = row.original.status;
-            const indicatorColors: Record<string, string> = {
-                recruiting: 'bg-[#2dd4bf]',
-                active: 'bg-slate-400',
-                suspended: 'bg-orange-400',
-                pending: 'bg-purple-400',
-            };
-            const showIndicator = ['recruiting', 'active', 'suspended', 'pending'].includes(status);
+            // Normalize status to lowercase for styling lookup
+            const originalStatus = row.original.status || 'unknown';
+            const statusKey = originalStatus.toLowerCase();
+
             return (
                 <div className="flex items-center justify-center w-full">
-                    <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-tighter whitespace-nowrap ${statusStyles[status] || statusStyles.unknown}`}>
-                        {showIndicator && (
-                            <span className={`h-1.5 w-1.5 rounded-full ${indicatorColors[status]} ${status === 'recruiting' ? 'animate-pulse' : ''}`} />
-                        )}
-                        {statusLabels[status] || status}
+                    <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-tighter whitespace-nowrap ${statusStyles[statusKey] || statusStyles.unknown}`}>
+                        {originalStatus}
                     </span>
                 </div>
             );

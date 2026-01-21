@@ -133,7 +133,7 @@ export function DashboardPage() {
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                                 <span className={`text-sm font-medium ${!isFamilial ? 'text-foreground' : 'text-muted-foreground'}`}>All</span>
                                 <Switch checked={isFamilial} onCheckedChange={setIsFamilial} />
@@ -225,6 +225,7 @@ export function DashboardPage() {
                 {/* Right Sidebar (Right 3 columns) */}
                 <aside className="lg:col-span-3 space-y-6">
 
+                    <LiveUpdatesWidget news={currentData.news_data} />
                     <GeneticMarkersWidget markers={currentData.gene_data.map(g => ({
                         name: g.name,
                         trend: { value: `${g.trials} trials`, direction: 'stable' as const },
@@ -232,7 +233,6 @@ export function DashboardPage() {
                         trials: g.trials,
                         drugs: g.drugs,
                     }))} />
-                    <LiveUpdatesWidget news={currentData.news_data} />
                 </aside>
             </div>
         </div>
