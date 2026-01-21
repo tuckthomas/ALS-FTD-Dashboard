@@ -71,7 +71,7 @@ export function Footer() {
                         <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Resources</h4>
                         <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
                             <li><a href="#" onClick={handleResourceClick} className="hover:text-primary transition-colors">Documentation</a></li>
-                            <li><a href="#" onClick={handleResourceClick} className="hover:text-primary transition-colors">API Reference</a></li>
+                            <li><a href="/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">API Reference</a></li>
                             <li><a href="#" onClick={handleResourceClick} className="hover:text-primary transition-colors">Research Papers</a></li>
                             <li><a href="#" onClick={handleResourceClick} className="hover:text-primary transition-colors">Data Standards</a></li>
                         </ul>
