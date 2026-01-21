@@ -6,10 +6,21 @@ import { TrialStatusChart } from '../components/dashboard/TrialStatusChart';
 import { FundingSourcesChart } from '../components/dashboard/FundingSourcesChart';
 import { TrialsByYearChart } from '../components/dashboard/TrialsByYearChart';
 import { GlobalMapSection } from '../components/dashboard/GlobalMapSection';
+import { GeneDistributionChart } from '../components/dashboard/GeneDistributionChart';
 
 import { GeneticMarkersWidget } from '../components/dashboard/GeneticMarkersWidget';
 import { LiveUpdatesWidget } from '../components/dashboard/LiveUpdatesWidget';
 import { Switch } from '../components/ui/switch';
+
+export interface GeneData {
+    name: string;
+    full_name: string;
+    category: string;
+    trials: number;
+    drugs: number;
+    interventional?: number;
+    observational?: number;
+}
 
 interface DashboardStats {
     total_trials: number;
@@ -36,12 +47,14 @@ interface GeoData {
     value: number;
 }
 
-interface GeneData {
+export interface GeneData {
     name: string;
     full_name: string;
     category: string;
     trials: number;
     drugs: number;
+    interventional?: number;
+    observational?: number;
 }
 
 interface DashboardPackage {
@@ -51,6 +64,7 @@ interface DashboardPackage {
     funding_data: FundingData[];
     geo_data: GeoData[];
     gene_data: GeneData[];
+    historical_gene_data: GeneData[];
     year_data: any[];
     map_data: any[];
     news_data: any[];
@@ -165,6 +179,11 @@ export function DashboardPage() {
                             />
                         </div>
 
+                        {/* Gene Distribution Chart (Current Landscape) */}
+                        <div className="h-[350px]">
+                            <GeneDistributionChart data={currentData.gene_data} />
+                        </div>
+
                         {/* Geographic Density Map */}
                         <GlobalMapSection data={currentData.map_data} />
                     </div>
@@ -209,9 +228,14 @@ export function DashboardPage() {
                             />
                         </div>
 
-                        {/* Timeline Chart */}
-                        <div className="w-full">
-                            <TrialsByYearChart data={currentData.year_data} />
+                        {/* Timeline Chart and Gene Distribution Chart */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="w-full">
+                                <TrialsByYearChart data={currentData.year_data} />
+                            </div>
+                            <div className="w-full">
+                                <GeneDistributionChart data={currentData.historical_gene_data} />
+                            </div>
                         </div>
 
                         {/* Complex Charts Row */}

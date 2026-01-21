@@ -455,8 +455,9 @@ def get_genetic_markers(request, status: List[str] = None, phase: List[str] = No
     # 1. Get the filtered set of trials first
     queryset = Trial.objects.all()
     
-    # Default to "Active/Actionable" if no status provided (Dashboard view)
-    target_status = status if status else ['active_all']
+    # Default to "Active/Actionable" ONLY if status is None (not provided)
+    # If status is [] (explicit empty list), it means "All", so we skip filtering
+    target_status = ['active_all'] if status is None else status
     queryset = apply_analytics_filters(queryset, target_status, phase, gene, familial)
     
     # Get IDs to ensure sub-queries in Count() are accurate
@@ -469,7 +470,10 @@ def get_genetic_markers(request, status: List[str] = None, phase: List[str] = No
         # Number of unique trials for this gene in the active set
         trial_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids), distinct=True),
         # Number of unique trials for this gene that HAVE a Drug intervention
-        drug_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids) & Q(trials__interventions__intervention_type__icontains='Drug'), distinct=True)
+        drug_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids) & Q(trials__interventions__intervention_type__icontains='Drug'), distinct=True),
+        # Interventional vs Observational breakdown
+        interventional_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids) & Q(trials__study_type__iexact='Interventional'), distinct=True),
+        observational_count=Count('trials', filter=Q(trials__unique_protocol_id__in=active_trial_ids) & Q(trials__study_type__iexact='Observational'), distinct=True)
     ).order_by('-trial_count')
     
     result = []
@@ -480,7 +484,9 @@ def get_genetic_markers(request, status: List[str] = None, phase: List[str] = No
             "full_name": gene.gene_name,
             "category": gene.gene_risk_category,
             "trials": gene.trial_count,
-            "drugs": gene.drug_count
+            "drugs": gene.drug_count,
+            "interventional": gene.interventional_count,
+            "observational": gene.observational_count
         })
     
     return result
@@ -520,7 +526,7 @@ def get_latest_news(request):
 @router.get("/dashboard-package")
 def get_dashboard_package(request, familial: bool = False):
     """Returns all data needed for the dashboard in a single request."""
-    cache_key = f'dashboard_package_familial_{familial}'
+    cache_key = f'dashboard_package_familial_v2_{familial}'
     cached_data = cache.get(cache_key)
     
     if cached_data:
@@ -532,7 +538,8 @@ def get_dashboard_package(request, familial: bool = False):
         "status_data": get_trials_by_status(request, status=None, phase=None, gene=None, familial=familial),
         "funding_data": get_funding_sources(request, status=None, phase=None, gene=None, familial=familial),
         "geo_data": get_geographic_distribution(request, status=None, phase=None, gene=None, familial=familial),
-        "gene_data": get_genetic_markers(request, status=None, phase=None, gene=None, familial=familial),
+        "gene_data": get_genetic_markers(request, status=None, phase=None, gene=None, familial=familial), # Active (default)
+        "historical_gene_data": get_genetic_markers(request, status=[], phase=None, gene=None, familial=familial), # All Time (explicit empty status)
         "year_data": get_trials_by_year(request, status=None, phase=None, gene=None, country=None, familial=familial),
         "map_data": get_global_map_data(request, status=None, phase=None, gene=None, familial=familial),
         "news_data": get_latest_news(request)

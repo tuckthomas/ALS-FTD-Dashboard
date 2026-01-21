@@ -311,7 +311,7 @@ def enhanced_fetch_trial_data():
 
     # Match genes
     processed_data_df['genes'] = processed_data_df.apply(
-        lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol), axis=1)
+        lambda row: match_genes(row['combined_keywords'], gene_symbols, gene_names, gene_name_to_symbol, row['unique_protocol_id']), axis=1)
 
     # Merge processed data
     trials_data_df = pd.merge(trials_data_df, processed_data_df[['unique_protocol_id', 'genes']], on='unique_protocol_id', how='left')
@@ -404,7 +404,13 @@ def validate_and_transform_choice_field(value):
 # To refine the matching process and avoid false positives, an additional check occurs to ensure that gene symbols
 # are recognized as distinct words or part of a larger keyword that correctly represents
 # a gene symbol within the context (e.g., at the beginning of a word, followed by a non-alphabetic character, or at the end of a word). 
-def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol):
+def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol, nct_id=None):
+    # Check for manual override first
+    from .manual_overrides import GENE_OVERRIDES
+    if nct_id and nct_id in GENE_OVERRIDES:
+        print(f"Applying manual override for {nct_id}: {GENE_OVERRIDES[nct_id]}")
+        return json.dumps(GENE_OVERRIDES[nct_id])
+
     valid_keywords_count = 0
     invalid_keywords_count = 0
     matched_genes = set()  # Use a set to avoid duplicates
@@ -444,13 +450,11 @@ def match_genes(combined_keywords, gene_symbols, gene_names, gene_name_to_symbol
             print(f"Error processing combined keywords: {e}")
             invalid_keywords_count += 1
     else:
-        print("Invalid or empty 'combined_keywords' field")
+        # print("Invalid or empty 'combined_keywords' field") # Reduce noise
         invalid_keywords_count += 1
 
     # Print results for debug purposes
-    print(f"Total records with valid keyword matches: {valid_keywords_count}")
-    print(f"Valid keywords count: {valid_keywords_count}")
-    print(f"Invalid/Empty keywords count: {invalid_keywords_count}")
+    # print(f"Total records with valid keyword matches: {valid_keywords_count}")
     return json.dumps(list(matched_genes))  # Convert set back to list for JSON serialization
 
 
