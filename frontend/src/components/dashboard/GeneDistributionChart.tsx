@@ -41,8 +41,9 @@ export function GeneDistributionChart({ data = [] }: GeneDistributionChartProps)
     }, [data, filter]);
 
     return (
-        <div className="glass-panel p-6 rounded-xl h-[350px] flex flex-col">
-            <div className="flex justify-between items-start mb-6">
+        <div className="glass-panel p-4 sm:p-6 rounded-xl min-h-[420px] sm:min-h-[350px] flex flex-col">
+            {/* Header - Stack on mobile, row on larger screens */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Dna className="h-5 w-5 text-primary" />
@@ -51,33 +52,35 @@ export function GeneDistributionChart({ data = [] }: GeneDistributionChartProps)
                     <p className="text-muted-foreground text-xs">Trials by genetic marker</p>
                 </div>
 
-                <div className="flex bg-muted/50 p-1 rounded-lg">
+                {/* Toggle buttons - Wrap on mobile */}
+                <div className="flex flex-wrap bg-muted/50 p-1 rounded-lg gap-1 w-full sm:w-auto">
                     {(['all', 'interventional', 'observational'] as const).map((type) => (
                         <button
                             key={type}
                             onClick={() => setFilter(type)}
                             className={`
-                                px-3 py-1 rounded-md text-[10px] font-medium transition-all capitalize uppercase tracking-wide
+                                flex-1 sm:flex-none px-2 sm:px-3 py-1.5 rounded-md text-[10px] font-medium transition-all capitalize uppercase tracking-wide whitespace-nowrap
                                 ${filter === type
                                     ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}
                             `}
                         >
-                            {type}
+                            {type === 'interventional' ? 'Interv.' : type === 'observational' ? 'Observ.' : type}
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div className="flex-1 w-full min-h-0">
+            {/* Chart area with more vertical space */}
+            <div className="flex-1 w-full min-h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
                             data={chartData}
                             cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
+                            cy="45%"
+                            innerRadius={50}
+                            outerRadius={70}
                             paddingAngle={2}
                             dataKey="value"
                         >
@@ -97,8 +100,10 @@ export function GeneDistributionChart({ data = [] }: GeneDistributionChartProps)
                         />
                         <Legend
                             verticalAlign="bottom"
-                            height={36}
+                            wrapperStyle={{ paddingTop: '16px' }}
                             iconType="circle"
+                            iconSize={8}
+                            formatter={(value) => <span className="text-[10px] sm:text-xs">{value}</span>}
                         />
                     </PieChart>
                 </ResponsiveContainer>
