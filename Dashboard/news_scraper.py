@@ -1,12 +1,22 @@
+import feedparser
 from datetime import datetime, timedelta
 from django.utils.timezone import make_aware
 from .models import NewsArticle, Gene
 import logging
 
 logger = logging.getLogger(__name__)
-# ... (rest of imports)
 
-# ... (RSS_FEEDS list remains same)
+# List of RSS feeds to scrape
+RSS_FEEDS = [
+    "https://www.sciencedaily.com/rss/mind_brain/als.xml",
+    "https://medicalxpress.com/rss/tags/amyotrophic+lateral+sclerosis/",
+    "https://www.news-medical.net/tag/feed/Amyotrophic-Lateral-Sclerosis-ALS.aspx",
+    "https://medicalxpress.com/rss/tags/frontotemporal+dementia/",
+    # Google News RSS (Real-time)
+    "https://news.google.com/rss/search?q=Amyotrophic+Lateral+Sclerosis+when:7d&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Frontotemporal+Dementia+when:7d&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Lou+Gehrig%27s+Disease+when:7d&hl=en-US&gl=US&ceid=US:en"
+]
 
 def fetch_and_process_news():
     """
@@ -21,10 +31,9 @@ def fetch_and_process_news():
     
     # Base keywords (Using full names as requested)
     base_keywords = {
-        "Amyotrophic Lateral Sclerosis", 
-        "Frontotemporal Dementia", 
-        "Lou Gehrig's Disease", 
-        "Motor Neuron Disease"
+        "ALS", "Amyotrophic Lateral Sclerosis", 
+        "FTD", "Frontotemporal Dementia", 
+        "Lou Gehrig's Disease", "Motor Neuron Disease"
     }
     
     # Map keywords to Gene objects for linking
