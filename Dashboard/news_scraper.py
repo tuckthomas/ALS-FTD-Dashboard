@@ -12,7 +12,11 @@ RSS_FEEDS = [
     "https://medicalxpress.com/rss/tags/amyotrophic+lateral+sclerosis/",
     "https://www.news-medical.net/tag/feed/Amyotrophic-Lateral-Sclerosis-ALS.aspx",
     "https://www.sciencedaily.com/rss/mind_brain/dementia.xml", # For FTD coverage
-    "https://medicalxpress.com/rss/tags/frontotemporal+dementia/"
+    "https://medicalxpress.com/rss/tags/frontotemporal+dementia/",
+    # Google News RSS (Real-time)
+    "https://news.google.com/rss/search?q=Amyotrophic+Lateral+Sclerosis+when:7d&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Frontotemporal+Dementia+when:7d&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Lou+Gehrig%27s+Disease+when:7d&hl=en-US&gl=US&ceid=US:en"
 ]
 
 def fetch_and_process_news():
@@ -26,11 +30,12 @@ def fetch_and_process_news():
     # Filter out 'Tenuous' risk genes
     gene_objects = Gene.objects.exclude(gene_risk_category='Tenuous')
     
-    # Base keywords
+    # Base keywords (Using full names as requested)
     base_keywords = {
-        "ALS", "Amyotrophic Lateral Sclerosis", 
-        "FTD", "Frontotemporal Dementia", 
-        "Lou Gehrig's Disease", "Motor Neuron Disease"
+        "Amyotrophic Lateral Sclerosis", 
+        "Frontotemporal Dementia", 
+        "Lou Gehrig's Disease", 
+        "Motor Neuron Disease"
     }
     
     # Map keywords to Gene objects for linking
@@ -38,15 +43,17 @@ def fetch_and_process_news():
     all_keywords = base_keywords.copy()
 
     for gene in gene_objects:
-        if gene.gene_symbol:
-            symbol = gene.gene_symbol.upper()
-            keyword_to_gene[symbol] = gene
-            all_keywords.add(symbol)
-        
+        # Use full gene name if available
         if gene.gene_name:
             name = gene.gene_name.upper()
             keyword_to_gene[name] = gene
             all_keywords.add(name)
+        
+        # Keep symbols as well, as they are standard identifiers (e.g. SOD1)
+        if gene.gene_symbol:
+            symbol = gene.gene_symbol.upper()
+            keyword_to_gene[symbol] = gene
+            all_keywords.add(symbol)
         
     logger.info(f"Loaded {len(all_keywords)} keywords for filtering.")
 
