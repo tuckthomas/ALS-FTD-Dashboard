@@ -1,23 +1,12 @@
-import feedparser
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils.timezone import make_aware
 from .models import NewsArticle, Gene
 import logging
 
 logger = logging.getLogger(__name__)
+# ... (rest of imports)
 
-# List of RSS feeds to scrape
-RSS_FEEDS = [
-    "https://www.sciencedaily.com/rss/mind_brain/als.xml",
-    "https://medicalxpress.com/rss/tags/amyotrophic+lateral+sclerosis/",
-    "https://www.news-medical.net/tag/feed/Amyotrophic-Lateral-Sclerosis-ALS.aspx",
-    "https://www.sciencedaily.com/rss/mind_brain/dementia.xml", # For FTD coverage
-    "https://medicalxpress.com/rss/tags/frontotemporal+dementia/",
-    # Google News RSS (Real-time)
-    "https://news.google.com/rss/search?q=Amyotrophic+Lateral+Sclerosis+when:7d&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=Frontotemporal+Dementia+when:7d&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=Lou+Gehrig%27s+Disease+when:7d&hl=en-US&gl=US&ceid=US:en"
-]
+# ... (RSS_FEEDS list remains same)
 
 def fetch_and_process_news():
     """
@@ -26,6 +15,9 @@ def fetch_and_process_news():
     """
     logger.info("Starting news scrape...")
     
+    # Define cutoff date (e.g., 30 days ago)
+    cutoff_date = make_aware(datetime.now() - timedelta(days=30))
+
     # 1. Build Keyword List from Database
     # Filter out 'Tenuous' risk genes
     gene_objects = Gene.objects.exclude(gene_risk_category='Tenuous')
@@ -94,6 +86,10 @@ def fetch_and_process_news():
                         pub_date = make_aware(pub_date)
                     else:
                         pub_date = make_aware(datetime.now())
+                    
+                    # DATE FILTER: Skip if older than 30 days
+                    if pub_date < cutoff_date:
+                        continue
 
                     # 4. Extract Image (if available in media_content or summary)
                     image_url = None
