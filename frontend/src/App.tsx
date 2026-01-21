@@ -12,6 +12,7 @@ import { NewsPage } from '@/pages/NewsPage';
 import { GenesPage } from '@/pages/GenesPage';
 import { GenePage } from '@/pages/GenePage';
 import { CookieBanner } from '@/components/layout/CookieBanner';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 
 
 function App() {
@@ -107,6 +108,7 @@ function App() {
 
       {/* Main App */}
       <MainLayout>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/trials" element={<TrialFinderPage />} />

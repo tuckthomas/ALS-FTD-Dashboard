@@ -52,7 +52,7 @@ export function MobileSidebar({ isOpen, onClose, navLinks }: MobileSidebarProps)
                 <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-3">
                         <img
-                            src="/f-als-ftd-dashboard.png"
+                            src="/f-als-ftd-dashboard-helix.png"
                             alt="ALS/FTD Logo"
                             className="h-8 w-auto"
                         />
