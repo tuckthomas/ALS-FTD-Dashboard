@@ -15,9 +15,6 @@ def fetch_and_process_news():
     """
     logger.info("Starting news scrape...")
     
-    # Define cutoff date (e.g., 30 days ago)
-    cutoff_date = make_aware(datetime.now() - timedelta(days=30))
-
     # 1. Build Keyword List from Database
     # Filter out 'Tenuous' risk genes
     gene_objects = Gene.objects.exclude(gene_risk_category='Tenuous')
@@ -85,11 +82,10 @@ def fetch_and_process_news():
                         pub_date = datetime(*published_parsed[:6])
                         pub_date = make_aware(pub_date)
                     else:
-                        pub_date = make_aware(datetime.now())
-                    
-                    # DATE FILTER: Skip if older than 30 days
-                    if pub_date < cutoff_date:
-                        continue
+                        # Fallback to an old date instead of NOW to prevent it from showing as "Latest"
+                        # Defaulting to Jan 1, 2000
+                        pub_date = make_aware(datetime(2000, 1, 1))
+                        logger.warning(f"Could not parse date for article '{title}'. Defaulting to 2000-01-01.")
 
                     # 4. Extract Image (if available in media_content or summary)
                     image_url = None
