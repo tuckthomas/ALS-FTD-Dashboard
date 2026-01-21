@@ -298,7 +298,6 @@ export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
     const hasMore = displayedTrials.length < processedTrials.length;
 
     const renderExpandedContent = (trial: Trial) => {
-        const hasLocations = trial.locations && trial.locations.length > 0;
         const validCoords = (trial.locations || [])
             .map(l => l.geoPoint)
             .filter(g => g && g.lat && g.lon);

@@ -1,7 +1,8 @@
-from ninja import Router, schema
-from typing import List
+from ninja import Router, schema, Query
+from typing import List, Optional
 import re
 import requests
+from datetime import date
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from ninja.errors import ValidationError
@@ -20,8 +21,25 @@ from typing import Any
 router = Router()
 
 @router.get("/news", response=List[NewsArticleSchema], tags=["News Aggregator"])
-def get_news(request):
-    return NewsArticle.objects.all()[:50]
+def get_news(request, 
+             genes: List[str] = Query(None), 
+             start_date: date = None, 
+             end_date: date = None,
+             limit: int = 100):
+    
+    queryset = NewsArticle.objects.all()
+
+    if genes:
+        # Filter articles that are linked to ANY of the provided gene symbols
+        queryset = queryset.filter(related_genes__gene_symbol__in=genes).distinct()
+
+    if start_date:
+        queryset = queryset.filter(publication_date__date__gte=start_date)
+    
+    if end_date:
+        queryset = queryset.filter(publication_date__date__lte=end_date)
+
+    return queryset.order_by('-publication_date')[:limit]
 
 @router.post("/contact", tags=["User Feedback"])
 def submit_contact_form(request, data: ContactSubmissionSchema):
