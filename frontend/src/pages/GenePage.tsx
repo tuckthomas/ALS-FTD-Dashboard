@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dna, Newspaper, ExternalLink, Calendar, ChevronRight, FlaskConical, Tag } from 'lucide-react';
+import { TrialsTable } from '@/components/trials/TrialsTable';
 
 interface GeneData {
     gene_symbol: string;
@@ -33,20 +34,13 @@ interface NewsArticle {
     tags: string[];
 }
 
-interface Trial {
-    nctId: string;
-    title: string;
-    status: string;
-    phase: string;
-    sponsor: string;
-}
+
 
 export function GenePage() {
     const { symbol } = useParams<{ symbol: string }>();
     const [gene, setGene] = useState<GeneData | null>(null);
     const [structure, setStructure] = useState<StructureData | null>(null);
     const [news, setNews] = useState<NewsArticle[]>([]);
-    const [trials, setTrials] = useState<Trial[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -73,17 +67,6 @@ export function GenePage() {
                     setNews(newsRes.data);
                 } catch {
                     setNews([]);
-                }
-
-                // Trials for gene
-                try {
-                    const trialsRes = await axios.get('/api/analytics/trial-finder-data');
-                    const filtered = trialsRes.data.trials.filter((t: any) =>
-                        t.genes?.some((g: string) => g.toLowerCase() === symbol.toLowerCase())
-                    );
-                    setTrials(filtered.slice(0, 5));
-                } catch {
-                    setTrials([]);
                 }
             } catch (err) {
                 console.error('Failed to load gene data:', err);
@@ -184,40 +167,19 @@ export function GenePage() {
 
             {/* Trials Section */}
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-lg">
                             <FlaskConical className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                             <CardTitle>Clinical Trials</CardTitle>
-                            <CardDescription>Active studies targeting {symbol}</CardDescription>
+                            <CardDescription>All active studies targeting {symbol}</CardDescription>
                         </div>
                     </div>
-                    <Link to={`/trials?gene=${symbol}`} className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-                        View All <ChevronRight className="h-4 w-4" />
-                    </Link>
                 </CardHeader>
-                <CardContent>
-                    {trials.length > 0 ? (
-                        <div className="space-y-3">
-                            {trials.map((t) => (
-                                <div key={t.nctId} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                                    <div className="font-medium text-sm mb-1">{t.title}</div>
-                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <span className="font-mono">{t.nctId}</span>
-                                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">{t.status}</span>
-                                        <span>{t.phase}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                            <FlaskConical className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                            <p className="text-sm">No trials found for {symbol}</p>
-                        </div>
-                    )}
+                <CardContent className="pt-0">
+                    <TrialsTable filters={{ genes: symbol ? [symbol] : [] }} />
                 </CardContent>
             </Card>
 
