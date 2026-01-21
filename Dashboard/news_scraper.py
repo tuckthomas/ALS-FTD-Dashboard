@@ -24,21 +24,31 @@ def fetch_and_process_news():
     
     # 1. Build Keyword List from Database
     # Filter out 'Tenuous' risk genes
-    genes = Gene.objects.exclude(gene_risk_category='Tenuous').values_list('gene_symbol', 'gene_name')
+    gene_objects = Gene.objects.exclude(gene_risk_category='Tenuous')
     
     # Base keywords
-    keywords = {
+    base_keywords = {
         "ALS", "Amyotrophic Lateral Sclerosis", 
         "FTD", "Frontotemporal Dementia", 
         "Lou Gehrig's Disease", "Motor Neuron Disease"
     }
     
-    # Add High-Confidence Genes
-    for symbol, name in genes:
-        if symbol: keywords.add(symbol.upper())
-        if name: keywords.add(name.upper())
+    # Map keywords to Gene objects for linking
+    keyword_to_gene = {}
+    all_keywords = base_keywords.copy()
+
+    for gene in gene_objects:
+        if gene.gene_symbol:
+            symbol = gene.gene_symbol.upper()
+            keyword_to_gene[symbol] = gene
+            all_keywords.add(symbol)
         
-    logger.info(f"Loaded {len(keywords)} keywords for filtering.")
+        if gene.gene_name:
+            name = gene.gene_name.upper()
+            keyword_to_gene[name] = gene
+            all_keywords.add(name)
+        
+    logger.info(f"Loaded {len(all_keywords)} keywords for filtering.")
 
     new_articles_count = 0
 
@@ -61,11 +71,15 @@ def fetch_and_process_news():
                 full_text = (title + " " + summary).upper()
                 
                 # Check if ANY keyword is present in the text
-                # We use word boundary check logic roughly by checking spaces, 
-                # but simple substring match is usually fine for these specific scientific terms.
-                matched_keywords = [k for k in keywords if k in full_text]
+                matched_keywords = [k for k in all_keywords if k in full_text]
                 
                 if matched_keywords:
+                    # Identify related genes
+                    related_genes = []
+                    for k in matched_keywords:
+                        if k in keyword_to_gene:
+                            related_genes.append(keyword_to_gene[k])
+
                     # 3. Parse Date
                     published_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
                     if published_parsed:
@@ -85,7 +99,7 @@ def fetch_and_process_news():
                                 break
                     
                     # 5. Save Article
-                    NewsArticle.objects.create(
+                    article = NewsArticle.objects.create(
                         title=title,
                         summary=summary,
                         content=summary, # RSS usually only gives summary
@@ -95,6 +109,11 @@ def fetch_and_process_news():
                         publication_date=pub_date,
                         tags=matched_keywords[:5] # Store top 5 matching keywords as tags
                     )
+                    
+                    # Link genes
+                    if related_genes:
+                        article.related_genes.set(related_genes)
+
                     new_articles_count += 1
                     
         except Exception as e:

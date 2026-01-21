@@ -142,6 +142,7 @@ class NewsArticle(models.Model):
     publication_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     tags = models.JSONField(default=list, blank=True) # e.g., ["Research", "Clinical Trial", "ALS"]
+    related_genes = models.ManyToManyField(Gene, related_name='news_articles', blank=True)
 
     def __str__(self):
         return self.title
