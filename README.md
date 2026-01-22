@@ -10,14 +10,17 @@
 
 This open-source dashboard aggregates and visualizes clinical trial data for the familial ALS and FTD research community. It provides researchers, patients, and caregivers with actionable insights into ongoing and historical interventional drug trials.
 
-### Personal Impact
-
-Within my lifetime, I have witnessed SOD1 Familial ALS claim the lives of my grandmother, my uncle, my father, and most recently my aunt. [Learn more about fALS's impact on my family.](https://www.iamals.org/stories/tucker-olson-2/)
+### Support ALS Research
 
 If you appreciate this work and would like to support ALS research, please consider donating to:
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 - [I AM ALS](https://www.iamals.org/give/)
+
+
+Additionally, if you appreciate this work, I am available for hire: tuckerolson13@gmail.com
+
+Additonal projects of mine can be seen within my portfolio: https://tuckerolson.me/portfolio
 
 ---
 
