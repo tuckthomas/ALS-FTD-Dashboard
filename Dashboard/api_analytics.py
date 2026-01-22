@@ -162,7 +162,9 @@ def get_full_trials_dataset():
                  intervention_types.update(t.intervention_types)
         
         # Genes: Strip 'Mutation' suffix more aggressively
-        raw_genes = [g.gene_symbol for g in t.related_genes.all()] + (t.genes if t.genes else [])
+        raw_genes = [g.gene_symbol for g in t.related_genes.all()]
+        if t.genes and isinstance(t.genes, list):
+            raw_genes = raw_genes + t.genes
         cleaned_genes = set()
         for g in raw_genes:
             if g:
