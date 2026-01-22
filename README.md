@@ -28,43 +28,57 @@ Additonal projects of mine can be seen within my portfolio: https://tuckerolson.
 
 ```mermaid
 flowchart TB
-    subgraph Frontend["Frontend (React/Vite)"]
+    subgraph FrontendGroup["Frontend (React/Vite)"]
         Dashboard[Dashboard]
         TrialFinder[Trial Finder]
         GenePages[Gene Pages]
         NewsPage[News Page]
     end
 
-    subgraph Backend["Backend (Django Ninja)"]
+    subgraph BackendGroup["Backend (Django Ninja)"]
         AnalyticsAPI[Analytics API]
         TrialsAPI[Trials API]
         GenesAPI[Genes API]
         NewsAPI[News API]
     end
 
-    subgraph DataLayer["Data Layer"]
+    subgraph DataLayerGroup["Data Layer"]
         PostgreSQL[(PostgreSQL)]
         Redis[(Redis Cache)]
     end
 
-    subgraph External["External Data Sources"]
+    subgraph ExternalGroup["External Data Sources"]
         ClinicalTrials[ClinicalTrials.gov]
         ALSoD[ALSoD Gene Database]
         PDB[Protein Data Bank]
         AlphaFold[AlphaFold DB]
     end
 
-    subgraph Pipeline["Data Pipeline"]
+    subgraph PipelineGroup["Data Pipeline"]
         Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
     end
 
-    Frontend -->|Axios| Backend
-    Backend --> DataLayer
+    %% Frontend to Backend
+    Dashboard -->|Axios| AnalyticsAPI
+    TrialFinder -->|Axios| TrialsAPI
+    GenePages -->|Axios| GenesAPI
+    NewsPage -->|Axios| NewsAPI
+
+    %% Backend to Data Layer
+    AnalyticsAPI --> PostgreSQL
+    AnalyticsAPI --> Redis
+    TrialsAPI --> PostgreSQL
+    GenesAPI --> PostgreSQL
+    NewsAPI --> PostgreSQL
+
+    %% Pipeline Flows
     ClinicalTrials -->|Nightly Sync| Sanitizer
     ALSoD -->|Gene Scraping| Scraper
     Scraper --> PostgreSQL
     Sanitizer -->|Clean Data| PostgreSQL
+    
+    %% External Integrations
     PDB --> GenePages
     AlphaFold --> GenePages
 ```
