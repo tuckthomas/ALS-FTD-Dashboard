@@ -21,31 +21,32 @@ export function Footer() {
     return (
         <footer className="w-full border-t border-border bg-slate-950 dark:bg-background/80 backdrop-blur-md mt-12 relative z-40 transition-colors duration-300">
             <div className="max-w-[1600px] mx-auto px-6 py-12 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 md:gap-12 mb-8 md:mb-12">
                     {/* Brand & Status Column */}
-                    <div className="col-span-1 lg:col-span-2 flex gap-8 items-center">
-                        {/* Even Larger Logo to the Left */}
+                    <div className="col-span-2 flex flex-col sm:flex-row gap-6 sm:gap-8 items-start sm:items-center">
+                        {/* Logo */}
                         <Link to="/" className="shrink-0">
                             <img
                                 src="/f-als-ftd-dashboard-helix.png"
                                 alt="ALS/FTD Logo"
-                                className="h-32 w-auto"
+                                className="h-24 sm:h-32 w-auto"
                             />
                         </Link>
 
-                        {/* Vertical Column for Text Content */}
-                        <div className="space-y-6">                                                            <div className="flex flex-col gap-2">
-                            <Link to="/" className="font-bold text-lg tracking-tight logo-gradient-text hover:opacity-80 transition-opacity">
-                                ALS/FTD Research Analytics
-                            </Link>
-                            <p className="text-sm text-slate-400 dark:text-muted-foreground max-w-xs leading-relaxed">
-                                Aggregating and visualizing clinical trial data for the familial ALS and FTD research community.
-                            </p>
-                        </div>
+                        {/* Text Content */}
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="flex flex-col gap-2">
+                                <Link to="/" className="font-bold text-lg tracking-tight logo-gradient-text hover:opacity-80 transition-opacity">
+                                    ALS/FTD Research Analytics
+                                </Link>
+                                <p className="text-sm text-slate-400 dark:text-muted-foreground max-w-xs leading-relaxed">
+                                    Aggregating and visualizing clinical trial data for the familial ALS and FTD research community.
+                                </p>
+                            </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-slate-500 dark:text-muted-foreground uppercase font-bold tracking-widest">
                                     Last Data Ingest
-                                </span>
+                                </span >
                                 <div className="flex items-center gap-2">
                                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                     <span className="text-xs text-slate-200 dark:text-foreground font-medium">
@@ -57,7 +58,7 @@ export function Footer() {
                     </div>
 
                     {/* Sitemap Columns */}
-                    <div>
+                    <div className="col-span-1">
                         <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Platform</h4>
                         <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
                             <li><Link to="/" className="hover:text-primary transition-colors">Dashboard</Link></li>
@@ -67,7 +68,7 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div>
+                    <div className="col-span-1">
                         <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Resources</h4>
                         <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
                             <li><a href="#" onClick={handleResourceClick} className="hover:text-primary transition-colors">Documentation</a></li>
@@ -77,7 +78,7 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div>
+                    <div className="col-span-2 md:col-span-1">
                         <h4 className="font-semibold text-sm text-white dark:text-foreground mb-4">Connect</h4>
                         <ul className="space-y-3 text-sm text-slate-400 dark:text-muted-foreground">
                             <li><a href="https://github.com/tuckthomas/ALS-FTD-Dashboard" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub Repository</a></li>
@@ -90,11 +91,11 @@ export function Footer() {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-slate-800 dark:border-border/40">
-                    <p className="text-xs text-slate-500 dark:text-muted-foreground">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-slate-800 dark:border-border/40 text-center md:text-left">
+                    <p className="text-xs text-slate-500 dark:text-muted-foreground px-4 md:px-0">
                         © {today.getFullYear()} ALS/FTD Research Dashboard. Open source for non-commercial research use.
                     </p>
-                    <div className="flex gap-6 text-xs text-slate-400 dark:text-muted-foreground">
+                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-400 dark:text-muted-foreground">
                         <Link to="/privacy#privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
                         <Link to="/privacy#terms" className="hover:text-primary transition-colors">Terms of Service</Link>
                         <Link to="/privacy#cookies" className="hover:text-primary transition-colors">Cookie Settings</Link>
