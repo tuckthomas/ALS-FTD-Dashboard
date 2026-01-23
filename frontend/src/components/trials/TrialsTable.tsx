@@ -350,64 +350,13 @@ export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
-                    {/* Main Content Area: Summary + Eligibility (Float Layout) */}
-                    <div className="lg:col-span-8 block">
-                        {/* Eligibility Criteria - Floated Right on Desktop */}
-                        <div className="lg:float-right lg:w-1/2 lg:ml-8 lg:mb-4 w-full mb-6">
-                            <div className="bg-background/40 p-4 rounded-xl border border-border/30 shadow-sm">
-                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2 mb-4">
-                                    <Info className="h-3.5 w-3.5" /> Eligibility Criteria
-                                </h4>
-                                {trial.eligibility && trial.eligibility.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {trial.eligibility.slice(0, 6).map((item, i) => (
-                                            <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground font-medium">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                                                <span>{typeof item === 'string' ? item : JSON.stringify(item)}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-xs text-muted-foreground italic">No criteria details available.</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Summary Text - Wraps around floated element */}
-                        <div className="space-y-6">
-                            <div className="space-y-3">
-                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
-                                    <Info className="h-3.5 w-3.5" /> Summary
-                                </h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed font-medium text-justify">
-                                    {trial.summary || 'No summary available for this trial.'}
-                                </p>
-                            </div>
-
-                            {trial.genes && trial.genes.length > 0 && (
-                                <div className="space-y-3 pt-2 clear-both">
-                                    <h4 className="text-xs font-bold uppercase text-primary tracking-widest">
-                                        Genetic Targets
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {trial.genes.map(g => (
-                                            <span key={g} className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded uppercase">
-                                                {g}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Right: Mini Map */}
-                    <div className="lg:col-span-4 space-y-4">
-                        <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                <div className="block clearfix">
+                    {/* Float 1: Mini Map (Far Right) */}
+                    <div className="lg:float-right lg:w-[30%] lg:ml-8 mb-8 w-full">
+                        <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2 mb-4">
                             <MapPin className="h-3.5 w-3.5" /> Study Locations ({trial.locations?.length || 0})
                         </h4>
-                        <div className="h-[250px] rounded-xl overflow-hidden border border-border bg-secondary/20 relative z-0">
+                        <div className="h-[250px] rounded-xl overflow-hidden border border-border bg-secondary/20 relative z-0 shadow-sm">
                             {validCoords.length > 0 ? (
                                 <MapContainer
                                     center={[validCoords[0].lat, validCoords[0].lon]}
@@ -440,6 +389,54 @@ export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
                                 </div>
                             )}
                         </div>
+                    </div>
+
+                    {/* Float 2: Eligibility Criteria (Middle Right) */}
+                    <div className="lg:float-right lg:w-[35%] lg:ml-8 mb-6 w-full">
+                        <div className="bg-background/40 p-5 rounded-xl border border-border/30 shadow-sm">
+                            <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2 mb-4">
+                                <Info className="h-3.5 w-3.5" /> Eligibility Criteria
+                            </h4>
+                            {trial.eligibility && trial.eligibility.length > 0 ? (
+                                <ul className="space-y-3">
+                                    {trial.eligibility.slice(0, 6).map((item, i) => (
+                                        <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground font-medium">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                            <span>{typeof item === 'string' ? item : JSON.stringify(item)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-xs text-muted-foreground italic">No criteria details available.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Main Content: Summary - Wraps around both */}
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                                <Info className="h-3.5 w-3.5" /> Summary
+                            </h4>
+                            <p className="text-sm text-muted-foreground leading-relaxed font-medium text-justify">
+                                {trial.summary || 'No summary available for this trial.'}
+                            </p>
+                        </div>
+
+                        {trial.genes && trial.genes.length > 0 && (
+                            <div className="space-y-3 pt-2 clear-both">
+                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest">
+                                    Genetic Targets
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {trial.genes.map(g => (
+                                        <span key={g} className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded uppercase">
+                                            {g}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
