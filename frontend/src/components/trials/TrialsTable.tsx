@@ -46,7 +46,7 @@ const statusStyles: Record<string, string> = {
     'enrolling by invitation': 'bg-blue-500/10 text-blue-600 dark:bg-[#0ea5e9]/20 dark:text-[#0ea5e9]',
     'available': 'bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400',
     'approved for marketing': 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
-    
+
     // Common fallbacks/others that might appear
     'active, not recruiting': 'bg-slate-500/20 text-slate-600 dark:text-slate-400',
     'completed': 'bg-slate-500/10 text-slate-500 dark:bg-slate-600/20 dark:text-slate-500',
@@ -321,7 +321,7 @@ export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div className="h-10 w-px bg-border hidden md:block" />
 
                         <div className="space-y-1 text-left">
@@ -351,50 +351,55 @@ export function TrialsTable({ filters, onDataUpdate }: TrialsTableProps) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
-                    {/* Left: Summary & Stats */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <div className="space-y-3">
-                            <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
-                                <Info className="h-3.5 w-3.5" /> Summary
-                            </h4>
-                            <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                                {trial.summary || 'No summary available for this trial.'}
-                            </p>
+                    {/* Main Content Area: Summary + Eligibility (Float Layout) */}
+                    <div className="lg:col-span-8 block">
+                        {/* Eligibility Criteria - Floated Right on Desktop */}
+                        <div className="lg:float-right lg:w-1/2 lg:ml-8 lg:mb-4 w-full mb-6">
+                            <div className="bg-background/40 p-4 rounded-xl border border-border/30 shadow-sm">
+                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2 mb-4">
+                                    <Info className="h-3.5 w-3.5" /> Eligibility Criteria
+                                </h4>
+                                {trial.eligibility && trial.eligibility.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {trial.eligibility.slice(0, 6).map((item, i) => (
+                                            <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground font-medium">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                                <span>{typeof item === 'string' ? item : JSON.stringify(item)}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground italic">No criteria details available.</p>
+                                )}
+                            </div>
                         </div>
 
-                        {trial.genes && trial.genes.length > 0 && (
+                        {/* Summary Text - Wraps around floated element */}
+                        <div className="space-y-6">
                             <div className="space-y-3">
-                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest">
-                                    Genetic Targets
+                                <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
+                                    <Info className="h-3.5 w-3.5" /> Summary
                                 </h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {trial.genes.map(g => (
-                                        <span key={g} className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded uppercase">
-                                            {g}
-                                        </span>
-                                    ))}
-                                </div>
+                                <p className="text-sm text-muted-foreground leading-relaxed font-medium text-justify">
+                                    {trial.summary || 'No summary available for this trial.'}
+                                </p>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Middle: Eligibility */}
-                    <div className="lg:col-span-4 space-y-4">
-                        <h4 className="text-xs font-bold uppercase text-primary tracking-widest flex items-center gap-2">
-                            <Info className="h-3.5 w-3.5" /> Eligibility Criteria
-                        </h4>
-                        {trial.eligibility && trial.eligibility.length > 0 ? (
-                            <ul className="space-y-3">
-                                {trial.eligibility.slice(0, 6).map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground font-medium bg-background/40 p-2 rounded-lg border border-border/30">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                                        {typeof item === 'string' ? item : JSON.stringify(item)}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-xs text-muted-foreground italic">No criteria details available.</p>
-                        )}
+                            {trial.genes && trial.genes.length > 0 && (
+                                <div className="space-y-3 pt-2 clear-both">
+                                    <h4 className="text-xs font-bold uppercase text-primary tracking-widest">
+                                        Genetic Targets
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {trial.genes.map(g => (
+                                            <span key={g} className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded uppercase">
+                                                {g}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Right: Mini Map */}
