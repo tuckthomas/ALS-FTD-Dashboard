@@ -19,8 +19,12 @@ from io import StringIO
 from typing import Any
 
 router = Router()
+news_router = Router()
+contact_router = Router()
+genes_router = Router()
+trials_router = Router()
 
-@router.get("/news", response=List[NewsArticleSchema], tags=["News Aggregator"])
+@news_router.get("/", response=List[NewsArticleSchema], tags=["News Aggregator"])
 def get_news(request, 
              genes: List[str] = Query(None), 
              start_date: date = None, 
@@ -41,7 +45,7 @@ def get_news(request,
 
     return queryset.order_by('-publication_date')[:limit]
 
-@router.post("/contact", tags=["User Feedback"])
+@contact_router.post("/", tags=["User Feedback"])
 def submit_contact_form(request, data: ContactSubmissionSchema):
     try:
         ContactSubmission.objects.create(**data.dict())
@@ -49,7 +53,7 @@ def submit_contact_form(request, data: ContactSubmissionSchema):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@router.post("/report-issue", tags=["User Feedback"])
+@contact_router.post("/report-issue", tags=["User Feedback"])
 def report_issue(request, data: IssueReportSchema):
     try:
         IssueReport.objects.create(**data.dict())
@@ -57,13 +61,13 @@ def report_issue(request, data: IssueReportSchema):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@router.get("/", tags=["ClinicalTrials.gov API Fetch; Updated Nightly"])
+@trials_router.get("/", tags=["ClinicalTrials.gov API Fetch; Updated Nightly"])
 def get_trials(request):
     # update_data()  # REMOVED: Blocking call caused 504 timeouts. Use /sync-trials instead.
     trials = get_serialized_trials()
     return trials
 
-@router.post("/sync-trials", tags=["Trigger Data Scrape (Manual/Cron)"])
+@trials_router.post("/sync-trials", tags=["Trigger Data Scrape (Manual/Cron)"])
 def sync_trials(request):
     try:
         update_data()
@@ -71,7 +75,7 @@ def sync_trials(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@router.post("/AI-Eligibility-Descriptions", response=List[ProcessedCriteriaSchema], tags=["Testing Local AI's Classification of Eligibility Criteria"])
+@trials_router.post("/AI-Eligibility-Descriptions", response=List[ProcessedCriteriaSchema], tags=["Testing Local AI's Classification of Eligibility Criteria"])
 def ai_eligibility_description(request):
     # This endpoint wraps the process_trials_with_ai logic for Ninja
     trials = Trial.objects.filter(eligibility_criteria_generic_description__isnull=False) #[:15]  # Adjust as necessary
@@ -93,7 +97,7 @@ def ai_eligibility_description(request):
 
     return processed_trials
 
-@router.get("/update-healey-trial", tags=["Update Healey Trial Web Scrape"])
+@trials_router.get("/update-healey-trial", tags=["Update Healey Trial Web Scrape"])
 def update_healey_trial(request):
     try:
         # Directly scrape and save the data
@@ -102,7 +106,7 @@ def update_healey_trial(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@router.get("/healey-trials", tags=["Download Healey Trials as JSON or CSV"])
+@trials_router.get("/healey-trials", tags=["Download Healey Trials as JSON or CSV"])
 def get_healey_trials(request, format: str = "json") -> Any:
     trials = HealeyTrial.objects.all()
     
@@ -129,7 +133,7 @@ def get_healey_trials(request, format: str = "json") -> Any:
     else:
         return JsonResponse({'error': 'Unsupported format specified. Please use either "json" or "csv".'}, status=400)
 
-@router.get("/genes", response=Any)
+@genes_router.get("/", response=Any)
 def get_genes(request, format: str = "json"):
     genes = Gene.objects.all().values_list('gene_symbol', 'gene_name', 'gene_risk_category')
     
@@ -149,7 +153,7 @@ def get_genes(request, format: str = "json"):
     return list(genes)
 
 
-@router.get("/genes/{symbol}", tags=["Gene Data"])
+@genes_router.get("/{symbol}", tags=["Gene Data"])
 def get_gene_detail(request, symbol: str):
     """Get detailed information for a specific gene."""
     from .models import GeneStructure
@@ -175,7 +179,7 @@ def get_gene_detail(request, symbol: str):
         return JsonResponse({"error": f"Gene {symbol} not found"}, status=404)
 
 
-@router.get("/genes/{symbol}/structure", tags=["Gene Data"])
+@genes_router.get("/{symbol}/structure", tags=["Gene Data"])
 def get_gene_structure(request, symbol: str):
     """Get the primary 3D structure for a gene."""
     from .models import GeneStructure

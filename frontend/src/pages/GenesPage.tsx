@@ -28,7 +28,7 @@ export function GenesPage() {
         const fetchGenes = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('/api/trials/genes');
+                const response = await axios.get('/api/genes/');
                 // API returns array of [symbol, name, risk_category]
                 const geneList: GeneItem[] = response.data.map((g: [string, string, string]) => ({
                     symbol: g[0],

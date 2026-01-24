@@ -50,12 +50,12 @@ export function GenePage() {
             setLoading(true);
             try {
                 // Gene details
-                const geneRes = await axios.get(`/api/trials/genes/${symbol}`);
+                const geneRes = await axios.get(`/api/genes/${symbol}`);
                 setGene(geneRes.data);
 
                 // 3D Structure
                 try {
-                    const structRes = await axios.get(`/api/trials/genes/${symbol}/structure`);
+                    const structRes = await axios.get(`/api/genes/${symbol}/structure`);
                     setStructure(structRes.data);
                 } catch {
                     setStructure(null);
@@ -63,7 +63,7 @@ export function GenePage() {
 
                 // News for gene
                 try {
-                    const newsRes = await axios.get(`/api/trials/news?genes=${symbol}&limit=3`);
+                    const newsRes = await axios.get(`/api/news/?genes=${symbol}&limit=3`);
                     setNews(newsRes.data);
                 } catch {
                     setNews([]);

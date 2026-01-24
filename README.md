@@ -28,25 +28,7 @@ Additonal projects of mine can be seen within my portfolio: https://tuckerolson.
 
 ```mermaid
 flowchart TB
-    subgraph FrontendGroup["Frontend (React/Vite)"]
-        Dashboard[Dashboard]
-        TrialFinder[Trial Finder]
-        GenePages[Gene Pages]
-        NewsPage[News Page]
-    end
-
-    subgraph BackendGroup["Backend (Django Ninja)"]
-        AnalyticsAPI[Analytics API]
-        TrialsAPI[Trials API]
-        GenesAPI[Genes API]
-        NewsAPI[News API]
-    end
-
-    subgraph DataLayerGroup["Data Layer"]
-        PostgreSQL[(PostgreSQL)]
-        Redis[(Redis Cache)]
-    end
-
+    %% Level 1: External Data Sources
     subgraph ExternalGroup["External Data Sources"]
         ClinicalTrials[ClinicalTrials.gov]
         ALSoD[ALSoD Gene Database]
@@ -54,31 +36,58 @@ flowchart TB
         AlphaFold[AlphaFold DB]
     end
 
-    subgraph PipelineGroup["Data Pipeline"]
+    %% Level 2: Data Pipeline & Ingestion
+    subgraph PipelineGroup["Data Pipeline (Managed by TrialsAPI)"]
         Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
     end
 
-    %% Frontend to Backend
+    %% Level 3: Backend & Data Layer
+    subgraph BackendGroup["Backend (Django Ninja)"]
+        TrialsAPI[Trials API (Ingestion & Mgmt)]
+        AnalyticsAPI[Analytics API]
+        GenesAPI[Genes API]
+        NewsAPI[News API]
+        ContactAPI[Contact API]
+    end
+
+    subgraph DataLayerGroup["Data Layer"]
+        PostgreSQL[(PostgreSQL)]
+        Redis[(Redis Cache)]
+    end
+
+    %% Level 4: Frontend
+    subgraph FrontendGroup["Frontend (React/Vite)"]
+        Dashboard[Dashboard]
+        TrialFinder[Trial Finder]
+        GenePages[Gene Pages]
+        NewsPage[News Page]
+        ContactPage[Contact Page]
+    end
+
+    %% Data Inflow (Pipeline)
+    ClinicalTrials -->|Nightly Sync| Sanitizer
+    ALSoD -->|Gene Scraping| Scraper
+    TrialsAPI -.->|Triggers| PipelineGroup
+    Sanitizer -->|Write Clean Data| PostgreSQL
+    Scraper -->|Write Gene Data| PostgreSQL
+
+    %% Backend/Data Layer Interactions
+    TrialsAPI -->|Read/Write| PostgreSQL
+    AnalyticsAPI -->|Read-Optimized| Redis
+    AnalyticsAPI -->|Read Combined| PostgreSQL
+    GenesAPI -->|Read| PostgreSQL
+    NewsAPI -->|Read| PostgreSQL
+    ContactAPI -->|Write Feedback| PostgreSQL
+
+    %% Frontend Consumption (Outflow)
     Dashboard -->|Axios| AnalyticsAPI
     TrialFinder -->|Axios| AnalyticsAPI
     GenePages -->|Axios| GenesAPI
     NewsPage -->|Axios| NewsAPI
+    ContactPage -->|Axios| ContactAPI
 
-    %% Backend to Data Layer
-    AnalyticsAPI --> PostgreSQL
-    AnalyticsAPI --> Redis
-    TrialsAPI --> PostgreSQL
-    GenesAPI --> PostgreSQL
-    NewsAPI --> PostgreSQL
-
-    %% Pipeline Flows
-    ClinicalTrials -->|Nightly Sync| Sanitizer
-    ALSoD -->|Gene Scraping| Scraper
-    Scraper --> PostgreSQL
-    Sanitizer -->|Clean Data| PostgreSQL
-    
-    %% External Integrations
+    %% External Direct Integrations (Frontend)
     PDB --> GenePages
     AlphaFold --> GenePages
 ```

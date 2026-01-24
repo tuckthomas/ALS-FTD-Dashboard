@@ -8,7 +8,7 @@ type ContactMode = 'general' | 'issue';
 
 export function ContactPage() {
     const [mode, setMode] = useState<ContactMode>('general');
-    
+
     // Check URL hash to set initial mode (e.g. /contact#report)
     useState(() => {
         if (window.location.hash === '#report') {
@@ -30,22 +30,20 @@ export function ContactPage() {
                 <div className="inline-flex h-12 items-center justify-center rounded-lg bg-secondary/50 p-1 text-muted-foreground">
                     <button
                         onClick={() => setMode('general')}
-                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-2 text-sm font-medium transition-all ${
-                            mode === 'general'
+                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-2 text-sm font-medium transition-all ${mode === 'general'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'hover:bg-background/50 hover:text-foreground'
-                        }`}
+                            }`}
                     >
                         <Mail className="mr-2 h-4 w-4" />
                         General Inquiry
                     </button>
                     <button
                         onClick={() => setMode('issue')}
-                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-2 text-sm font-medium transition-all ${
-                            mode === 'issue'
+                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-2 text-sm font-medium transition-all ${mode === 'issue'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'hover:bg-background/50 hover:text-foreground'
-                        }`}
+                            }`}
                     >
                         <Bug className="mr-2 h-4 w-4" />
                         Report an Issue
@@ -80,7 +78,7 @@ function GeneralContactForm() {
         };
 
         try {
-            await axios.post('/api/trials/contact', data);
+            await axios.post('/api/contact/', data);
             setSuccess(true);
         } catch (err) {
             setError('Failed to send message. Please try again later.');
@@ -116,7 +114,7 @@ function GeneralContactForm() {
                     <Input id="email" name="email" type="email" required placeholder="jane@research.org" />
                 </div>
             </div>
-            
+
             <div className="space-y-2">
                 <label htmlFor="subject" className="text-sm font-medium">Subject</label>
                 <Input id="subject" name="subject" required placeholder="Research collaboration inquiry" />
@@ -124,10 +122,10 @@ function GeneralContactForm() {
 
             <div className="space-y-2">
                 <label htmlFor="message" className="text-sm font-medium">Message</label>
-                <textarea 
-                    id="message" 
-                    name="message" 
-                    required 
+                <textarea
+                    id="message"
+                    name="message"
+                    required
                     rows={6}
                     className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="How can we help you?"
@@ -168,7 +166,7 @@ function IssueReportForm() {
         };
 
         try {
-            await axios.post('/api/trials/report-issue', data);
+            await axios.post('/api/contact/report-issue', data);
             setSuccess(true);
         } catch (err) {
             setError('Failed to submit report. Please try again later.');
@@ -201,10 +199,10 @@ function IssueReportForm() {
 
             <div className="space-y-2">
                 <label htmlFor="description" className="text-sm font-medium">Description</label>
-                <textarea 
-                    id="description" 
-                    name="description" 
-                    required 
+                <textarea
+                    id="description"
+                    name="description"
+                    required
                     rows={4}
                     className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="Describe what happened..."
@@ -213,9 +211,9 @@ function IssueReportForm() {
 
             <div className="space-y-2">
                 <label htmlFor="steps" className="text-sm font-medium">Steps to Reproduce (Optional)</label>
-                <textarea 
-                    id="steps" 
-                    name="steps" 
+                <textarea
+                    id="steps"
+                    name="steps"
                     rows={3}
                     className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="1. Go to Trial Finder&#10;2. Select Phase 3&#10;3. Click..."

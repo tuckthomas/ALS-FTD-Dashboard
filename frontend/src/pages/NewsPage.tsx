@@ -18,7 +18,7 @@ export function NewsPage() {
     const [articles, setArticles] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
-    
+
     // Filter State
     const [filters, setFilters] = useState({
         genes: [] as string[],
@@ -31,18 +31,18 @@ export function NewsPage() {
             setLoading(true);
             try {
                 const params = new URLSearchParams();
-                
+
                 // Add gene filters
                 filters.genes.forEach(gene => params.append('genes', gene));
-                
+
                 // Add date filters
                 if (filters.startDate) params.append('start_date', filters.startDate);
                 if (filters.endDate) params.append('end_date', filters.endDate);
-                
+
                 // Limit
                 params.append('limit', '100');
 
-                const response = await axios.get(`/api/trials/news?${params.toString()}`);
+                const response = await axios.get(`/api/news/?${params.toString()}`);
                 setArticles(response.data);
             } catch (err) {
                 console.error("Failed to fetch news:", err);
@@ -50,7 +50,7 @@ export function NewsPage() {
                 setLoading(false);
             }
         };
-        
+
         // Debounce slightly to prevent rapid refetching while typing/clicking
         const timeoutId = setTimeout(() => {
             fetchNews();
@@ -83,10 +83,10 @@ export function NewsPage() {
                             </p>
                         </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         {/* Mobile Filter Toggle */}
-                        <button 
+                        <button
                             onClick={() => setShowMobileFilters(!showMobileFilters)}
                             className="lg:hidden p-2 bg-secondary rounded-md text-foreground"
                         >
@@ -119,8 +119,8 @@ export function NewsPage() {
                                 {/* Image Header */}
                                 <div className="h-48 overflow-hidden bg-secondary/30 relative flex-shrink-0">
                                     {article.image_url ? (
-                                        <img 
-                                            src={article.image_url} 
+                                        <img
+                                            src={article.image_url}
                                             alt={article.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             onError={(e) => {
@@ -145,7 +145,7 @@ export function NewsPage() {
                                         <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-3 text-foreground">
                                             {article.title}
                                         </h3>
-                                        <div 
+                                        <div
                                             className="text-sm text-muted-foreground line-clamp-3 leading-relaxed"
                                             dangerouslySetInnerHTML={{ __html: article.summary }}
                                         />
@@ -168,9 +168,9 @@ export function NewsPage() {
                                             <Calendar className="h-3.5 w-3.5 text-primary" />
                                             {new Date(article.publication_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </div>
-                                        <a 
-                                            href={article.url} 
-                                            target="_blank" 
+                                        <a
+                                            href={article.url}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-primary text-sm font-bold flex items-center gap-1 hover:underline"
                                         >
