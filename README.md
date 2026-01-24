@@ -84,8 +84,8 @@ flowchart TB
     ContactAPI -->|Write Feedback| PostgreSQL
 
     %% Frontend Consumption (Outflow)
-    Dashboard -->|Axios (Cached)| AnalyticsAPI
-    TrialFinder -->|Axios (Cached)| AnalyticsAPI
+    Dashboard -->|"Axios (Cached)"| AnalyticsAPI
+    TrialFinder -->|"Axios (Cached)"| AnalyticsAPI
     GenePages -->|Axios| GenesAPI
     NewsPage -->|Axios| NewsAPI
     ContactPage -->|Axios| ContactAPI
