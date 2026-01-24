@@ -84,7 +84,11 @@ export function DataTable<TData, TValue>({
                     onLoadMore()
                 }
             },
-            { threshold: 0.1 }
+            {
+                threshold: 0.1,
+                // Trigger 500px before the element becomes visible (predictive loading for fast scrolling)
+                rootMargin: '0px 0px 500px 0px'
+            }
         )
 
         if (loadMoreRef.current) {
@@ -117,7 +121,7 @@ export function DataTable<TData, TValue>({
                 cell: ({ row }) => {
                     const rowId = (row.original as { id?: string })?.id || row.id
                     const isExpanded = expandedRows[rowId]
-                    
+
                     return (
                         <div className="flex items-center justify-center w-full">
                             <button
@@ -127,11 +131,11 @@ export function DataTable<TData, TValue>({
                                 }}
                                 className="transition-colors group"
                             >
-                                <ChevronRight 
+                                <ChevronRight
                                     className={cn(
                                         "h-6 w-6 text-muted-foreground transition-all duration-200 group-hover:text-primary",
                                         isExpanded && "rotate-90 text-primary"
-                                    )} 
+                                    )}
                                 />
                             </button>
                         </div>
@@ -231,7 +235,7 @@ export function DataTable<TData, TValue>({
             {/* Table */}
             <div className="glass-panel rounded-xl overflow-hidden">
                 <div className="overflow-x-auto custom-scrollbar">
-                    <Table className="table-fixed w-full">
+                    <Table className="w-full min-w-[900px]">
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id} className="border-b border-border bg-muted/5 hover:bg-muted/5">
@@ -320,14 +324,21 @@ export function DataTable<TData, TValue>({
                     </Table>
                 </div>
 
-                {/* Infinite scroll trigger */}
+                {/* Infinite scroll trigger + Load More button fallback */}
                 {hasMore && (
-                    <div ref={loadMoreRef} className="flex items-center justify-center py-4">
-                        {isLoading && (
+                    <div ref={loadMoreRef} className="flex flex-col items-center justify-center py-4 gap-3">
+                        {isLoading ? (
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Loader2 className="h-4 w-4 animate-spin" />
                                 Loading more...
                             </div>
+                        ) : (
+                            <button
+                                onClick={onLoadMore}
+                                className="px-4 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg transition-colors"
+                            >
+                                Load More Results
+                            </button>
                         )}
                     </div>
                 )}
@@ -338,8 +349,8 @@ export function DataTable<TData, TValue>({
                         {table.getFilteredRowModel().rows.length} row(s) displayed
                         {selectable && ` · ${table.getFilteredSelectedRowModel().rows.length} selected`}
                     </span>
-                    {hasMore && !isLoading && (
-                        <span className="text-xs text-muted-foreground">Scroll for more</span>
+                    {hasMore && (
+                        <span className="text-xs text-muted-foreground">More available</span>
                     )}
                 </div>
             </div>

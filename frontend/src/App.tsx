@@ -13,7 +13,10 @@ import { GenesPage } from '@/pages/GenesPage';
 import { GenePage } from '@/pages/GenePage';
 import { CookieBanner } from '@/components/layout/CookieBanner';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
+import { prefetchFilterOptions } from '@/lib/filterOptionsCache';
 
+// Prefetch filter options as early as possible
+prefetchFilterOptions();
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);

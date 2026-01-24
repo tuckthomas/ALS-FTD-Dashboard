@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Download, Table } from 'lucide-react';
+import { Download, Table, Filter } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { TrialFilters } from '../components/trials/TrialFilters';
 import { TrialsTable } from '../components/trials/TrialsTable';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 export function TrialFinderPage() {
     const [searchParams] = useSearchParams();
@@ -11,6 +12,7 @@ export function TrialFinderPage() {
 
     const [totalCount, setTotalCount] = useState<number | null>(null);
     const [currentData, setCurrentData] = useState<any[]>([]);
+    const [filtersOpen, setFiltersOpen] = useState(false);
     const [filters, setFilters] = useState({
         phases: [] as string[],
         genes: initialGene ? [initialGene] : [] as string[],
@@ -58,6 +60,16 @@ export function TrialFinderPage() {
 
     return (
         <div className="flex flex-1 max-w-[1600px] mx-auto w-full gap-6 p-6">
+            {/* Mobile Filters Drawer */}
+            <Sheet open={filtersOpen} onOpenChange={setFiltersOpen} side="left">
+                <SheetContent>
+                    <TrialFilters
+                        onFiltersChange={setFilters}
+                        initialFilters={{ genes: initialGene ? [initialGene] : [] }}
+                    />
+                </SheetContent>
+            </Sheet>
+
             {/* Filters Sidebar - hidden on mobile */}
             <div className="hidden lg:block">
                 <TrialFilters
@@ -82,13 +94,21 @@ export function TrialFinderPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button 
+                        {/* Mobile Filter Button */}
+                        <button
+                            onClick={() => setFiltersOpen(true)}
+                            className="lg:hidden flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg text-sm text-primary font-medium transition-all"
+                        >
+                            <Filter className="h-4 w-4" />
+                            Filters
+                        </button>
+                        <button
                             onClick={exportCSV}
                             disabled={currentData.length === 0}
                             className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 border border-border rounded-lg text-sm text-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Download className="h-4 w-4" />
-                            Export CSV
+                            <span className="hidden sm:inline">Export CSV</span>
                         </button>
                     </div>
                 </div>

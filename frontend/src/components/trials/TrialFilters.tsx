@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Loader2 } from 'lucide-react';
+import { getFilterOptions, getCachedFilterOptions } from '@/lib/filterOptionsCache';
 
 interface Filters {
     phases: string[];
@@ -52,32 +52,36 @@ export function TrialFilters({ onFiltersChange, initialFilters }: TrialFiltersPr
     const [studyType, setStudyType] = useState<string>(initialFilters?.studyType || '');
     const [interventionTypes, setInterventionTypes] = useState<string[]>(initialFilters?.interventionTypes || []);
 
-    // Dynamic Options State
+    // Dynamic Options State - use cached data
     const [options, setOptions] = useState<{
         phases: string[];
         study_types: string[];
         statuses: string[];
         genes: string[];
         intervention_types: string[];
-    }>({
-        phases: [],
-        study_types: [],
-        statuses: [],
-        genes: [],
-        intervention_types: []
+    }>(() => {
+        // Check for cached options on mount
+        const cached = getCachedFilterOptions();
+        return cached || {
+            phases: [],
+            study_types: [],
+            statuses: [],
+            genes: [],
+            intervention_types: []
+        };
     });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => !getCachedFilterOptions());
 
     useEffect(() => {
+        // If cached, no need to fetch
+        if (getCachedFilterOptions()) {
+            return;
+        }
+
         const fetchOptions = async () => {
-            try {
-                const response = await axios.get('/api/analytics/filter-options');
-                setOptions(response.data);
-            } catch (error) {
-                console.error("Failed to fetch filter options:", error);
-            } finally {
-                setLoading(false);
-            }
+            const data = await getFilterOptions();
+            setOptions(data);
+            setLoading(false);
         };
         fetchOptions();
     }, []);
