@@ -61,7 +61,7 @@ flowchart TB
 
     %% Frontend to Backend
     Dashboard -->|Axios| AnalyticsAPI
-    TrialFinder -->|Axios| TrialsAPI
+    TrialFinder -->|Axios| AnalyticsAPI
     GenePages -->|Axios| GenesAPI
     NewsPage -->|Axios| NewsAPI
 
