@@ -44,7 +44,7 @@ flowchart TB
 
     %% Level 3: Backend & Data Layer
     subgraph BackendGroup["Backend (Django Ninja)"]
-        TrialsAPI[Trials API (Ingestion & Mgmt)]
+        TrialsAPI["Trials API (Ingestion & Mgmt)"]
         AnalyticsAPI[Analytics API]
         GenesAPI[Genes API]
         NewsAPI[News API]
