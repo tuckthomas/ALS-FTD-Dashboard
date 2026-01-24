@@ -53,7 +53,7 @@ flowchart TB
 
     subgraph DataLayerGroup["Data Layer"]
         PostgreSQL[(PostgreSQL)]
-        Redis[(Redis Cache)]
+        Redis[("Redis (Nightly Cache)")]
     end
 
     %% Level 4: Frontend
@@ -71,18 +71,21 @@ flowchart TB
     TrialsAPI -.->|Triggers| PipelineGroup
     Sanitizer -->|Write Clean Data| PostgreSQL
     Scraper -->|Write Gene Data| PostgreSQL
+    
+    %% Cache Population (Explicit)
+    PostgreSQL -.->|Nightly Invalidation| Redis
 
     %% Backend/Data Layer Interactions
     TrialsAPI -->|Read/Write| PostgreSQL
     AnalyticsAPI -->|Read-Optimized| Redis
-    AnalyticsAPI -->|Read Combined| PostgreSQL
+    AnalyticsAPI -->|Read Direct| PostgreSQL
     GenesAPI -->|Read| PostgreSQL
     NewsAPI -->|Read| PostgreSQL
     ContactAPI -->|Write Feedback| PostgreSQL
 
     %% Frontend Consumption (Outflow)
-    Dashboard -->|Axios| AnalyticsAPI
-    TrialFinder -->|Axios| AnalyticsAPI
+    Dashboard -->|Axios (Cached)| AnalyticsAPI
+    TrialFinder -->|Axios (Cached)| AnalyticsAPI
     GenePages -->|Axios| GenesAPI
     NewsPage -->|Axios| NewsAPI
     ContactPage -->|Axios| ContactAPI
