@@ -963,6 +963,10 @@ def get_global_map_data(request, status: List[str] = None, phase: List[str] = No
     Returns aggregated trial location data for the global map.
     Grouping by rounded coordinates to cluster nearby sites.
     """
+    # Default to active/current trials if no status filter is provided
+    if status is None:
+        status = ['active_all', 'active']
+        
     queryset = Trial.objects.all()
     queryset = apply_analytics_filters(queryset, status, phase, gene, familial)
     
