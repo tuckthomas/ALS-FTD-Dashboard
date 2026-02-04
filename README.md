@@ -34,12 +34,20 @@ flowchart TB
         ALSoD[ALSoD Gene Database]
         PDB[Protein Data Bank]
         AlphaFold[AlphaFold DB]
+        
+        subgraph NewsSources["News Sources (Tiered)"]
+            T1[Tier 1: Journals & PubMed]
+            T2[Tier 2: Specialized Med News]
+            T3[Tier 3: General & Regional]
+            T4[Tier 4: Aggregators - Google/Yahoo]
+        end
     end
 
     %% Level 2: Data Pipeline & Ingestion
     subgraph PipelineGroup["Data Pipeline (Managed by TrialsAPI)"]
         Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
+        Prioritizer[Tiered Priority Logic]
     end
 
     %% Level 3: Backend & Data Layer
@@ -68,9 +76,11 @@ flowchart TB
     %% Data Inflow (Pipeline)
     ClinicalTrials -->|Nightly Sync| Sanitizer
     ALSoD -->|Gene Scraping| Scraper
+    NewsSources -->|RSS Ingestion| Prioritizer
     TrialsAPI -.->|Triggers| PipelineGroup
     Sanitizer -->|Write Clean Data| PostgreSQL
     Scraper -->|Write Gene Data| PostgreSQL
+    Prioritizer -->|Oldest/Primary Source First| PostgreSQL
     
     %% Cache Population (Explicit)
     PostgreSQL -.->|Nightly Invalidation| Redis
