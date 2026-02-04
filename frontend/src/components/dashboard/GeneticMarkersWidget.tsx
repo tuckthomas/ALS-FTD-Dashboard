@@ -97,7 +97,10 @@ export function GeneticMarkersWidget({ markers }: GeneticMarkersWidgetProps) {
                 ))}
             </div>
 
-            <button className="w-full mt-4 py-2 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2">
+            <button 
+                onClick={() => navigate('/genes')}
+                className="w-full mt-4 py-2 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2"
+            >
                 View All Markers
                 <ArrowRight className="h-4 w-4" />
             </button>
