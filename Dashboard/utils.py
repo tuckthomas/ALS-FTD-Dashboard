@@ -602,17 +602,16 @@ def fetch_trial_data():
     all_studies_details = []
     print("Starting fetch_trial_data")
     try:
-        print("About to make API call")
+        print("About to make API call to ClinicalTrials.gov...")
         while True:
             response = requests.get(base_url, params=query_params)
-            print("Finished request.get of base_url")
-            print("Response content:", response.content)
             if response.status_code == 200:
-                print("response.status_code == 200....proceed to data = response.json")
                 data = response.json()
 
                 studies_details = data.get("studies", [])
                 all_studies_details.extend(studies_details)
+                print(f"Fetched {len(studies_details)} studies. Total so far: {len(all_studies_details)}")
+                
                 # Continues to next 1000 page query due to ClinicalTrials.gov's imposed limitations.
                 nextPageToken = data.get("nextPageToken")
                 if not nextPageToken:

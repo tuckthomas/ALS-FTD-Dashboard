@@ -1,13 +1,19 @@
 from django.core.management.base import BaseCommand
 # Import your function here
 from Dashboard.utils import update_data
+from Dashboard.news_scraper import fetch_and_process_news
 
 class Command(BaseCommand):
-    help = 'Updates the trials and genes data in the database'
+    help = 'Updates the trials, genes, and news data in the database'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write(self.style.SUCCESS('Starting the update process...'))
+        self.stdout.write(self.style.SUCCESS('Starting the primary data update process (trials and genes)...'))
         update_data()
+        
+        self.stdout.write(self.style.SUCCESS('Starting the news data update process...'))
+        news_count = fetch_and_process_news()
+        self.stdout.write(self.style.SUCCESS(f'News update complete. Added {news_count} articles.'))
+        
         self.stdout.write(self.style.SUCCESS('Data update complete. Refreshing cache...'))
         
         # Refresh the API cache
