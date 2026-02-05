@@ -47,7 +47,7 @@ flowchart TB
     subgraph PipelineGroup["Data Pipeline (Managed by TrialsAPI)"]
         Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
-        Prioritizer[Tiered Priority Logic]
+        Prioritizer[Fuzzy Deduplication & Tiered Priority]
     end
 
     %% Level 3: Backend & Data Layer
@@ -80,7 +80,7 @@ flowchart TB
     TrialsAPI -.->|Triggers| PipelineGroup
     Sanitizer -->|Write Clean Data| PostgreSQL
     Scraper -->|Write Gene Data| PostgreSQL
-    Prioritizer -->|Oldest/Primary Source First| PostgreSQL
+    Prioritizer -->|Oldest Canonical Source First| PostgreSQL
     
     %% Cache Population (Explicit)
     PostgreSQL -.->|Nightly Invalidation| Redis
@@ -124,6 +124,7 @@ flowchart TB
 
 ### News Aggregator
 - **Multi-Source News Feed**: Aggregated articles from ALS News Today, research journals, and press releases
+- **Smart Deduplication**: Fuzzy title matching (FuzzyWuzzy) and date-based conflict resolution to ensure primary sources are prioritized
 - **Date Range Filtering**: Calendar-based article filtering
 - **Gene Tagging**: Articles tagged and linked to relevant genes
 
