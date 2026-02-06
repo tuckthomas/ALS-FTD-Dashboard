@@ -47,7 +47,7 @@ flowchart TB
     subgraph PipelineGroup["Data Pipeline (Managed by TrialsAPI)"]
         Sanitizer[Regex Sanitization]
         Scraper[Web Scraper]
-        Prioritizer[Fuzzy Deduplication & Tiered Priority]
+        Prioritizer[Tiered Priority Logic]
     end
 
     %% Level 3: Backend & Data Layer
@@ -80,7 +80,7 @@ flowchart TB
     TrialsAPI -.->|Triggers| PipelineGroup
     Sanitizer -->|Write Clean Data| PostgreSQL
     Scraper -->|Write Gene Data| PostgreSQL
-    Prioritizer -->|Oldest Canonical Source First| PostgreSQL
+    Prioritizer -->|Oldest/Primary Source First| PostgreSQL
     
     %% Cache Population (Explicit)
     PostgreSQL -.->|Nightly Invalidation| Redis
