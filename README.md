@@ -4,11 +4,11 @@
 
 # Familial ALS & FTD Research Dashboard
 
-> A comprehensive research dashboard focused on familial ALS/FTD interventional drug research, featuring clinical trial analytics, gene-specific data, 3D protein structure visualization, and AI-powered data enrichment.
+> Note: This project was dormant for nearly two years before being recently revived in January 2026. This still is very much an early work-in-progress.
 
 ## Introduction
 
-This open-source dashboard aggregates and visualizes clinical trial data for the familial ALS and FTD research community. It provides researchers, patients, and caregivers with actionable insights into ongoing and historical interventional drug trials.
+This open-source dashboard aggregates and visualizes clinical trial data for the familial ALS and FTD research community. It provides researchers, patients, and caregivers with actionable insights into ongoing and historical interventional drug trials. It features clinical trial analytics, gene-specific data, 3D protein structure visualization, and AI-powered data enrichment.
 
 ### Support ALS Research
 
