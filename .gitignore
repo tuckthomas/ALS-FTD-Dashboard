@@ -1,6 +1,7 @@
 # .env
 .env
 .env.gemini
+ALS_FTD_Research_Dashboard/.env.gemini
 
 # Python
 __pycache__/
