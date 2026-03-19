@@ -25,8 +25,8 @@ class Command(BaseCommand):
         
         # 2. Refresh Dashboard Packages (All & Familial)
         # Clear existing keys to force regeneration
-        cache.delete('dashboard_package_familial_False')
-        cache.delete('dashboard_package_familial_True')
+        cache.delete('dashboard_package_familial_v2_False')
+        cache.delete('dashboard_package_familial_v2_True')
         
         # Pre-warm the cache
         get_dashboard_package(request=None, familial=False)
