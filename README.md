@@ -16,11 +16,9 @@ If you appreciate this work and would like to support ALS research, please consi
 - [Everything ALS](https://www.everythingals.org/donate)
 - [ALS Hope Foundation](https://www.alshf.org/donate)
 - [I AM ALS](https://www.iamals.org/give/)
+- [ALS TDI] (https://www.als.net/donate/)
 
-
-Additionally, if you appreciate this work, I am available for hire: tuckerolson13@gmail.com
-
-Additonal projects of mine can be seen within my portfolio: https://tuckerolson.me/portfolio
+Additionally, if you appreciate this work, I am available for hire on a contractual, part-time, or full-time basis: tuckerolson13@gmail.com
 
 ---
 
